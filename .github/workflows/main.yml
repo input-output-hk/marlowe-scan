@@ -1,0 +1,19 @@
+name: "Stack build"
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test-stack-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: freckle/stack-cache-action@340db0620e8c2310f9e1ef551f47ccfb18f5ad42
+      - uses: freckle/stack-action@340db0620e8c2310f9e1ef551f47ccfb18f5ad42
+    
