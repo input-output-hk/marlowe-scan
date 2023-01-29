@@ -1,0 +1,22 @@
+cradle:
+  stack:
+    - path: "./test/Spec.hs"
+      component: "marlowe-explorer:test:marlowe-explorer-test"
+
+    - path: "./app/Main.hs"
+      component: "marlowe-explorer:exe:marlowe-explorer-exe"
+
+    - path: "./src/ContractView.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Language/Marlowe/Pretty.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Language/Marlowe/Runtime/Types/ContractJSON.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Language/Marlowe/Semantics/Types.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Lib.hs"
+      component: "marlowe-explorer:lib"
