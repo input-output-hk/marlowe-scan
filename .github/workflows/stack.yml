@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
       - uses: freckle/stack-cache-action@ed5f0b5ad23c22386472fc61b0b8da7fd6bfbc67
       - uses: freckle/stack-action@d32c32d930606e981e7bb34c624c31b5c5f9bdc6
     
