@@ -14,6 +14,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: freckle/stack-cache-action@340db0620e8c2310f9e1ef551f47ccfb18f5ad42
-      - uses: freckle/stack-action@340db0620e8c2310f9e1ef551f47ccfb18f5ad42
+      - uses: freckle/stack-cache-action@v2.0.8
+      - uses: freckle/stack-action@v2.0.8
     
