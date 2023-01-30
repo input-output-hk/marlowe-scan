@@ -12,7 +12,7 @@ bug-reports:    https://github.com/input-ouptut-hk/marlowe-explorer/issues
 author:         Input Output
 maintainer:     Input Output
 copyright:      2023 Input Output
-license:        BSD3
+license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:

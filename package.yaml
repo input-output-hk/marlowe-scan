@@ -1,7 +1,7 @@
 name:                marlowe-explorer
 version:             0.1.0.0
 github:              "input-ouptut-hk/marlowe-explorer"
-license:             BSD3
+license:             Apache-2.0
 author:              "Input Output"
 copyright:           "2023 Input Output"
 
