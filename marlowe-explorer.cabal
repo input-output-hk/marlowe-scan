@@ -101,7 +101,6 @@ test-suite marlowe-explorer-test
     , containers
     , hspec
     , hspec-wai
-    , hspec-wai-json
     , http-client
     , http-conduit
     , http-types

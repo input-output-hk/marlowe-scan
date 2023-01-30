@@ -1,10 +1,10 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "default", doBenchmark ? false }:
+{ nixpkgs ? import <nixpkgs> {}, compiler ? "ghc90", doBenchmark ? false }:
 
 let
   inherit (nixpkgs) pkgs;
   f = { mkDerivation, base, blaze-html, gtk, lib, process
       , temporary, zlib, aeson, servant-server, wai, warp, haskell-language-server
-      , hspec, hspec-wai, hspec-wai-json, servant-blaze, http-client, wl-pprint
+      , hspec, hspec-wai, servant-blaze, http-client, wl-pprint
       , http-conduit, http-types
       }:
       mkDerivation {
@@ -17,7 +17,7 @@ let
           base blaze-html gtk process temporary zlib
           aeson servant-server wai warp
           haskell-language-server 
-          hspec hspec-wai hspec-wai-json servant-blaze
+          hspec hspec-wai servant-blaze
           http-client wl-pprint http-conduit http-types
         ];
         license = "unknown";
