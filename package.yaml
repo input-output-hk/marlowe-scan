@@ -18,6 +18,7 @@ dependencies:
 - blaze-html
 - blaze-markup
 - bytestring
+- cmdargs
 - containers
 - http-client
 - http-conduit
