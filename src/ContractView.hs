@@ -3,18 +3,22 @@
 
 module ContractView(ContractView(..), contractView) where
 
+import Control.Newtype.Generics (op)
+import Data.Bifunctor (Bifunctor (bimap))
+import Data.ByteString.Char8 ( unpack, pack )
+import Language.Marlowe.Pretty ( pretty )
+import Language.Marlowe.Runtime.Types.ContractJSON (ContractJSON(..), getContractJSON)
+import Language.Marlowe.Semantics.Types (Contract, State)
+import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
+import Network.HTTP.Types ( renderSimpleQuery )
+import Prelude hiding ( head )
+import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ( body, docTypeHtml, h1, head, html, title, b,
                           string, Html, ToMarkup(toMarkup), (!), Markup, code, br, preEscapedString, a, ToValue (toValue) )
 import Text.Blaze.Html5.Attributes ( style, lang, href )
-import qualified Text.Blaze.Html5 as H
-import Prelude hiding ( head )
-import Language.Marlowe.Runtime.Types.ContractJSON (ContractJSON(..), getContractJSON)
-import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
-import Language.Marlowe.Semantics.Types (Contract, State)
-import Language.Marlowe.Pretty ( pretty )
-import Network.HTTP.Types ( renderSimpleQuery )
-import Data.Bifunctor (Bifunctor (bimap))
-import Data.ByteString.Char8 ( unpack, pack )
+import Text.Printf (printf)
+
+import Opts (Options (optRuntimePort), RuntimePort (..))
 
 baseDoc :: String -> Html -> Html
 baseDoc caption content = docTypeHtml
@@ -23,13 +27,14 @@ baseDoc caption content = docTypeHtml
                                       body $ do h1 $ string caption
                                                 content
 
-contractView :: Maybe String -> Maybe String -> IO ContractView
-contractView _ Nothing = return $ ContractViewError "Need to specify a contractId"
-contractView tab (Just cid) =
-  do v <- getContractJSON "http://builder:8080/" cid
-     return (case v of
-               Left str -> ContractViewError str
-               Right cjson -> extractInfo (parseTab tab) cjson)
+contractView :: Options -> Maybe String -> Maybe String -> IO ContractView
+contractView _    _   Nothing    = return $ ContractViewError "Need to specify a contractId"
+contractView opts tab (Just cid) = do
+  let rport = op RuntimePort . optRuntimePort $ opts
+  v <- getContractJSON (printf "http://builder:%d/" rport) cid
+  return $ case v of
+    Left str -> ContractViewError str
+    Right cjson -> extractInfo (parseTab tab) cjson
 
 parseTab :: Maybe String -> ContractViews
 parseTab (Just "state") = CStateView

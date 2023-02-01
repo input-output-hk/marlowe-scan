@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -30,6 +30,7 @@ library
       Language.Marlowe.Runtime.Types.ContractJSON
       Language.Marlowe.Semantics.Types
       Lib
+      Opts
   other-modules:
       Paths_marlowe_explorer
   hs-source-dirs:
@@ -46,6 +47,8 @@ library
     , http-client
     , http-conduit
     , http-types
+    , newtype-generics
+    , optparse-applicative
     , scientific
     , servant-blaze
     , servant-server
@@ -74,6 +77,7 @@ executable marlowe-explorer-exe
     , http-conduit
     , http-types
     , marlowe-explorer
+    , newtype-generics
     , scientific
     , servant-blaze
     , servant-server

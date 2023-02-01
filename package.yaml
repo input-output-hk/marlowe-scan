@@ -43,6 +43,9 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - newtype-generics
+  - optparse-applicative
 
 executables:
   marlowe-explorer-exe:
@@ -55,6 +58,7 @@ executables:
     dependencies:
     - base
     - marlowe-explorer
+    - newtype-generics
 
 tests:
   marlowe-explorer-test:
