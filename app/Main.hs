@@ -1,6 +1,10 @@
-module Main (main) where
+module Main
+  ( main
+  )
+  where
 
-import Lib
+import Lib (startApp)
+import Opts (parseOpts)
 
 main :: IO ()
-main = startApp
+main = parseOpts >>= startApp
