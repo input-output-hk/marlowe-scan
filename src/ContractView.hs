@@ -18,7 +18,7 @@ import Text.Blaze.Html5 ( body, docTypeHtml, h1, head, html, title, b,
 import Text.Blaze.Html5.Attributes ( style, lang, href )
 import Text.Printf (printf)
 
-import Opts (Options (optRuntimePort), RuntimePort (..))
+import Opts (Options (optRuntimeHost, optRuntimePort), RuntimeHost (..), RuntimePort (..))
 
 baseDoc :: String -> Html -> Html
 baseDoc caption content = docTypeHtml
@@ -30,8 +30,10 @@ baseDoc caption content = docTypeHtml
 contractView :: Options -> Maybe String -> Maybe String -> IO ContractView
 contractView _    _   Nothing    = return $ ContractViewError "Need to specify a contractId"
 contractView opts tab (Just cid) = do
-  let rport = op RuntimePort . optRuntimePort $ opts
-  v <- getContractJSON (printf "http://builder:%d/" rport) cid
+  let
+    rhost = op RuntimeHost . optRuntimeHost $ opts
+    rport = op RuntimePort . optRuntimePort $ opts
+  v <- getContractJSON (printf "http://%s:%d/" rhost rport) cid
   return $ case v of
     Left str -> ContractViewError str
     Right cjson -> extractInfo (parseTab tab) cjson
