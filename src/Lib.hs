@@ -6,7 +6,6 @@ module Lib
     , app
     ) where
 
-import ContractView ( ContractView(..), contractView )
 import Control.Monad.IO.Class (liftIO)
 import Control.Newtype.Generics (op)
 import Network.Wai ( Application )
@@ -15,10 +14,15 @@ import Servant ( serve, Proxy(..), type (:>), Get, type (:<|>) ((:<|>)), QueryPa
 import Servant.HTML.Blaze ( HTML )
 import Servant.Server ( hoistServer )
 
+import Explorer.Web.ContractView (ContractView (..), contractView)
 import Opts (Options (optExplorerPort), ExplorerPort (..))
 
 startApp :: Options -> IO ()
-startApp opts = run (op ExplorerPort . optExplorerPort $ opts) $ app opts
+startApp opts = do
+  let eport = op ExplorerPort . optExplorerPort $ opts
+  putStrLn $ "Marlowe Explorer server started, available at localhost:"
+    <> show eport
+  run eport $ app opts
 
 type API = "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> Get '[HTML] ContractView
       :<|> "listContracts" :> Get '[HTML] String

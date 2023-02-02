@@ -1,7 +1,9 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module ContractView(ContractView(..), contractView) where
+module Explorer.Web.ContractView
+  (ContractView(..), contractView)
+  where
 
 import Control.Newtype.Generics (op)
 import Data.Bifunctor (Bifunctor (bimap))
