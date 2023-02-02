@@ -2,6 +2,7 @@
 
 module Opts
   ( ExplorerPort (..)
+  , RuntimeHost (..)
   , RuntimePort (..)
   , Options (..)
   , parseOpts
@@ -12,18 +13,24 @@ import Control.Newtype.Generics
 import GHC.Generics hiding (Prefix)
 import Options.Applicative
 
-newtype RuntimePort = RuntimePort Int
-  deriving (Generic, Show)
-
-instance Newtype RuntimePort
-
 newtype ExplorerPort = ExplorerPort Int
   deriving (Generic, Show)
 
 instance Newtype ExplorerPort
 
+newtype RuntimeHost = RuntimeHost String
+  deriving (Generic, Show)
+
+instance Newtype RuntimeHost
+
+newtype RuntimePort = RuntimePort Int
+  deriving (Generic, Show)
+
+instance Newtype RuntimePort
+
 data Options = Options
   { optExplorerPort :: ExplorerPort
+  , optRuntimeHost :: RuntimeHost
   , optRuntimePort :: RuntimePort
   }
   deriving Show
@@ -37,6 +44,14 @@ parser = Options
         <> help "Port number to use for this Marlowe Explorer server"
         <> showDefault
         <> value 8081
+        )
+      )
+  <*> ( RuntimeHost <$> strOption
+        (  long "runtime-host"
+        <> metavar "HOSTNAME-OR-IP"
+        <> help "Hostname or IP of the running Marlowe Runtime server"
+        <> showDefault
+        <> value "builder"
         )
       )
   <*> ( RuntimePort <$> option auto
