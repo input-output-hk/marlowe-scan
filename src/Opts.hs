@@ -39,7 +39,6 @@ parser :: Parser Options
 parser = Options
   <$> ( ExplorerPort <$> option auto
         (  long "explorer-port"
-        <> short 'e'
         <> metavar "PORT"
         <> help "Port number to use for this Marlowe Explorer server"
         <> showDefault
@@ -56,7 +55,6 @@ parser = Options
       )
   <*> ( RuntimePort <$> option auto
         (  long "runtime-port"
-        <> short 'r'
         <> metavar "PORT"
         <> help "Port number of the running Marlowe Runtime server"
         <> showDefault
