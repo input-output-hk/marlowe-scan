@@ -33,3 +33,6 @@ stack.yaml.lock
 *.hp
 *.eventlog
 .HTF/
+
+# ctags file made with 'hasktags -c .'
+tags
