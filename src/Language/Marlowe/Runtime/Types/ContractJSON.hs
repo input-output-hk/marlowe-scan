@@ -1,6 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.Marlowe.Runtime.Types.ContractJSON(getContractJSON, ContractJSON(..), Links(..), Resource(..), Block(..)) where
+module Language.Marlowe.Runtime.Types.ContractJSON
+  ( Block(..)
+  , ContractJSON(..)
+  , Links(..)
+  , Resource(..)
+  , Transaction(..)
+  , getContractJSON
+  ) where
 
 import Language.Marlowe.Semantics.Types ( Contract(..), State(..) )
 import Data.Aeson ( withObject, (.:?), (.:), FromJSON(parseJSON), eitherDecode )
