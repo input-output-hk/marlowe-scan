@@ -5,7 +5,7 @@ module Explorer.Web.Util
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
-import Data.ByteString.Char8 ( unpack, pack )
+import Data.ByteString.Char8 ( pack, unpack )
 import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
@@ -51,4 +51,4 @@ stringToHtml str = mconcat $ map processLine $ lines str
                              br
 
 generateLink :: String -> [(String, String)] -> String
-generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap Data.ByteString.Char8.pack Data.ByteString.Char8.pack) params))
+generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap pack pack) params))
