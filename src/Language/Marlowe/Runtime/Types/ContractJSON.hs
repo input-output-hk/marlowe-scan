@@ -23,9 +23,18 @@ data ContractJSON = ContractJSON {
     resource :: Resource
 } deriving (Show, Eq)
 
+instance FromJSON ContractJSON where
+    parseJSON = withObject "JSON" $ \v -> ContractJSON
+        <$> v .: "links"
+        <*> v .: "resource"
+
 newtype Links = Links {
     transactions :: String
 } deriving (Show, Eq)
+
+instance FromJSON Links where
+    parseJSON = withObject "Links" $ \v -> Links
+        <$> v .: "transactions"
 
 data Resource = Resource {
     block :: Block,
@@ -38,21 +47,6 @@ data Resource = Resource {
     version :: String
 } deriving (Show, Eq)
 
-data Block = Block {
-    blockHeaderHash :: String,
-    blockNo :: Integer,
-    slotNo :: Integer
-} deriving (Show, Eq)
-
-instance FromJSON ContractJSON where
-    parseJSON = withObject "JSON" $ \v -> ContractJSON
-        <$> v .: "links"
-        <*> v .: "resource"
-
-instance FromJSON Links where
-    parseJSON = withObject "Links" $ \v -> Links
-        <$> v .: "transactions"
-
 instance FromJSON Resource where
     parseJSON = withObject "Resource" $ \v -> Resource
         <$> v .: "block"
@@ -63,6 +57,12 @@ instance FromJSON Resource where
         <*> v .:? "state"
         <*> v .: "status"
         <*> v .: "version"
+
+data Block = Block {
+    blockHeaderHash :: String,
+    blockNo :: Integer,
+    slotNo :: Integer
+} deriving (Show, Eq)
 
 instance FromJSON Block where
     parseJSON = withObject "Block" $ \v -> Block
