@@ -49,7 +49,9 @@ contractView opts tab@(Just _) (Just cid) = do
     Left str -> ContractViewError str
     Right cjson -> extractInfo (parseTab tab) cjson Nothing
 
-contractView _opts _tab _cid = return $ ContractViewError "Need to specify a contractId"
+contractView opts Nothing cid = contractView opts (Just "info") cid
+
+contractView _opts _tab Nothing = return $ ContractViewError "Need to specify a contractId"
 
 
 parseTab :: Maybe String -> ContractViews
@@ -210,7 +212,7 @@ renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
             td $ string . ctvrTransactionId $ ctvr
             td $ toHtml . ctvrBlock $ ctvr
             td $ toHtml . ctvrSlot $ ctvr
-    forM_ ctvrs $ makeRow
+    forM_ ctvrs makeRow
 
 
 renderMState :: Maybe State -> Html

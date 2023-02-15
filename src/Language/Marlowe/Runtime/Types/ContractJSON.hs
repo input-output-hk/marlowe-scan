@@ -87,10 +87,9 @@ data Transaction = Transaction
 
 instance FromJSON Transaction where
   parseJSON = withObject "Transaction" $ \o -> do
-    link <- ((o .: "links") >>= (.: "transaction"))
     res <- o .: "resource"
     Transaction
-      <$> pure link
+      <$> ((o .: "links") >>= (.: "transaction"))
       <*> res .: "block"
       <*> res .: "contractId"
       <*> res .: "transactionId"
