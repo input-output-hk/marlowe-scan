@@ -25,10 +25,13 @@ source-repository head
 
 library
   exposed-modules:
+      Explorer.Web.ContractListView
       Explorer.Web.ContractView
       Explorer.Web.Util
       Language.Marlowe.Pretty
+      Language.Marlowe.Runtime.Types.Common
       Language.Marlowe.Runtime.Types.ContractJSON
+      Language.Marlowe.Runtime.Types.ContractsJSON
       Language.Marlowe.Semantics.Types
       Lib
       Opts

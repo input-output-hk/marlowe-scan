@@ -14,6 +14,7 @@ import Servant ( serve, Proxy(..), type (:>), Get, type (:<|>) ((:<|>)), QueryPa
 import Servant.HTML.Blaze ( HTML )
 import Servant.Server ( hoistServer )
 
+import Explorer.Web.ContractListView ( ContractListView (..), contractListView )
 import Explorer.Web.ContractView ( ContractView (..), contractView )
 import Opts ( Options (optExplorerPort), ExplorerPort (..) )
 
@@ -26,13 +27,10 @@ startApp opts = do
   run eport $ app opts
 
 type API
-     = "listContracts" :> Get '[HTML] String
+     = "listContracts" :> Get '[HTML] ContractListView
   :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> Get '[HTML] ContractView
 
 app :: Options -> Application
 app opts = serve (Proxy :: Proxy API) $ hoistServer (Proxy :: Proxy API) liftIO $
-       listContracts
+       contractListView opts
   :<|> contractView opts
-
-listContracts :: IO String
-listContracts = return "Under contruction!"

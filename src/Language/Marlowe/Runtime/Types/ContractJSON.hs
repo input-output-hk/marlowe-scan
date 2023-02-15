@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.Marlowe.Runtime.Types.ContractJSON
-  ( Block(..)
-  , ContractJSON(..)
+  ( ContractJSON(..)
   , Links(..)
   , Resource(..)
   , Transaction(..)
@@ -11,12 +10,15 @@ module Language.Marlowe.Runtime.Types.ContractJSON
   , getContractTransactions
   ) where
 
-import Language.Marlowe.Semantics.Types ( Contract(..), State(..) )
 import Data.Aeson ( withObject, (.:?), (.:), FromJSON(parseJSON), eitherDecode )
 import Network.HTTP.Simple (parseRequest, getResponseBody, httpLBS, setRequestHeader, setRequestMethod)
 import Network.HTTP.Types (urlEncode)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 import Data.Text (pack, unpack)
+
+import Language.Marlowe.Runtime.Types.Common  -- FIXME explicit imports
+import Language.Marlowe.Semantics.Types ( Contract(..), State(..) )
+
 
 data ContractJSON = ContractJSON {
     links :: Links,
@@ -57,18 +59,6 @@ instance FromJSON Resource where
         <*> v .:? "state"
         <*> v .: "status"
         <*> v .: "version"
-
-data Block = Block {
-    blockHeaderHash :: String,
-    blockNo :: Integer,
-    slotNo :: Integer
-} deriving (Show, Eq)
-
-instance FromJSON Block where
-    parseJSON = withObject "Block" $ \v -> Block
-        <$> v .: "blockHeaderHash"
-        <*> v .: "blockNo"
-        <*> v .: "slotNo"
 
 getContractJSON :: String -> String -> IO (Either String ContractJSON)
 getContractJSON endpoint reqContractId = do
