@@ -40,7 +40,7 @@ contractView opts tab@(Just "txs") (Just cid) = do
         Left str -> ContractViewError str
         Right tx -> extractInfo (parseTab tab) cjson (Just tx)
 
-contractView opts tab@(Just _) (Just cid) = do
+contractView opts tab (Just cid) = do
   let
     rhost = op RuntimeHost . optRuntimeHost $ opts
     rport = op RuntimePort . optRuntimePort $ opts
