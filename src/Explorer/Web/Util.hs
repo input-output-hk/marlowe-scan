@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, mkNavLink, stringToHtml, table, td, tr )
+  ( baseDoc, mkNavLink, stringToHtml, table, td, th, tr )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -32,6 +32,9 @@ table = H.table ! style "border: 1px solid black"
 
 tr :: Html -> Html
 tr = H.tr
+
+th :: Html -> Html
+th = H.th ! style "border: 1px solid black; padding: 5px;"
 
 td :: Html -> Html
 td = H.td ! style "border: 1px solid black; padding: 5px;"
