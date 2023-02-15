@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, mkNavLink, stringToHtml, table, td, tr )
+  ( baseDoc, mkNavLink, stringToHtml, table, td, th, tr )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
-import Data.ByteString.Char8 ( unpack, pack )
+import Data.ByteString.Char8 ( pack, unpack )
 import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
@@ -33,6 +33,9 @@ table = H.table ! style "border: 1px solid black"
 tr :: Html -> Html
 tr = H.tr
 
+th :: Html -> Html
+th = H.th ! style "border: 1px solid black; padding: 5px;"
+
 td :: Html -> Html
 td = H.td ! style "border: 1px solid black; padding: 5px;"
 
@@ -51,4 +54,4 @@ stringToHtml str = mconcat $ map processLine $ lines str
                              br
 
 generateLink :: String -> [(String, String)] -> String
-generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap Data.ByteString.Char8.pack Data.ByteString.Char8.pack) params))
+generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap pack pack) params))

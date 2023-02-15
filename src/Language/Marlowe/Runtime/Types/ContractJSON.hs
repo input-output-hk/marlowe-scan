@@ -1,6 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.Marlowe.Runtime.Types.ContractJSON(getContractJSON, ContractJSON(..), Links(..), Resource(..), Block(..)) where
+module Language.Marlowe.Runtime.Types.ContractJSON
+  ( Block(..)
+  , ContractJSON(..)
+  , Links(..)
+  , Resource(..)
+  , Transaction(..)
+  , Transactions(..)
+  , getContractJSON
+  , getContractTransactions
+  ) where
 
 import Language.Marlowe.Semantics.Types ( Contract(..), State(..) )
 import Data.Aeson ( withObject, (.:?), (.:), FromJSON(parseJSON), eitherDecode )
@@ -65,6 +74,36 @@ getContractJSON :: String -> String -> IO (Either String ContractJSON)
 getContractJSON endpoint reqContractId = do
     let reqContractIdUrlEncoded = urlEncode False $ encodeUtf8 $ pack reqContractId
     initialRequest <- parseRequest $ endpoint ++ "contracts/" ++ unpack (decodeUtf8 reqContractIdUrlEncoded)
+    let request = setRequestMethod "GET" $ setRequestHeader "Accept" ["application/json"] initialRequest
+    response <- httpLBS request
+    return $ eitherDecode (getResponseBody response)
+
+data Transaction = Transaction
+  { txLink :: String
+  , txBlock :: Block
+  , txContractId :: String
+  , txTransactionId :: String
+  } deriving (Show, Eq)
+
+instance FromJSON Transaction where
+  parseJSON = withObject "Transaction" $ \o -> do
+    res <- o .: "resource"
+    Transaction
+      <$> ((o .: "links") >>= (.: "transaction"))
+      <*> res .: "block"
+      <*> res .: "contractId"
+      <*> res .: "transactionId"
+
+newtype Transactions = Transactions [Transaction]
+  deriving (Show, Eq)
+
+instance FromJSON Transactions where
+  parseJSON = withObject "Transactions" $ \o -> do
+    Transactions <$> o .: "results"
+
+getContractTransactions :: String -> String -> IO (Either String Transactions)
+getContractTransactions endpoint link = do
+    initialRequest <- parseRequest $ endpoint ++ link
     let request = setRequestMethod "GET" $ setRequestHeader "Accept" ["application/json"] initialRequest
     response <- httpLBS request
     return $ eitherDecode (getResponseBody response)
