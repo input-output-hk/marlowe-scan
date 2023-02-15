@@ -85,7 +85,7 @@ extractInfo CStateView cv _ =
   where res = CJ.resource cv
 
 extractInfo CTxView cv (Just (Transactions txs)) =
-  ContractTxView (CJ.contractId . CJ.resource $ cv) . map convertTx $ txs
+  ContractTxView . CTVRs (CJ.contractId . CJ.resource $ cv) . map convertTx $ txs
   where
     convertTx tx = CTVR
       { ctvrLink = txLink tx
@@ -118,7 +118,7 @@ data ContractViews = CInfoView
 
 data ContractView = ContractInfoView CIVR
                   | ContractStateView CSVR
-                  | ContractTxView String [CTVR]
+                  | ContractTxView CTVRs
                   | ContractViewError String
 
 instance ToMarkup ContractView where
@@ -127,7 +127,7 @@ instance ToMarkup ContractView where
     baseDoc ("Contract - " ++ cid) $ addNavBar CInfoView cid $ renderCIVR cvr
   toMarkup (ContractStateView ccsr@(CSVR {csvrContractId = cid})) =
     baseDoc ("Contract - " ++ cid) $ addNavBar CStateView cid $ renderCSVR ccsr
-  toMarkup (ContractTxView cid ctvrs) =
+  toMarkup (ContractTxView (CTVRs cid ctvrs)) =
     baseDoc ("Contract - " ++ cid) $ addNavBar CTxView cid $ renderCTVRs ctvrs
   toMarkup (ContractViewError str) =
     baseDoc "An error occurred" (string ("Error: " ++ str))
@@ -196,6 +196,8 @@ data CTVR = CTVR
   , ctvrTransactionId :: String
   }
   deriving Show
+
+data CTVRs = CTVRs String [CTVR]
 
 
 renderCTVRs :: [CTVR] -> Html
