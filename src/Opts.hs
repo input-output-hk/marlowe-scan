@@ -5,6 +5,7 @@ module Opts
   , RuntimeHost (..)
   , RuntimePort (..)
   , Options (..)
+  , mkUrlPrefix
   , parseOpts
   )
   where
@@ -12,6 +13,7 @@ module Opts
 import Control.Newtype.Generics
 import GHC.Generics hiding (Prefix)
 import Options.Applicative
+import Text.Printf (printf)
 
 newtype ExplorerPort = ExplorerPort Int
   deriving (Generic, Show)
@@ -67,3 +69,11 @@ parseOpts = do
   execParser $ info (parser <**> helper)
     (  header "Marlowe Explorer server"
     )
+
+mkUrlPrefix :: Options -> String
+mkUrlPrefix opts =
+  let
+    rhost = op RuntimeHost . optRuntimeHost $ opts
+    rport = op RuntimePort . optRuntimePort $ opts
+  in
+    printf "http://%s:%d/" rhost rport

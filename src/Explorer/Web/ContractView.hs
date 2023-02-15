@@ -6,7 +6,6 @@ module Explorer.Web.ContractView
   where
 
 import Control.Monad (forM_)
-import Control.Newtype.Generics (op)
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import Language.Marlowe.Runtime.Types.ContractJSON
@@ -17,19 +16,15 @@ import Language.Marlowe.Semantics.Types (Contract, State)
 import Prelude hiding ( head )
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( style )
-import Text.Printf ( printf )
 
 import Explorer.Web.Util
-import Opts (Options (optRuntimeHost, optRuntimePort), RuntimeHost (..), RuntimePort (..))
+import Opts (Options, mkUrlPrefix)
 
 
 contractView :: Options -> Maybe String -> Maybe String -> IO ContractView
 
 contractView opts tab@(Just "txs") (Just cid) = do
-  let
-    rhost = op RuntimeHost . optRuntimeHost $ opts
-    rport = op RuntimePort . optRuntimePort $ opts
-    urlPrefix = printf "http://%s:%d/" rhost rport
+  let urlPrefix = mkUrlPrefix opts
   cjs <- getContractJSON urlPrefix cid
   case cjs of
     Left str -> pure $ ContractViewError str
@@ -40,11 +35,8 @@ contractView opts tab@(Just "txs") (Just cid) = do
         Left str -> ContractViewError str
         Right tx -> extractInfo (parseTab tab) cjson (Just tx)
 
-contractView opts tab (Just cid) = do
-  let
-    rhost = op RuntimeHost . optRuntimeHost $ opts
-    rport = op RuntimePort . optRuntimePort $ opts
-  cjs <- getContractJSON (printf "http://%s:%d/" rhost rport) cid
+contractView opts tab@(Just _) (Just cid) = do
+  cjs <- getContractJSON (mkUrlPrefix opts) cid
   return $ case cjs of
     Left str -> ContractViewError str
     Right cjson -> extractInfo (parseTab tab) cjson Nothing
