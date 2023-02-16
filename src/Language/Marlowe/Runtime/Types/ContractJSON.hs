@@ -1,9 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.Marlowe.Runtime.Types.ContractJSON
-  ( Block(..)
-  , ContractJSON(..)
-  , Links(..)
+  ( ContractJSON(..)
+  , Link(..)
   , Resource(..)
   , Transaction(..)
   , Transactions(..)
@@ -11,21 +10,25 @@ module Language.Marlowe.Runtime.Types.ContractJSON
   , getContractTransactions
   ) where
 
-import Language.Marlowe.Semantics.Types ( Contract(..), State(..) )
 import Data.Aeson ( withObject, (.:?), (.:), FromJSON(parseJSON), eitherDecode )
 import Network.HTTP.Simple (parseRequest, getResponseBody, httpLBS, setRequestHeader, setRequestMethod)
 import Network.HTTP.Types (urlEncode)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 import Data.Text (pack, unpack)
 
+import Language.Marlowe.Runtime.Types.Common ( Block, Link(..) )
+import Language.Marlowe.Semantics.Types ( Contract(..), State(..) )
+
+
 data ContractJSON = ContractJSON {
-    links :: Links,
+    links :: Link,
     resource :: Resource
 } deriving (Show, Eq)
 
-newtype Links = Links {
-    transactions :: String
-} deriving (Show, Eq)
+instance FromJSON ContractJSON where
+  parseJSON = withObject "JSON" $ \v -> ContractJSON
+    <$> (Link <$> (v .: "links" >>= (.: "transactions")))
+    <*> v .: "resource"
 
 data Resource = Resource {
     block :: Block,
@@ -38,21 +41,6 @@ data Resource = Resource {
     version :: String
 } deriving (Show, Eq)
 
-data Block = Block {
-    blockHeaderHash :: String,
-    blockNo :: Integer,
-    slotNo :: Integer
-} deriving (Show, Eq)
-
-instance FromJSON ContractJSON where
-    parseJSON = withObject "JSON" $ \v -> ContractJSON
-        <$> v .: "links"
-        <*> v .: "resource"
-
-instance FromJSON Links where
-    parseJSON = withObject "Links" $ \v -> Links
-        <$> v .: "transactions"
-
 instance FromJSON Resource where
     parseJSON = withObject "Resource" $ \v -> Resource
         <$> v .: "block"
@@ -64,12 +52,6 @@ instance FromJSON Resource where
         <*> v .: "status"
         <*> v .: "version"
 
-instance FromJSON Block where
-    parseJSON = withObject "Block" $ \v -> Block
-        <$> v .: "blockHeaderHash"
-        <*> v .: "blockNo"
-        <*> v .: "slotNo"
-
 getContractJSON :: String -> String -> IO (Either String ContractJSON)
 getContractJSON endpoint reqContractId = do
     let reqContractIdUrlEncoded = urlEncode False $ encodeUtf8 $ pack reqContractId
@@ -79,7 +61,7 @@ getContractJSON endpoint reqContractId = do
     return $ eitherDecode (getResponseBody response)
 
 data Transaction = Transaction
-  { txLink :: String
+  { txLink :: Link
   , txBlock :: Block
   , txContractId :: String
   , txTransactionId :: String
@@ -89,7 +71,7 @@ instance FromJSON Transaction where
   parseJSON = withObject "Transaction" $ \o -> do
     res <- o .: "resource"
     Transaction
-      <$> ((o .: "links") >>= (.: "transaction"))
+      <$> (Link <$> (o .: "links" >>= (.: "transaction")))
       <*> res .: "block"
       <*> res .: "contractId"
       <*> res .: "transactionId"

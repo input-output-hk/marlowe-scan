@@ -6,45 +6,37 @@ module Explorer.Web.ContractView
   where
 
 import Control.Monad (forM_)
-import Control.Newtype.Generics (op)
+import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
+import Text.Blaze.Html5.Attributes ( href, style )
+
+import Explorer.Web.Util
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import Language.Marlowe.Runtime.Types.ContractJSON
   ( ContractJSON(..), getContractJSON
   , Transaction(..), Transactions(..), getContractTransactions
   )
+import qualified Language.Marlowe.Runtime.Types.Common as Common
 import Language.Marlowe.Semantics.Types (Contract, State)
-import Prelude hiding ( head )
-import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), b, code, p, string, toHtml )
-import Text.Blaze.Html5.Attributes ( style )
-import Text.Printf ( printf )
-
-import Explorer.Web.Util
-import Opts (Options (optRuntimeHost, optRuntimePort), RuntimeHost (..), RuntimePort (..))
+import Opts (Options, mkUrlPrefix)
 
 
 contractView :: Options -> Maybe String -> Maybe String -> IO ContractView
 
 contractView opts tab@(Just "txs") (Just cid) = do
-  let
-    rhost = op RuntimeHost . optRuntimeHost $ opts
-    rport = op RuntimePort . optRuntimePort $ opts
-    urlPrefix = printf "http://%s:%d/" rhost rport
+  let urlPrefix = mkUrlPrefix opts
   cjs <- getContractJSON urlPrefix cid
   case cjs of
     Left str -> pure $ ContractViewError str
     Right cjson -> do
-      let link = CJ.transactions . CJ.links $ cjson
+      let link = CJ.linkUrl . CJ.links $ cjson
       etx <- getContractTransactions urlPrefix link
       pure $ case etx of
         Left str -> ContractViewError str
         Right tx -> extractInfo (parseTab tab) cjson (Just tx)
 
-contractView opts tab (Just cid) = do
-  let
-    rhost = op RuntimeHost . optRuntimeHost $ opts
-    rport = op RuntimePort . optRuntimePort $ opts
-  cjs <- getContractJSON (printf "http://%s:%d/" rhost rport) cid
+contractView opts tab@(Just _) (Just cid) = do
+  cjs <- getContractJSON (mkUrlPrefix opts) cid
   return $ case cjs of
     Left str -> ContractViewError str
     Right cjson -> extractInfo (parseTab tab) cjson Nothing
@@ -65,9 +57,9 @@ extractInfo :: ContractViews -> ContractJSON -> Maybe Transactions -> ContractVi
 extractInfo CInfoView cv _ =
   ContractInfoView
       (CIVR { civrContractId = CJ.contractId res
-            , blockHeaderHash = CJ.blockHeaderHash block
-            , blockNo = CJ.blockNo block
-            , slotNo = CJ.slotNo block
+            , blockHeaderHash = Common.blockHeaderHash block
+            , blockNo = Common.blockNo block
+            , slotNo = Common.slotNo block
             , roleTokenMintingPolicyId = CJ.roleTokenMintingPolicyId res
             , status = CJ.status res
             , version = CJ.version res
@@ -88,9 +80,9 @@ extractInfo CTxView cv (Just (Transactions txs)) =
   ContractTxView . CTVRs (CJ.contractId . CJ.resource $ cv) . map convertTx $ txs
   where
     convertTx tx = CTVR
-      { ctvrLink = txLink tx
-      , ctvrBlock = CJ.blockNo . txBlock $ tx
-      , ctvrSlot = CJ.slotNo . txBlock $ tx
+      { ctvrLink = CJ.linkUrl . txLink $ tx
+      , ctvrBlock = Common.blockNo . txBlock $ tx
+      , ctvrSlot = Common.slotNo . txBlock $ tx
       , ctvrContractId = txContractId tx
       , ctvrTransactionId = txTransactionId tx
       }
@@ -228,7 +220,8 @@ renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c =
   table ! style "border: 1px solid black"
-        $ do tr (do td $ b "Navigation bar"
+        $ do tr (do td $ b $ a ! href "listContracts" $ "Contracts List"
+                    td $ b "Navigation bar"
                     mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
                           allContractViews
                     c)

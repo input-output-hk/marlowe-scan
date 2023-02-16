@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, mkNavLink, stringToHtml, table, td, th, tr )
+  ( baseDoc, generateLink, mkNavLink, stringToHtml, table, td, th, tr )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
