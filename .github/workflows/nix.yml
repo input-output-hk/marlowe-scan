@@ -17,4 +17,4 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-22.11
     - run: nix-build shell.nix
-    - run: nix-shell --run "echo OK"
+    - run: nix-shell --run "hlint src"
