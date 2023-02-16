@@ -12,7 +12,9 @@ module Opts
 
 import Control.Newtype.Generics
 import GHC.Generics hiding (Prefix)
-import Options.Applicative
+import Options.Applicative ( (<**>), auto, header, help, info, long, metavar,
+                             option, showDefault, strOption, value, execParser,
+                             helper, Parser )
 import Text.Printf (printf)
 
 newtype ExplorerPort = ExplorerPort Int

@@ -27,7 +27,7 @@ data ContractJSON = ContractJSON {
 
 instance FromJSON ContractJSON where
   parseJSON = withObject "JSON" $ \v -> ContractJSON
-    <$> Link <$> (v .: "links" >>= (.: "transactions"))
+    <$> (Link <$> (v .: "links" >>= (.: "transactions")))
     <*> v .: "resource"
 
 data Resource = Resource {
@@ -71,7 +71,7 @@ instance FromJSON Transaction where
   parseJSON = withObject "Transaction" $ \o -> do
     res <- o .: "resource"
     Transaction
-      <$> Link <$> (o .: "links" >>= (.: "transaction"))
+      <$> (Link <$> (o .: "links" >>= (.: "transaction")))
       <*> res .: "block"
       <*> res .: "contractId"
       <*> res .: "transactionId"

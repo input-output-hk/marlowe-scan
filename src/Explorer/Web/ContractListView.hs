@@ -9,7 +9,7 @@ import Control.Monad (forM_)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, string, toHtml, toValue )
 import Text.Blaze.Html5.Attributes ( href, style )
 
-import Explorer.Web.Util
+import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
 import Language.Marlowe.Runtime.Types.ContractsJSON
   ( ContractInList(..)

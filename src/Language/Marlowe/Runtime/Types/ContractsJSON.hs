@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.Marlowe.Runtime.Types.ContractsJSON
-  ( ContractList(..), ContractInList(..)
+  ( ContractList(..)
+  , ContractInList(..)
   , Resource(..)
   , getContracts
   )
@@ -28,17 +29,12 @@ data ContractInList = ContractInList
 
 instance FromJSON ContractInList where
   parseJSON = withObject "ContractInList" $ \o -> ContractInList
-    <$> Link <$> (o .: "links" >>= (.: "contract"))
+    <$> (Link <$> (o .: "links" >>= (.: "contract")))
     <*> o .: "resource"
 
 data Resource = Resource
   { resContractId :: String
   , resBlock :: Block
-  -- FIXME Add these soon, unsure of the use-cases yet
-  -- , cilMetadata
-  -- , cilRoleTokenPolicyId
-  -- , cilStatus
-  -- , cilVersion
   }
   deriving (Eq, Show)
 
