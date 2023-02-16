@@ -28,7 +28,7 @@ data ContractListView
 instance ToMarkup ContractListView where
   toMarkup :: ContractListView -> Markup
   toMarkup (ContractListView clvrs) =
-    baseDoc "Marlowe Contract List" $ renderCLVRs clvrs
+    baseDoc "Marlowe Contract List (most recent 100 contracts)" $ renderCLVRs clvrs
   toMarkup (ContractListViewError msg) =
     baseDoc "An error occurred" $ string ("Error: " <> msg)
 
