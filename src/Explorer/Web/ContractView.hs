@@ -29,7 +29,7 @@ contractView opts tab@(Just "txs") (Just cid) = do
   case cjs of
     Left str -> pure $ ContractViewError str
     Right cjson -> do
-      let link = CJ.transactions . CJ.links $ cjson
+      let link = CJ.linkUrl . CJ.links $ cjson
       etx <- getContractTransactions urlPrefix link
       pure $ case etx of
         Left str -> ContractViewError str
@@ -80,7 +80,7 @@ extractInfo CTxView cv (Just (Transactions txs)) =
   ContractTxView . CTVRs (CJ.contractId . CJ.resource $ cv) . map convertTx $ txs
   where
     convertTx tx = CTVR
-      { ctvrLink = txLink tx
+      { ctvrLink = CJ.linkUrl . txLink $ tx
       , ctvrBlock = Common.blockNo . txBlock $ tx
       , ctvrSlot = Common.slotNo . txBlock $ tx
       , ctvrContractId = txContractId tx

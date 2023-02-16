@@ -2,10 +2,18 @@
 
 module Language.Marlowe.Runtime.Types.Common
   ( Block(..)
+  , Link(..)
   ) where
 
 import Data.Aeson ( withObject, (.:), FromJSON(parseJSON) )
 
+
+-- Many of the resources we get back from Marlowe Runtime have a single link of
+-- some named kind, but the name varies ("contract" or "transaction"). This
+-- type is for holding onto that link. The JSON path will be expressed in the
+-- containing type's FromJSON intance.
+newtype Link = Link { linkUrl :: String }
+  deriving (Show, Eq)
 
 data Block = Block
   { blockHeaderHash :: String

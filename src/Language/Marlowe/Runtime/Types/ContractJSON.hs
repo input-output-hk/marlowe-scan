@@ -2,7 +2,7 @@
 
 module Language.Marlowe.Runtime.Types.ContractJSON
   ( ContractJSON(..)
-  , Links(..)
+  , Link(..)
   , Resource(..)
   , Transaction(..)
   , Transactions(..)
@@ -16,27 +16,19 @@ import Network.HTTP.Types (urlEncode)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 import Data.Text (pack, unpack)
 
-import Language.Marlowe.Runtime.Types.Common  -- FIXME explicit imports
+import Language.Marlowe.Runtime.Types.Common ( Block, Link(..) )
 import Language.Marlowe.Semantics.Types ( Contract(..), State(..) )
 
 
 data ContractJSON = ContractJSON {
-    links :: Links,
+    links :: Link,
     resource :: Resource
 } deriving (Show, Eq)
 
 instance FromJSON ContractJSON where
-    parseJSON = withObject "JSON" $ \v -> ContractJSON
-        <$> v .: "links"
-        <*> v .: "resource"
-
-newtype Links = Links {
-    transactions :: String
-} deriving (Show, Eq)
-
-instance FromJSON Links where
-    parseJSON = withObject "Links" $ \v -> Links
-        <$> v .: "transactions"
+  parseJSON = withObject "JSON" $ \v -> ContractJSON
+    <$> Link <$> (v .: "links" >>= (.: "transactions"))
+    <*> v .: "resource"
 
 data Resource = Resource {
     block :: Block,
@@ -69,7 +61,7 @@ getContractJSON endpoint reqContractId = do
     return $ eitherDecode (getResponseBody response)
 
 data Transaction = Transaction
-  { txLink :: String
+  { txLink :: Link
   , txBlock :: Block
   , txContractId :: String
   , txTransactionId :: String
@@ -79,7 +71,7 @@ instance FromJSON Transaction where
   parseJSON = withObject "Transaction" $ \o -> do
     res <- o .: "resource"
     Transaction
-      <$> ((o .: "links") >>= (.: "transaction"))
+      <$> Link <$> (o .: "links" >>= (.: "transaction"))
       <*> res .: "block"
       <*> res .: "contractId"
       <*> res .: "transactionId"

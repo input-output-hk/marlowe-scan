@@ -2,7 +2,6 @@
 
 module Language.Marlowe.Runtime.Types.ContractsJSON
   ( ContractList(..), ContractInList(..)
-  , Links(..)
   , Resource(..)
   , getContracts
   )
@@ -11,7 +10,7 @@ module Language.Marlowe.Runtime.Types.ContractsJSON
 import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode )
 import Network.HTTP.Simple (parseRequest, getResponseBody, httpLBS, setRequestHeader, setRequestMethod)
 
-import Language.Marlowe.Runtime.Types.Common  -- FIXME explicit imports
+import Language.Marlowe.Runtime.Types.Common ( Block, Link(..) )
 
 
 newtype ContractList = ContractList [ContractInList]
@@ -22,22 +21,15 @@ instance FromJSON ContractList where
     ContractList <$> o .: "results"
 
 data ContractInList = ContractInList
-  { cilLinks :: Links
+  { cilLink :: Link
   , cilResource :: Resource
   }
   deriving (Eq, Show)
 
 instance FromJSON ContractInList where
   parseJSON = withObject "ContractInList" $ \o -> ContractInList
-    <$> o .: "links"
+    <$> Link <$> (o .: "links" >>= (.: "contract"))
     <*> o .: "resource"
-
-newtype Links = Links { linkUrl :: String }
-  deriving (Show, Eq)
-
-instance FromJSON Links where
-  parseJSON = withObject "Links" $ \o -> Links
-    <$> o .: "contract"
 
 data Resource = Resource
   { resContractId :: String

@@ -14,7 +14,6 @@ import qualified Language.Marlowe.Runtime.Types.Common as Common
 import Language.Marlowe.Runtime.Types.ContractsJSON
   ( ContractInList(..)
   , ContractList(..)
-  , Links(..)
   , Resource(..)
   , getContracts
   )
@@ -46,7 +45,7 @@ extractInfo (ContractList cils) = ContractListView . map convertContract $ cils
       { clvrContractId = resContractId . cilResource $ cil
       , clvrBlock = Common.blockNo . resBlock . cilResource $ cil
       , clvrSlot = Common.slotNo . resBlock . cilResource $ cil
-      , clvrLink = linkUrl . cilLinks $ cil
+      , clvrLink = Common.linkUrl . cilLink $ cil
       }
 
 contractListView :: Options -> IO ContractListView
