@@ -22,6 +22,11 @@ let
         ];
         license = "unknown";
         hydraPlatforms = lib.platforms.none;
+        shellHook = ''
+          fix-hie () {
+            gen-hie --stack > hie.yaml
+          }
+        '';
       };
   haskellPackages = if compiler == "default"
                        then pkgs.haskellPackages

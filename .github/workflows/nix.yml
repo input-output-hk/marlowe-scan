@@ -17,4 +17,4 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-22.11
     - run: nix-build shell.nix
-    - run: nix-shell --run "hlint src"
+    - run: nix-shell --run "hlint src && fix-hie && git diff --exit-code hie.yaml"
