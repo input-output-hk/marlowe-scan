@@ -6,7 +6,7 @@ on:
     branches: [ "master" ]
 
 permissions:
-  contents: read
+  contents: write 
   
 jobs:
   test-nix-build:
@@ -17,4 +17,11 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-22.11
     - run: nix-build shell.nix
-    - run: nix-shell --run "hlint src && fix-hie && git diff --exit-code hie.yaml"
+    - run: nix-shell --run "fix-hie"
+    - uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a
+      if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
+      with:
+        commit_message: Update hie.yaml 
+        file_pattern: 'hie.yaml'
+        disable_globbing: true
+    - run: nix-shell --run "hlint src && git diff --exit-code hie.yaml"
