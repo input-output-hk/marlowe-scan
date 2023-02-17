@@ -1,8 +1,5 @@
 cradle:
   stack:
-    - path: "./test/Spec.hs"
-      component: "marlowe-explorer:test:marlowe-explorer-test"
-
     - path: "./app/Main.hs"
       component: "marlowe-explorer:exe:marlowe-explorer-exe"
 
