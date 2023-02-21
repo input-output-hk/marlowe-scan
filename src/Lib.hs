@@ -27,10 +27,12 @@ startApp opts = do
   run eport $ app opts
 
 type API
-     = "listContracts" :> Get '[HTML] ContractListView
+     = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/
+  :<|> "listContracts" :> Get '[HTML] ContractListView
   :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> Get '[HTML] ContractView
 
 app :: Options -> Application
 app opts = serve (Proxy :: Proxy API) $ hoistServer (Proxy :: Proxy API) liftIO $
        contractListView opts
+  :<|> contractListView opts
   :<|> contractView opts
