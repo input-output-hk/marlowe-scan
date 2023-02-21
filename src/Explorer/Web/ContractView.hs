@@ -6,6 +6,8 @@ module Explorer.Web.ContractView
   where
 
 import Control.Monad (forM_)
+import Data.List (intercalate)
+import Data.Map (Map)
 import qualified Data.Map as Map
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
@@ -18,7 +20,7 @@ import Language.Marlowe.Runtime.Types.ContractJSON
   , Transaction(..), Transactions(..), getContractTransactions
   )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
-import Language.Marlowe.Semantics.Types (Contract, Money, Party, State(..), Token)
+import Language.Marlowe.Semantics.Types (Contract, Money, Party, State(..), Token, ValueId(..))
 import Opts (Options, mkUrlPrefix)
 
 
@@ -214,7 +216,7 @@ renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
 -- renderMState Nothing = string "Contract closed"
 -- renderMState (Just s) = string (show s)
 
-renderMAccounts :: (Map.Map (Party, Token) Money) -> Html
+renderMAccounts :: Map (Party, Token) Money -> Html
 renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
   tr $ do
     th $ b "party"
@@ -230,13 +232,18 @@ renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
           td . string . show $ money
   mapM_ mkRow $ Map.toList mapAccounts
 
+renderBoundValues :: Map ValueId Integer -> String
+renderBoundValues mapBoundValues = case Map.toList mapBoundValues of
+  [] -> "-"
+  listBoundValues -> intercalate ", " . map (\(ValueId vid, int) -> show vid <> ": " <> show int) $ listBoundValues
+
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
 renderMState (Just st) = table ! style "border: 1px solid black" $ do
   tr (do td $ b "accounts"
          td . renderMAccounts . accounts $ st)
   tr (do td $ b "bound values"
-         td . string . show . boundValues $ st)
+         td . string . renderBoundValues . boundValues $ st)
   tr (do td $ b "choices"
          td . string . show . choices $ st)
   tr (do td $ b "minTime"

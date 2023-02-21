@@ -10,6 +10,7 @@ module Language.Marlowe.Semantics.Types
   , Party(..)
   , State(..)
   , Token(..)
+  , ValueId(..)
   , emptyState
   , getAction
   , getInputContent
