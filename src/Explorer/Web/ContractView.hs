@@ -6,6 +6,7 @@ module Explorer.Web.ContractView
   where
 
 import Control.Monad (forM_)
+import qualified Data.Map as Map
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
 
@@ -17,7 +18,7 @@ import Language.Marlowe.Runtime.Types.ContractJSON
   , Transaction(..), Transactions(..), getContractTransactions
   )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
-import Language.Marlowe.Semantics.Types (Contract, State)
+import Language.Marlowe.Semantics.Types (Contract, Money, Party, State(..), Token)
 import Opts (Options, mkUrlPrefix)
 
 
@@ -175,7 +176,7 @@ renderCSVR (CSVR { csvrContractId = cid
                     td $ string cid)
              tr (do td $ b "Current contract"
                     td $ renderMContract cc)
-             tr (do td $ b "Current state"
+             tr (do td $ b "State"
                     td $ renderMState cs)
              tr (do td $ b "Initial contract"
                     td $ renderMContract (Just ic))
@@ -209,9 +210,37 @@ renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
     forM_ ctvrs makeRow
 
 
+-- renderMState :: Maybe State -> Html
+-- renderMState Nothing = string "Contract closed"
+-- renderMState (Just s) = string (show s)
+
+renderMAccounts :: (Map.Map (Party, Token) Money) -> Html
+renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
+  tr $ do
+    th $ b "party"
+    th $ b "currency"
+    -- th $ b "currency symbol"
+    -- th $ b "token name"
+    th $ b "amount"
+  let mkRow ((party, token), money) =
+        tr $ do
+          td . string . show $ party
+          td . string . show $ token
+          -- td $ "token name"
+          td . string . show $ money
+  mapM_ mkRow $ Map.toList mapAccounts
+
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
-renderMState (Just s) = string (show s)
+renderMState (Just st) = table ! style "border: 1px solid black" $ do
+  tr (do td $ b "accounts"
+         td . renderMAccounts . accounts $ st)
+  tr (do td $ b "bound values"
+         td . string . show . boundValues $ st)
+  tr (do td $ b "choices"
+         td . string . show . choices $ st)
+  tr (do td $ b "minTime"
+         td . string . show . minTime $ st)
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"

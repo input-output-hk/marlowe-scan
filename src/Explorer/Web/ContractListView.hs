@@ -41,6 +41,7 @@ data CLVR = CLVR
 extractInfo :: ContractList -> ContractListView
 extractInfo (ContractList cils) = ContractListView . map convertContract $ cils
   where
+    convertContract :: ContractInList -> CLVR
     convertContract cil = CLVR
       { clvrContractId = resContractId . cilResource $ cil
       , clvrBlock = Common.blockNo . resBlock . cilResource $ cil
