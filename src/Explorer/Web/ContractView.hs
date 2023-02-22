@@ -9,6 +9,7 @@ import Control.Monad (forM_)
 import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Data.Text (unpack)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
 
@@ -20,7 +21,7 @@ import Language.Marlowe.Runtime.Types.ContractJSON
   , Transaction(..), Transactions(..), getContractTransactions
   )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
-import Language.Marlowe.Semantics.Types (Contract, Money, Party, State(..), Token, ValueId(..))
+import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money, Party, State(..), Token, ValueId(..))
 import Opts (Options, mkUrlPrefix)
 
 
@@ -211,11 +212,6 @@ renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
             td $ toHtml . ctvrSlot $ ctvr
     forM_ ctvrs makeRow
 
-
--- renderMState :: Maybe State -> Html
--- renderMState Nothing = string "Contract closed"
--- renderMState (Just s) = string (show s)
-
 renderMAccounts :: Map (Party, Token) Money -> Html
 renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
   tr $ do
@@ -235,7 +231,16 @@ renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
 renderBoundValues :: Map ValueId Integer -> String
 renderBoundValues mapBoundValues = case Map.toList mapBoundValues of
   [] -> "-"
-  listBoundValues -> intercalate ", " . map (\(ValueId vid, int) -> show vid <> ": " <> show int) $ listBoundValues
+  listBoundValues -> intercalate ", "
+    . map (\(ValueId vid, int) -> show vid <> ": " <> show int)
+    $ listBoundValues
+
+renderChoices :: Map ChoiceId a -> String
+renderChoices mapChoices = case Map.keys mapChoices of
+  [] -> "-"
+  listChoiceIds -> intercalate ", "
+    . map (\(ChoiceId choiceName party) -> show party <> ": " <> unpack choiceName)
+    $ listChoiceIds
 
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
@@ -245,7 +250,7 @@ renderMState (Just st) = table ! style "border: 1px solid black" $ do
   tr (do td $ b "bound values"
          td . string . renderBoundValues . boundValues $ st)
   tr (do td $ b "choices"
-         td . string . show . choices $ st)
+         td . string . renderChoices . choices $ st)
   tr (do td $ b "minTime"
          td . string . show . minTime $ st)
 

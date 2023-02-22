@@ -5,7 +5,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.Marlowe.Semantics.Types
-  ( Contract(..)
+  ( ChoiceId(..)
+  , ChoiceName
+  , Contract(..)
   , Money
   , Party(..)
   , State(..)
