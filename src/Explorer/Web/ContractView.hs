@@ -10,6 +10,9 @@ import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (unpack)
+import Data.Time (formatTime)
+import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
+import Data.Time.Format (defaultTimeLocale)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
 
@@ -21,7 +24,8 @@ import Language.Marlowe.Runtime.Types.ContractJSON
   , Transaction(..), Transactions(..), getContractTransactions
   )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
-import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money, Party, State(..), Token, ValueId(..))
+import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money,
+  POSIXTime(..), Party, State(..), Token, ValueId(..))
 import Opts (Options, mkUrlPrefix)
 
 
@@ -242,6 +246,13 @@ renderChoices mapChoices = case Map.keys mapChoices of
     . map (\(ChoiceId choiceName party) -> show party <> ": " <> unpack choiceName)
     $ listChoiceIds
 
+renderTime :: POSIXTime -> String
+renderTime =
+  formatTime defaultTimeLocale "%s [%A, %d %B %Y %T %Z]"  -- ..and format it.
+  . posixSecondsToUTCTime  -- ..convert to UTCTime for the formatting function..
+  . realToFrac . (/ (1000 :: Double)) . fromIntegral  -- ..convert from millis to epoch seconds..
+  . getPOSIXTime  -- Get the Integer out of our custom type..
+
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
 renderMState (Just st) = table ! style "border: 1px solid black" $ do
@@ -252,7 +263,7 @@ renderMState (Just st) = table ! style "border: 1px solid black" $ do
   tr (do td $ b "choices"
          td . string . renderChoices . choices $ st)
   tr (do td $ b "minTime"
-         td . string . show . minTime $ st)
+         td . string . renderTime . minTime $ st)
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"

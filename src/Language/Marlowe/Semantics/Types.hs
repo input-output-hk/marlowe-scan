@@ -10,6 +10,7 @@ module Language.Marlowe.Semantics.Types
   , Contract(..)
   , Money
   , Party(..)
+  , POSIXTime(..)
   , State(..)
   , Token(..)
   , ValueId(..)
