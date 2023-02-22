@@ -26,7 +26,7 @@ import Language.Marlowe.Runtime.Types.ContractJSON
   )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
 import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money,
-  POSIXTime(..), Party, State(..), Token(..), ValueId(..))
+  POSIXTime(..), Party(..), State(..), Token(..), ValueId(..))
 import Opts (Options, mkUrlPrefix)
 
 
@@ -217,6 +217,10 @@ renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
             td $ toHtml . ctvrSlot $ ctvr
     forM_ ctvrs makeRow
 
+renderParty :: Party -> String
+renderParty (Address ad) = printf "Address: %s" $ unpack ad
+renderParty (Role ro) = printf "Role: %s" $ unpack ro
+
 renderToken :: Token -> String
 renderToken (Token "" "") = "ADA (Lovelace)"
 renderToken (Token currSymbol tokenName) = printf "%s (%s)" currSymbol tokenName
@@ -229,7 +233,7 @@ renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
     th $ b "amount"
   let mkRow ((party, token), money) =
         tr $ do
-          td . string . show $ party
+          td . string . renderParty $ party
           td . string . renderToken $ token
           td . string . show $ money
   mapM_ mkRow $ Map.toList mapAccounts
