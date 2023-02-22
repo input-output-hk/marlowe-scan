@@ -15,6 +15,7 @@ import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import Data.Time.Format (defaultTimeLocale)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
+import Text.Printf (printf)
 
 import Explorer.Web.Util
 import Language.Marlowe.Pretty ( pretty )
@@ -25,7 +26,7 @@ import Language.Marlowe.Runtime.Types.ContractJSON
   )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
 import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money,
-  POSIXTime(..), Party, State(..), Token, ValueId(..))
+  POSIXTime(..), Party, State(..), Token(..), ValueId(..))
 import Opts (Options, mkUrlPrefix)
 
 
@@ -216,19 +217,20 @@ renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
             td $ toHtml . ctvrSlot $ ctvr
     forM_ ctvrs makeRow
 
+renderToken :: Token -> String
+renderToken (Token "" "") = "ADA (Lovelace)"
+renderToken (Token currSymbol tokenName) = printf "%s (%s)" currSymbol tokenName
+
 renderMAccounts :: Map (Party, Token) Money -> Html
 renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
   tr $ do
     th $ b "party"
-    th $ b "currency"
-    -- th $ b "currency symbol"
-    -- th $ b "token name"
+    th $ b "currency (token name)"
     th $ b "amount"
   let mkRow ((party, token), money) =
         tr $ do
           td . string . show $ party
-          td . string . show $ token
-          -- td $ "token name"
+          td . string . renderToken $ token
           td . string . show $ money
   mapM_ mkRow $ Map.toList mapAccounts
 
