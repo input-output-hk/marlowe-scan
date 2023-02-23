@@ -7,7 +7,7 @@ module Explorer.Web.ContractListView
 
 import Control.Monad (forM_)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, string, toHtml, toValue )
-import Text.Blaze.Html5.Attributes ( href, style )
+import Text.Blaze.Html5.Attributes ( href )
 
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
@@ -57,7 +57,7 @@ contractListView opts = do
     Right cl -> extractInfo cl
 
 renderCLVRs :: [CLVR] -> Html
-renderCLVRs clvrs = table ! style "border: 1px solid black" $ do
+renderCLVRs clvrs = table $ do
     tr $ do
       th $ b "Contract ID"
       th $ b "Block No"

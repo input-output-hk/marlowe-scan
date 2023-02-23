@@ -17,7 +17,7 @@ import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, 
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
 
-import Explorer.Web.Util
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import Language.Marlowe.Runtime.Types.ContractJSON
@@ -151,8 +151,7 @@ renderCIVR (CIVR { civrContractId = cid
                  , status = contractStatus
                  , version = marloweVersion
                  }) =
-  table ! style "border: 1px solid black"
-        $ do tr (do td $ b "Contract ID"
+  table $ do tr (do td $ b "Contract ID"
                     td $ string cid)
              tr (do td $ b "Block Header Hash"
                     td $ string blockHash)
@@ -179,12 +178,11 @@ renderCSVR (CSVR { csvrContractId = cid
                  , initialContract = ic
                  , currentState = cs
                  }) =
-  table ! style "border: 1px solid black"
-        $ do tr (do td $ b "Contract ID"
+  table $ do tr (do td $ b "Contract ID"
                     td $ string cid)
              tr (do td $ b "Current contract"
                     td $ renderMContract cc)
-             tr (do td $ b "State"
+             tr (do td $ b "Current state"
                     td $ renderMState cs)
              tr (do td $ b "Initial contract"
                     td $ renderMContract (Just ic))
@@ -205,17 +203,17 @@ renderCTVRs :: [CTVR] -> Html
 
 renderCTVRs [] = p ! style "color: red" $ string "There are no transactions"
 
-renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
+renderCTVRs ctvrs = table $ do
     tr $ do
       th $ b "Transaction ID"
       th $ b "Block No"
       th $ b "Slot No"
-    let makeRow ctvr = do
+    forM_ ctvrs makeRow
+  where makeRow ctvr = do
           tr $ do
             td $ string . ctvrTransactionId $ ctvr
             td $ toHtml . ctvrBlock $ ctvr
             td $ toHtml . ctvrSlot $ ctvr
-    forM_ ctvrs makeRow
 
 renderParty :: Party -> String
 renderParty (Address ad) = printf "Address: %s" $ unpack ad
@@ -226,7 +224,7 @@ renderToken (Token "" "") = "ADA (Lovelace)"
 renderToken (Token currSymbol tokenName) = printf "%s (%s)" currSymbol tokenName
 
 renderMAccounts :: Map (Party, Token) Money -> Html
-renderMAccounts mapAccounts = table ! style "border: 1px solid black" $ do
+renderMAccounts mapAccounts = table $ do
   tr $ do
     th $ b "party"
     th $ b "currency (token name)"
@@ -261,7 +259,7 @@ renderTime =
 
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
-renderMState (Just st) = table ! style "border: 1px solid black" $ do
+renderMState (Just st) = table $ do
   tr (do td $ b "accounts"
          td . renderMAccounts . accounts $ st)
   tr (do td $ b "bound values"
@@ -277,8 +275,7 @@ renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c =
-  table ! style "border: 1px solid black"
-        $ do tr (do td $ b $ a ! href "listContracts" $ "Contracts List"
+  table $ do tr (do td $ b $ a ! href "listContracts" $ "Contracts List"
                     td $ b "Navigation bar"
                     mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
                           allContractViews
