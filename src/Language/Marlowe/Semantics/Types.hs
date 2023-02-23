@@ -4,7 +4,22 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.Marlowe.Semantics.Types(Contract(..), State(..), ivFrom, ivTo, inBounds, getAction, emptyState, getInputContent) where
+module Language.Marlowe.Semantics.Types
+  ( ChoiceId(..)
+  , ChoiceName
+  , Contract(..)
+  , Money
+  , Party(..)
+  , POSIXTime(..)
+  , State(..)
+  , Token(..)
+  , ValueId(..)
+  , emptyState
+  , getAction
+  , getInputContent
+  , inBounds
+  , ivFrom, ivTo
+  ) where
 
 import           Data.Aeson.Types (FromJSON(parseJSON), KeyValue((.=)), Parser, ToJSON(toJSON, toJSONList), object, withArray, withObject, (.:))
 import           GHC.Generics (Generic)

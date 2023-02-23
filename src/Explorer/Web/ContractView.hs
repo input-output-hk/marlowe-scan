@@ -6,10 +6,18 @@ module Explorer.Web.ContractView
   where
 
 import Control.Monad (forM_)
+import Data.List (intercalate)
+import Data.Map (Map)
+import qualified Data.Map as Map
+import Data.Text (unpack)
+import Data.Time (formatTime)
+import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
+import Data.Time.Format (defaultTimeLocale)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
+import Text.Printf (printf)
 
-import Explorer.Web.Util
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import Language.Marlowe.Runtime.Types.ContractJSON
@@ -17,7 +25,8 @@ import Language.Marlowe.Runtime.Types.ContractJSON
   , Transaction(..), Transactions(..), getContractTransactions
   )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
-import Language.Marlowe.Semantics.Types (Contract, State)
+import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money,
+  POSIXTime(..), Party(..), State(..), Token(..), ValueId(..))
 import Opts (Options, mkUrlPrefix)
 
 
@@ -142,21 +151,20 @@ renderCIVR (CIVR { civrContractId = cid
                  , status = contractStatus
                  , version = marloweVersion
                  }) =
-  table ! style "border: 1px solid black"
-        $ do tr (do td $ b "Contract ID"
-                    td $ string cid)
-             tr (do td $ b "Block Header Hash"
-                    td $ string blockHash)
-             tr (do td $ b "Block No"
-                    td $ string (show blockNum))
-             tr (do td $ b "Slot No"
-                    td $ string (show slotNum))
-             tr (do td $ b "Role Token Minting Policy ID"
-                    td $ string roleMintingPolicyId)
-             tr (do td $ b "Status"
-                    td $ string contractStatus)
-             tr (do td $ b "Version"
-                    td $ string marloweVersion)
+  table $ do tr $ do td $ b "Contract ID"
+                     td $ string cid
+             tr $ do td $ b "Block Header Hash"
+                     td $ string blockHash
+             tr $ do td $ b "Block No"
+                     td $ string (show blockNum)
+             tr $ do td $ b "Slot No"
+                     td $ string (show slotNum)
+             tr $ do td $ b "Role Token Minting Policy ID"
+                     td $ string roleMintingPolicyId
+             tr $ do td $ b "Status"
+                     td $ string contractStatus
+             tr $ do td $ b "Version"
+                     td $ string marloweVersion
 
 data CSVR = CSVR { csvrContractId :: String
                  , currentContract :: Maybe Contract
@@ -170,15 +178,14 @@ renderCSVR (CSVR { csvrContractId = cid
                  , initialContract = ic
                  , currentState = cs
                  }) =
-  table ! style "border: 1px solid black"
-        $ do tr (do td $ b "Contract ID"
-                    td $ string cid)
-             tr (do td $ b "Current contract"
-                    td $ renderMContract cc)
-             tr (do td $ b "Current state"
-                    td $ renderMState cs)
-             tr (do td $ b "Initial contract"
-                    td $ renderMContract (Just ic))
+  table $ do tr $ do td $ b "Contract ID"
+                     td $ string cid
+             tr $ do td $ b "Current contract"
+                     td $ renderMContract cc
+             tr $ do td $ b "Current state"
+                     td $ renderMState cs
+             tr $ do td $ b "Initial contract"
+                     td $ renderMContract (Just ic)
 
 data CTVR = CTVR
   { ctvrLink :: String
@@ -196,22 +203,71 @@ renderCTVRs :: [CTVR] -> Html
 
 renderCTVRs [] = p ! style "color: red" $ string "There are no transactions"
 
-renderCTVRs ctvrs = table ! style "border: 1px solid black" $ do
+renderCTVRs ctvrs = table $ do
     tr $ do
       th $ b "Transaction ID"
       th $ b "Block No"
       th $ b "Slot No"
-    let makeRow ctvr = do
+    forM_ ctvrs makeRow
+  where makeRow ctvr = do
           tr $ do
             td $ string . ctvrTransactionId $ ctvr
             td $ toHtml . ctvrBlock $ ctvr
             td $ toHtml . ctvrSlot $ ctvr
-    forM_ ctvrs makeRow
 
+renderParty :: Party -> String
+renderParty (Address ad) = printf "Address: %s" $ unpack ad
+renderParty (Role ro) = printf "Role: %s" $ unpack ro
+
+renderToken :: Token -> String
+renderToken (Token "" "") = "ADA (Lovelace)"
+renderToken (Token currSymbol tokenName) = printf "%s (%s)" currSymbol tokenName
+
+renderMAccounts :: Map (Party, Token) Money -> Html
+renderMAccounts mapAccounts = table $ do
+  tr $ do
+    th $ b "party"
+    th $ b "currency (token name)"
+    th $ b "amount"
+  let mkRow ((party, token), money) =
+        tr $ do
+          td . string . renderParty $ party
+          td . string . renderToken $ token
+          td . string . show $ money
+  mapM_ mkRow $ Map.toList mapAccounts
+
+renderBoundValues :: Map ValueId Integer -> String
+renderBoundValues mapBoundValues = case Map.toList mapBoundValues of
+  [] -> "-"
+  listBoundValues -> intercalate ", "
+    . map (\(ValueId vid, int) -> show vid <> ": " <> show int)
+    $ listBoundValues
+
+renderChoices :: Map ChoiceId a -> String
+renderChoices mapChoices = case Map.keys mapChoices of
+  [] -> "-"
+  listChoiceIds -> intercalate ", "
+    . map (\(ChoiceId choiceName party) -> show party <> ": " <> unpack choiceName)
+    $ listChoiceIds
+
+renderTime :: POSIXTime -> String
+renderTime =
+  formatTime defaultTimeLocale "%s [%A, %d %B %Y %T %Z]"  -- ..and format it.
+  . posixSecondsToUTCTime  -- ..convert to UTCTime for the formatting function..
+  . realToFrac . (/ (1000 :: Double)) . fromIntegral  -- ..convert from millis to epoch seconds..
+  . getPOSIXTime  -- Get the Integer out of our custom type..
 
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
-renderMState (Just s) = string (show s)
+renderMState (Just st) = table $ do
+  tr $ do td $ b "accounts"
+          td . renderMAccounts . accounts $ st
+  tr $ do td $ b "bound values"
+          td . string . renderBoundValues . boundValues $ st
+  tr $ do td $ b "choices"
+          td . string . renderChoices . choices $ st
+  tr $ do td $ b "minTime"
+          td . string . renderTime . minTime $ st
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"
@@ -219,9 +275,8 @@ renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c =
-  table ! style "border: 1px solid black"
-        $ do tr (do td $ b $ a ! href "listContracts" $ "Contracts List"
-                    td $ b "Navigation bar"
-                    mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
-                          allContractViews
-                    c)
+  table $ do tr $ do td $ b $ a ! href "listContracts" $ "Contracts List"
+                     td $ b "Navigation bar"
+                     mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
+                           allContractViews
+                     c

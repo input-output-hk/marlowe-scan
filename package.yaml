@@ -46,6 +46,7 @@ library:
   dependencies:
   - newtype-generics
   - optparse-applicative
+  - time
 
 executables:
   marlowe-explorer-exe:
