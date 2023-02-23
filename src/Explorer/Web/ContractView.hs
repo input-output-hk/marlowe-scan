@@ -151,20 +151,20 @@ renderCIVR (CIVR { civrContractId = cid
                  , status = contractStatus
                  , version = marloweVersion
                  }) =
-  table $ do tr (do td $ b "Contract ID"
-                    td $ string cid)
-             tr (do td $ b "Block Header Hash"
-                    td $ string blockHash)
-             tr (do td $ b "Block No"
-                    td $ string (show blockNum))
-             tr (do td $ b "Slot No"
-                    td $ string (show slotNum))
-             tr (do td $ b "Role Token Minting Policy ID"
-                    td $ string roleMintingPolicyId)
-             tr (do td $ b "Status"
-                    td $ string contractStatus)
-             tr (do td $ b "Version"
-                    td $ string marloweVersion)
+  table $ do tr $ do td $ b "Contract ID"
+                     td $ string cid
+             tr $ do td $ b "Block Header Hash"
+                     td $ string blockHash
+             tr $ do td $ b "Block No"
+                     td $ string (show blockNum)
+             tr $ do td $ b "Slot No"
+                     td $ string (show slotNum)
+             tr $ do td $ b "Role Token Minting Policy ID"
+                     td $ string roleMintingPolicyId
+             tr $ do td $ b "Status"
+                     td $ string contractStatus
+             tr $ do td $ b "Version"
+                     td $ string marloweVersion
 
 data CSVR = CSVR { csvrContractId :: String
                  , currentContract :: Maybe Contract
@@ -178,14 +178,14 @@ renderCSVR (CSVR { csvrContractId = cid
                  , initialContract = ic
                  , currentState = cs
                  }) =
-  table $ do tr (do td $ b "Contract ID"
-                    td $ string cid)
-             tr (do td $ b "Current contract"
-                    td $ renderMContract cc)
-             tr (do td $ b "Current state"
-                    td $ renderMState cs)
-             tr (do td $ b "Initial contract"
-                    td $ renderMContract (Just ic))
+  table $ do tr $ do td $ b "Contract ID"
+                     td $ string cid
+             tr $ do td $ b "Current contract"
+                     td $ renderMContract cc
+             tr $ do td $ b "Current state"
+                     td $ renderMState cs
+             tr $ do td $ b "Initial contract"
+                     td $ renderMContract (Just ic)
 
 data CTVR = CTVR
   { ctvrLink :: String
@@ -260,14 +260,14 @@ renderTime =
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
 renderMState (Just st) = table $ do
-  tr (do td $ b "accounts"
-         td . renderMAccounts . accounts $ st)
-  tr (do td $ b "bound values"
-         td . string . renderBoundValues . boundValues $ st)
-  tr (do td $ b "choices"
-         td . string . renderChoices . choices $ st)
-  tr (do td $ b "minTime"
-         td . string . renderTime . minTime $ st)
+  tr $ do td $ b "accounts"
+          td . renderMAccounts . accounts $ st
+  tr $ do td $ b "bound values"
+          td . string . renderBoundValues . boundValues $ st
+  tr $ do td $ b "choices"
+          td . string . renderChoices . choices $ st
+  tr $ do td $ b "minTime"
+          td . string . renderTime . minTime $ st
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"
@@ -275,8 +275,8 @@ renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c =
-  table $ do tr (do td $ b $ a ! href "listContracts" $ "Contracts List"
-                    td $ b "Navigation bar"
-                    mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
-                          allContractViews
-                    c)
+  table $ do tr $ do td $ b $ a ! href "listContracts" $ "Contracts List"
+                     td $ b "Navigation bar"
+                     mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
+                           allContractViews
+                     c
