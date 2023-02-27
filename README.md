@@ -24,8 +24,7 @@ As usual, you can use the `nix-shell` command to enter the development environme
 nix-shell
 ```
 
-That will make 
-
+That will make the required Haskell libraries, tools like cabal, stack, the Haskell Language Server, and the `gen-hie` command available in the command line.
 
 ### Caching dependencies
 
@@ -79,7 +78,6 @@ gen-hie --stack > hie.yaml
 
 Please note that `hie.yaml` files located outside of the project folder (in ancestor folders) may interfere with HLS.
 
-
 ## Executable parameters
 
 Marlowe Explorer provides the following flags that can be used to configure its behavior:
@@ -90,7 +88,6 @@ Marlowe Explorer provides the following flags that can be used to configure its 
     
 - `--runtime-port PORT`: The port number of the running Marlowe Runtime server. The default value is `8080`.
     
-
 These flags can be set by using the command line when starting the Marlowe Explorer server. For example, to start the server on port `9000` and connect to a runtime server running on the IP address `192.168.0.1` and port `8888`, you could use the following command:
 
 ```bash
