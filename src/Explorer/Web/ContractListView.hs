@@ -6,7 +6,10 @@ module Explorer.Web.ContractListView
   where
 
 import Control.Monad (forM_)
-import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, string, toHtml, toValue )
+import Data.Time ( formatTime )
+import Data.Time.Clock ( UTCTime )
+import Data.Time.Format (defaultTimeLocale)
+import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, string, toHtml, toValue )
 import Text.Blaze.Html5.Attributes ( href )
 
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
@@ -21,13 +24,13 @@ import Opts (Options, mkUrlPrefix)
 
 
 data ContractListView
-  = ContractListView [CLVR]
+  = ContractListView UTCTime [CLVR]
   | ContractListViewError String
 
 instance ToMarkup ContractListView where
   toMarkup :: ContractListView -> Markup
-  toMarkup (ContractListView clvrs) =
-    baseDoc "Marlowe Contract List" $ renderCLVRs clvrs
+  toMarkup (ContractListView retrievalTime clvrs) =
+    baseDoc "Marlowe Contract List" $ renderCLVRs retrievalTime clvrs
   toMarkup (ContractListViewError msg) =
     baseDoc "An error occurred" $ string ("Error: " <> msg)
 
@@ -39,7 +42,7 @@ data CLVR = CLVR
   }
 
 extractInfo :: ContractList -> ContractListView
-extractInfo (ContractList cils) = ContractListView . map convertContract $ cils
+extractInfo (ContractList retrievalTime cils) = ContractListView retrievalTime . map convertContract $ cils
   where
     convertContract :: ContractInList -> CLVR
     convertContract cil = CLVR
@@ -56,8 +59,10 @@ contractListView opts = do
     Left str -> ContractListViewError str
     Right cl -> extractInfo cl
 
-renderCLVRs :: [CLVR] -> Html
-renderCLVRs clvrs = table $ do
+renderCLVRs :: UTCTime -> [CLVR] -> Html
+renderCLVRs retrievalTime clvrs = do
+  p $ string ("Contracts list acquired: " <> formatTime defaultTimeLocale "%F %T %Z" retrievalTime)
+  table $ do
     tr $ do
       th $ b "Contract ID"
       th $ b "Block No"

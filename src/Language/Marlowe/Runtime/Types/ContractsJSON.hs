@@ -16,6 +16,7 @@ import Data.Foldable ( toList )  -- Used in this module as the counterpart to Se
 import Data.List ( foldl' )
 import qualified Data.Sequence as Seq
 import Data.Sequence ( Seq, (><) )
+import Data.Time.Clock ( UTCTime, getCurrentTime )
 import Network.HTTP.Simple ( Request, parseRequest, getResponseBody, httpLBS,
   getResponseHeader, setRequestHeader, setRequestMethod )
 
@@ -28,12 +29,11 @@ data Range
   | Done
   deriving (Eq, Show)
 
-newtype ContractList = ContractList [ContractInList]
+data ContractList = ContractList
+  { clRetrievedTime :: UTCTime
+  , clContracts :: [ContractInList]
+  }
   deriving (Eq, Show)
-
-instance FromJSON ContractList where
-  parseJSON = withObject "ContractList" $ \o -> do
-    ContractList <$> o .: "results"
 
 data ContractInList = ContractInList
   { cilLink :: Link
@@ -45,6 +45,21 @@ instance FromJSON ContractInList where
   parseJSON = withObject "ContractInList" $ \o -> ContractInList
     <$> (Link <$> (o .: "links" >>= (.: "contract")))
     <*> o .: "resource"
+
+
+-- There's probably a simpler way to do this without an internal "dummy"
+-- newtype wrapper. I had trouble understanding how to parse into a simple
+-- [ContractInList] and also drill down into the "results" part of the JSON
+-- document at the same time.
+-- And writing instances for [ContractInList] in various ways kept leading me
+-- to overlapping instance errors.
+
+newtype InternalContractList = InternalContractList [ContractInList]
+
+instance FromJSON InternalContractList where
+  parseJSON = withObject "InternalContractList" $ \o -> do
+    InternalContractList <$> o .: "results"
+
 
 data Resource = Resource
   { resContractId :: String
@@ -66,7 +81,8 @@ runGetContracts env ev = runExceptT $ runReaderT ev env
 getContracts :: String -> IO (Either String ContractList)
 getContracts endpoint = do
   eresult <- runGetContracts endpoint $ getContracts' (Seq.empty, Start)
-  return $ (Right . ContractList . toList . fst) =<< eresult
+  now <- getCurrentTime
+  return $ (Right . ContractList now . toList . fst) =<< eresult
 
 
 getContracts' :: (Seq ContractInList, Range) -> GetContracts (Seq ContractInList, Range)
@@ -98,6 +114,6 @@ contractsRESTCall range = do
   response <- liftIO $ httpLBS request
   case eitherDecode (getResponseBody response) of
     Left err -> throwError err
-    Right (ContractList contracts) -> do
+    Right (InternalContractList contracts) -> do
       let nextRange = parseRangeHeader . getResponseHeader "Next-Range" $ response
       return (Seq.fromList contracts, nextRange)
