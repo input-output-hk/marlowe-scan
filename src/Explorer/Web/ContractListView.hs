@@ -12,15 +12,14 @@ import Data.Time.Format (defaultTimeLocale)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, string, toHtml, toValue )
 import Text.Blaze.Html5.Attributes ( href )
 
+import Control.Concurrent.Var ( Var, readVar )
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
 import Language.Marlowe.Runtime.Types.ContractsJSON
   ( ContractInList(..)
   , ContractList(..)
   , Resource(..)
-  , getContracts
   )
-import Opts (Options, mkUrlPrefix)
 
 
 data ContractListView
@@ -54,12 +53,8 @@ extractInfo (ContractList retrievalTime cils) = ContractListView retrievalTime .
       , clvrLink = Common.linkUrl . cilLink $ cil
       }
 
-contractListView :: Options -> IO ContractListView
-contractListView opts = do
-  ecl <- getContracts (mkUrlPrefix opts)
-  pure $ case ecl of
-    Left str -> ContractListViewError str
-    Right cl -> extractInfo cl
+contractListView :: Var ContractList -> IO ContractListView
+contractListView varContractList = extractInfo <$> readVar varContractList
 
 renderCLVRs :: UTCTime -> [CLVR] -> Html
 renderCLVRs retrievalTime clvrs = do
