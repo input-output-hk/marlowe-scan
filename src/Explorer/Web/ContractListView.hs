@@ -38,6 +38,7 @@ data CLVR = CLVR
   { clvrContractId :: String
   , clvrBlock :: Integer
   , clvrSlot :: Integer
+  , clvrRoleMintingPolicyId :: String
   , clvrLink :: String
   }
 
@@ -49,6 +50,7 @@ extractInfo (ContractList retrievalTime cils) = ContractListView retrievalTime .
       { clvrContractId = resContractId . cilResource $ cil
       , clvrBlock = Common.blockNo . resBlock . cilResource $ cil
       , clvrSlot = Common.slotNo . resBlock . cilResource $ cil
+      , clvrRoleMintingPolicyId = resRoleTokenMintingPolicyId . cilResource $ cil
       , clvrLink = Common.linkUrl . cilLink $ cil
       }
 
@@ -65,6 +67,7 @@ renderCLVRs retrievalTime clvrs = do
   table $ do
     tr $ do
       th $ b "Contract ID"
+      th $ b "Role token minting policy"
       th $ b "Block No"
       th $ b "Slot No"
     let makeRow clvr = do
@@ -72,6 +75,11 @@ renderCLVRs retrievalTime clvrs = do
           tr $ do
             td $ a ! href (toValue $ generateLink "contractView" [("tab", "info"), ("contractId", cid)])
               $ string cid
+            td $ renderStr . clvrRoleMintingPolicyId $ clvr
             td $ toHtml . clvrBlock $ clvr
             td $ toHtml . clvrSlot $ clvr
     forM_ clvrs makeRow
+
+renderStr :: String -> Html
+renderStr "" = string "-"
+renderStr s = string s

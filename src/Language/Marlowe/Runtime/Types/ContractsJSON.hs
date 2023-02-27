@@ -64,6 +64,7 @@ instance FromJSON InternalContractList where
 data Resource = Resource
   { resContractId :: String
   , resBlock :: Block
+  , resRoleTokenMintingPolicyId :: String
   }
   deriving (Eq, Show)
 
@@ -71,6 +72,7 @@ instance FromJSON Resource where
   parseJSON = withObject "Resource" $ \o -> Resource
     <$> o .: "contractId"
     <*> o .: "block"
+    <*> o .: "roleTokenMintingPolicyId"
 
 
 type GetContracts a = ReaderT String (ExceptT String IO) a
