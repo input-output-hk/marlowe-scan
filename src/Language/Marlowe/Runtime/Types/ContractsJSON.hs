@@ -8,6 +8,7 @@ module Language.Marlowe.Runtime.Types.ContractsJSON
   )
   where
 
+import Control.Exception ( try )
 import Control.Monad.Except
 import Control.Monad.Reader
 import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode )
@@ -17,7 +18,7 @@ import Data.List ( foldl' )
 import qualified Data.Sequence as Seq
 import Data.Sequence ( Seq, (><) )
 import Data.Time.Clock ( UTCTime, getCurrentTime )
-import Network.HTTP.Simple ( Request, parseRequest, getResponseBody, httpLBS,
+import Network.HTTP.Simple ( HttpException, Request, parseRequest, getResponseBody, httpLBS,
   getResponseHeader, setRequestHeader, setRequestMethod )
 
 import Language.Marlowe.Runtime.Types.Common ( Block, Link(..) )
@@ -113,9 +114,11 @@ contractsRESTCall range = do
         , setRequestHeader "Accept" ["application/json"]
         , setRangeHeader range
         ]
-  response <- liftIO $ httpLBS request
-  case eitherDecode (getResponseBody response) of
-    Left err -> throwError err
-    Right (InternalContractList contracts) -> do
-      let nextRange = parseRangeHeader . getResponseHeader "Next-Range" $ response
-      return (Seq.fromList contracts, nextRange)
+  eresponse <- liftIO . try $ httpLBS request
+  case eresponse of
+    Left exception -> throwError . show $ (exception :: HttpException)
+    Right response -> case eitherDecode (getResponseBody response) of
+      Left err -> throwError err
+      Right (InternalContractList contracts) -> do
+        let nextRange = parseRangeHeader . getResponseHeader "Next-Range" $ response
+        return (Seq.fromList contracts, nextRange)
