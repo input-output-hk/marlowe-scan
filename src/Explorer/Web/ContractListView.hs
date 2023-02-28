@@ -6,11 +6,11 @@ module Explorer.Web.ContractListView
   where
 
 import Control.Monad (forM_)
-import Data.Time ( formatTime )
-import Data.Time.Clock ( UTCTime )
-import Data.Time.Format (defaultTimeLocale)
+import Data.Time.Clock ( NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime )
+import Data.Time.Format ( defaultTimeLocale, formatTime )
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, string, toHtml, toValue )
-import Text.Blaze.Html5.Attributes ( href )
+import Text.Blaze.Html5.Attributes ( href, style )
+import Text.Printf ( printf )
 
 import Control.Concurrent.Var ( Var, readVar )
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
@@ -23,15 +23,16 @@ import Language.Marlowe.Runtime.Types.ContractsJSON
 
 
 data ContractListView
-  = ContractListView UTCTime [CLVR]
+  = ContractListView
+      UTCTime  -- Time of rendering (set to now when contractListView is called)
+      UTCTime  -- Time of last contracts list retrieval from Marlowe Runtime
+      [CLVR]   -- Contract list view records
   | ContractListViewError String
 
 instance ToMarkup ContractListView where
   toMarkup :: ContractListView -> Markup
-  toMarkup (ContractListView retrievalTime clvrs) =
-    baseDoc "Marlowe Contract List" $ renderCLVRs retrievalTime clvrs
-  toMarkup (ContractListViewError msg) =
-    baseDoc "An error occurred" $ string ("Error: " <> msg)
+  toMarkup = renderCLVRs
+
 
 data CLVR = CLVR
   { clvrContractId :: String
@@ -41,8 +42,9 @@ data CLVR = CLVR
   , clvrLink :: String
   }
 
-extractInfo :: ContractList -> ContractListView
-extractInfo (ContractList retrievalTime cils) = ContractListView retrievalTime . map convertContract $ cils
+extractInfo :: UTCTime -> ContractList -> ContractListView
+extractInfo timeNow (ContractList retrievalTime cils) =
+  ContractListView timeNow retrievalTime . map convertContract $ cils
   where
     convertContract :: ContractInList -> CLVR
     convertContract cil = CLVR
@@ -54,11 +56,34 @@ extractInfo (ContractList retrievalTime cils) = ContractListView retrievalTime .
       }
 
 contractListView :: Var ContractList -> IO ContractListView
-contractListView varContractList = extractInfo <$> readVar varContractList
+contractListView varContractList = do
+  timeNow <- getCurrentTime
+  extractInfo timeNow <$> readVar varContractList
 
-renderCLVRs :: UTCTime -> [CLVR] -> Html
-renderCLVRs retrievalTime clvrs = do
-  p $ string ("Contracts list acquired: " <> formatTime defaultTimeLocale "%F %T %Z" retrievalTime)
+
+renderTime :: UTCTime -> UTCTime -> Html
+renderTime timeNow retrievalTime = do
+  let
+    -- Time formatters
+    formatTime' = formatTime defaultTimeLocale "%F %T %Z"
+    formatM = formatTime defaultTimeLocale "%M"
+    formatS = formatTime defaultTimeLocale "%S"
+
+    oneMinute :: NominalDiffTime
+    oneMinute = 60
+
+    difference = diffUTCTime timeNow retrievalTime
+
+  if difference > oneMinute
+    then do
+      p ! style "color: red" $ string (printf "The list of contracts could not be updated for the last %s minute(s) and %s second(s), check the Marlowe Runtime is accessible" (formatM difference) (formatS difference))
+    else p $ string ("Contracts list acquired: " <> formatTime' retrievalTime)
+
+
+renderCLVRs :: ContractListView -> Html
+
+renderCLVRs (ContractListView timeNow retrievalTime clvrs) = baseDoc "Marlowe Contract List" $ do
+  renderTime timeNow retrievalTime
   table $ do
     tr $ do
       th $ b "Contract ID"
@@ -74,6 +99,10 @@ renderCLVRs retrievalTime clvrs = do
             td $ toHtml . clvrBlock $ clvr
             td $ toHtml . clvrSlot $ clvr
     forM_ clvrs makeRow
+
+renderCLVRs (ContractListViewError msg) =
+  baseDoc "An error occurred" $ string ("Error: " <> msg)
+
 
 renderStr :: String -> Html
 renderStr "" = string "-"
