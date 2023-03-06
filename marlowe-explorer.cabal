@@ -30,6 +30,7 @@ library
       Explorer.Web.ContractView
       Explorer.Web.Util
       Language.Marlowe.Pretty
+      Language.Marlowe.Runtime.AdjustTip
       Language.Marlowe.Runtime.Background
       Language.Marlowe.Runtime.Types.Common
       Language.Marlowe.Runtime.Types.ContractJSON

@@ -8,7 +8,7 @@ import Control.Concurrent ( forkIO, threadDelay )
 import Data.Time.Clock ( secondsToNominalDiffTime )
 import Data.Time.Clock.POSIX ( posixSecondsToUTCTime )
 
-import Control.Concurrent.Var ( Var, modifyVar_, newVar )
+import Control.Concurrent.Var ( Var, modifyVar_, newVar, readVar )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), getContracts )
 
 
@@ -22,7 +22,8 @@ start endpoint = do
 
 run :: String -> Var ContractList -> IO ()
 run endpoint varContractList = do
-  eresult <- getContracts endpoint
+  ContractList _ oldChain <- readVar varContractList
+  eresult <- getContracts endpoint oldChain
   case eresult of
     Left err -> putStrLn $ "ERROR retrieving contracts: " <> err
     Right newContractList -> do
