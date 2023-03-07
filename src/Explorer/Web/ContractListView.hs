@@ -9,7 +9,7 @@ import Control.Monad (forM_)
 import Control.Newtype.Generics (op)
 import Data.Time.Clock ( NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime )
 import Data.Time.Format ( defaultTimeLocale, formatTime )
-import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, string, toHtml, toValue )
+import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, preEscapedToHtml, string, toHtml, toValue )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf ( printf )
 
@@ -26,9 +26,10 @@ import Opts (BlockExplorerPrefix(..), Options(optBlockExplorerPrefix))
 
 data ContractListView
   = ContractListView
-      UTCTime  -- Time of rendering (set to now when contractListView is called)
-      UTCTime  -- Time of last contracts list retrieval from Marlowe Runtime
-      [CLVR]   -- Contract list view records
+      UTCTime      -- Time of rendering (set to now when contractListView is called)
+      UTCTime      -- Time of last contracts list retrieval from Marlowe Runtime
+      (Maybe Int)  -- Page of contract ids to display
+      [CLVR]       -- Contract list view records
   | ContractListViewError String
 
 instance ToMarkup ContractListView where
@@ -45,9 +46,9 @@ data CLVR = CLVR
   , clvrBlockExplLink :: String
   }
 
-extractInfo :: UTCTime -> String -> ContractList -> ContractListView
-extractInfo timeNow blockExplPrefix (ContractList retrievalTime cils) =
-  ContractListView timeNow retrievalTime . map convertContract $ cils
+extractInfo :: UTCTime -> String -> Maybe Int -> ContractList -> ContractListView
+extractInfo timeNow blockExplPrefix mbPage (ContractList retrievalTime cils) =
+  ContractListView timeNow retrievalTime mbPage . map convertContract $ cils
   where
     convertContract :: ContractInList -> CLVR
     convertContract cil = CLVR
@@ -60,11 +61,12 @@ extractInfo timeNow blockExplPrefix (ContractList retrievalTime cils) =
       }
       where cid = resContractId . cilResource $ cil
 
-contractListView :: Options -> Var ContractList -> IO ContractListView
-contractListView opts varContractList = do
-  let blockExplPrefix = op BlockExplorerPrefix . optBlockExplorerPrefix $ opts
+contractListView :: Options -> Var ContractList -> Maybe Int -> IO ContractListView
+contractListView opts varContractList mbPage = do
+  let
+    blockExplPrefix = op BlockExplorerPrefix . optBlockExplorerPrefix $ opts
   timeNow <- getCurrentTime
-  extractInfo timeNow blockExplPrefix <$> readVar varContractList
+  extractInfo timeNow blockExplPrefix mbPage <$> readVar varContractList
 
 
 renderTime :: UTCTime -> UTCTime -> Html
@@ -88,7 +90,10 @@ renderTime timeNow retrievalTime = do
 
 renderCLVRs :: ContractListView -> Html
 
-renderCLVRs (ContractListView timeNow retrievalTime clvrs) = baseDoc "Marlowe Contract List" $ do
+renderCLVRs (ContractListView timeNow retrievalTime mbPage clvrs) = baseDoc "Marlowe Contract List" $ do
+  let
+    page = normalizePage (length clvrs) mbPage
+    pageOfClvrs = takePage page clvrs
   renderTime timeNow retrievalTime
   table $ do
     tr $ do
@@ -106,10 +111,87 @@ renderCLVRs (ContractListView timeNow retrievalTime clvrs) = baseDoc "Marlowe Co
             td $ toHtml . clvrBlock $ clvr
             td $ toHtml . clvrSlot $ clvr
             td $ a ! href (toValue $ clvrBlockExplLink clvr) $ string "Explore"
-    forM_ clvrs makeRow
+    forM_ pageOfClvrs makeRow
+  renderNavBar page (length clvrs)
 
 renderCLVRs (ContractListViewError msg) =
   baseDoc "An error occurred" $ string ("Error: " <> msg)
+
+
+generateLink' :: Int -> String -> Html
+generateLink' targetPage label =
+  a ! href (toValue $ generateLink "listContracts" [("page", show targetPage)]) $ string label
+
+space :: Html
+space = preEscapedToHtml ("&nbsp;&nbsp;" :: String)
+
+calcLastPage :: Int -> Int
+calcLastPage numContracts = div numContracts pageLength + 1
+
+renderNavBar :: Int -> Int -> Html
+renderNavBar page numContracts = p $ do
+  generateFirst page 1 "<<"
+  space
+  generatePrev page (page - 1) "<"
+  space
+  renderNavNumbers page numContracts
+  generateNext page (page + 1) ">"
+  space
+  generateLast page lastPage ">>"
+  space
+  string $ printf "| %d-%d contracts shown out of %d, (page %d out of %d)"
+    ((page - 1) * pageLength + 1)
+    (min (((page - 1) * pageLength) + pageLength) numContracts)
+    numContracts
+    page lastPage
+
+  where
+    lastPage = calcLastPage numContracts
+
+    generateFirst curPage targetPage label
+      | curPage == 1 = return ()
+      | otherwise = generateLink' targetPage label
+    generatePrev curPage targetPage label
+      | curPage == 1 = return ()
+      | otherwise = generateLink' targetPage label
+    generateNext curPage targetPage label
+      | curPage == lastPage = return ()
+      | otherwise = generateLink' targetPage label
+    generateLast curPage targetPage label
+      | curPage == lastPage = return ()
+      | otherwise = generateLink' targetPage label
+
+
+renderNavNumbers :: Int -> Int -> Html
+renderNavNumbers page numContracts = mapM_ generateNumLink generatePageList
+  where
+    lastPage = calcLastPage numContracts
+
+    generatePageList
+      | page < 11 = [1..11]
+      | page > lastPage - 11 = [lastPage - 11..lastPage]
+      | otherwise = [page - 5..page + 5]
+
+    generateNumLink curLink
+      | page == curLink = (string . show $ curLink) >> space
+      | otherwise = generateLink' curLink (show curLink) >> space
+
+
+-- We're using this all over the place, setting it once here. Could be
+-- parameterized in the future.
+pageLength :: Int
+pageLength = 20
+
+-- Given the length of the data we have to show, make sure the page value we
+-- received makes sense, or set it to 1
+normalizePage :: Int -> Maybe Int -> Int
+normalizePage 0            _           = 1  -- Sometimes the list hasn't loaded from the Runtime yet!
+normalizePage numContracts (Just page) = if page <= calcLastPage numContracts then page else 1
+normalizePage _            Nothing     = 1
+
+-- Take the section of the given list corresponding to the page specified
+takePage :: Int -> [a] -> [a]
+takePage page = take pageLength . drop ((page - 1) * pageLength)
 
 
 renderStr :: String -> Html

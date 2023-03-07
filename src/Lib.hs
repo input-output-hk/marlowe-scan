@@ -32,11 +32,11 @@ startApp opts = do
 
 type API
      = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/
-  :<|> "listContracts" :> Get '[HTML] ContractListView
+  :<|> "listContracts" :> QueryParam "page" Int :> Get '[HTML] ContractListView
   :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> Get '[HTML] ContractView
 
 app :: Options -> Var ContractList-> Application
 app opts varContractList = serve (Proxy :: Proxy API) $ hoistServer (Proxy :: Proxy API) liftIO $
-       contractListView opts varContractList
+       contractListView opts varContractList Nothing
   :<|> contractListView opts varContractList
   :<|> contractView opts
