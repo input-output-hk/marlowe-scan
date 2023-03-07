@@ -11,7 +11,7 @@ module Opts
   )
   where
 
-import Control.Newtype.Generics
+import Control.Newtype.Generics (Newtype, op)
 import GHC.Generics hiding (Prefix)
 import Options.Applicative ( (<**>), auto, header, help, info, long, metavar,
                              option, showDefault, strOption, value, execParser,
