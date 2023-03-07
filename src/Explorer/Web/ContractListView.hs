@@ -6,6 +6,7 @@ module Explorer.Web.ContractListView
   where
 
 import Control.Monad (forM_)
+import Control.Newtype.Generics (op)
 import Data.Time.Clock ( NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime )
 import Data.Time.Format ( defaultTimeLocale, formatTime )
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, string, toHtml, toValue )
@@ -20,6 +21,7 @@ import Language.Marlowe.Runtime.Types.ContractsJSON
   , ContractList(..)
   , Resource(..)
   )
+import Opts (BlockExplorerPrefix(..), Options(optBlockExplorerPrefix))
 
 
 data ContractListView
@@ -40,25 +42,29 @@ data CLVR = CLVR
   , clvrSlot :: Integer
   , clvrRoleMintingPolicyId :: String
   , clvrLink :: String
+  , clvrBlockExplLink :: String
   }
 
-extractInfo :: UTCTime -> ContractList -> ContractListView
-extractInfo timeNow (ContractList retrievalTime cils) =
+extractInfo :: UTCTime -> String -> ContractList -> ContractListView
+extractInfo timeNow blockExplPrefix (ContractList retrievalTime cils) =
   ContractListView timeNow retrievalTime . map convertContract $ cils
   where
     convertContract :: ContractInList -> CLVR
     convertContract cil = CLVR
-      { clvrContractId = resContractId . cilResource $ cil
+      { clvrContractId = cid
       , clvrBlock = Common.blockNo . resBlock . cilResource $ cil
       , clvrSlot = Common.slotNo . resBlock . cilResource $ cil
       , clvrRoleMintingPolicyId = resRoleTokenMintingPolicyId . cilResource $ cil
       , clvrLink = Common.linkUrl . cilLink $ cil
+      , clvrBlockExplLink = printf "%s/%s" blockExplPrefix cid
       }
+      where cid = resContractId . cilResource $ cil
 
-contractListView :: Var ContractList -> IO ContractListView
-contractListView varContractList = do
+contractListView :: Options -> Var ContractList -> IO ContractListView
+contractListView opts varContractList = do
+  let blockExplPrefix = op BlockExplorerPrefix . optBlockExplorerPrefix $ opts
   timeNow <- getCurrentTime
-  extractInfo timeNow <$> readVar varContractList
+  extractInfo timeNow blockExplPrefix <$> readVar varContractList
 
 
 renderTime :: UTCTime -> UTCTime -> Html
@@ -90,6 +96,7 @@ renderCLVRs (ContractListView timeNow retrievalTime clvrs) = baseDoc "Marlowe Co
       th $ b "Role token minting policy"
       th $ b "Block No"
       th $ b "Slot No"
+      th $ b ""
     let makeRow clvr = do
           let cid = clvrContractId clvr
           tr $ do
@@ -98,6 +105,7 @@ renderCLVRs (ContractListView timeNow retrievalTime clvrs) = baseDoc "Marlowe Co
             td $ renderStr . clvrRoleMintingPolicyId $ clvr
             td $ toHtml . clvrBlock $ clvr
             td $ toHtml . clvrSlot $ clvr
+            td $ a ! href (toValue $ clvrBlockExplLink clvr) $ string "Explore"
     forM_ clvrs makeRow
 
 renderCLVRs (ContractListViewError msg) =

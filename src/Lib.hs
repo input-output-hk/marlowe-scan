@@ -37,6 +37,6 @@ type API
 
 app :: Options -> Var ContractList-> Application
 app opts varContractList = serve (Proxy :: Proxy API) $ hoistServer (Proxy :: Proxy API) liftIO $
-       contractListView varContractList
-  :<|> contractListView varContractList
+       contractListView opts varContractList
+  :<|> contractListView opts varContractList
   :<|> contractView opts

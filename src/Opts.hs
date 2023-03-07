@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Opts
-  ( ExplorerPort (..)
+  ( BlockExplorerPrefix (..)
+  , ExplorerPort (..)
   , RuntimeHost (..)
   , RuntimePort (..)
   , Options (..)
@@ -32,10 +33,16 @@ newtype RuntimePort = RuntimePort Int
 
 instance Newtype RuntimePort
 
+newtype BlockExplorerPrefix = BlockExplorerPrefix String
+  deriving (Generic, Show)
+
+instance Newtype BlockExplorerPrefix
+
 data Options = Options
   { optExplorerPort :: ExplorerPort
   , optRuntimeHost :: RuntimeHost
   , optRuntimePort :: RuntimePort
+  , optBlockExplorerPrefix :: BlockExplorerPrefix
   }
   deriving Show
 
@@ -63,6 +70,14 @@ parser = Options
         <> help "Port number of the running Marlowe Runtime server"
         <> showDefault
         <> value 8080
+        )
+      )
+  <*> ( BlockExplorerPrefix <$> strOption
+        (  long "block-explorer-prefix"
+        <> metavar "URL"
+        <> help "Prefix URL for exploring Cardano blockchain addresses, transactions, etc."
+        <> showDefault
+        <> value "https://preprod.cardanoscan.io/transaction"
         )
       )
 
