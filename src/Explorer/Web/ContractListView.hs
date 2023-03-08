@@ -168,8 +168,8 @@ renderNavNumbers page numContracts = mapM_ generateNumLink generatePageList
     lastPage = calcLastPage numContracts
 
     generatePageList
-      | page < 11 = [1..11]
-      | page > lastPage - 11 = [lastPage - 11..lastPage]
+      | page < 6 = [1..11]
+      | page > lastPage - 5 = [lastPage - 10..lastPage]
       | otherwise = [page - 5..page + 5]
 
     generateNumLink curLink
