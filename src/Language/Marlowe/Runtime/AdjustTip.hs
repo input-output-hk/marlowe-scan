@@ -87,6 +87,6 @@ processTip oldChain tip =
     -- These parts are used to fashion the new chain from the "good" tip and
     -- part of the old chain.
     maybeMatch :: Eq a => Seq a -> Int -> a -> Maybe (Int, Seq a)
-    maybeMatch oldChain' indexTip elemTip = maybe Nothing
+    maybeMatch oldChain' indexTip elemTip =
       (\indexChain -> Just (indexTip, drop indexChain oldChain'))
-      $ elemIndexL elemTip oldChain'
+        =<< elemIndexL elemTip oldChain'
