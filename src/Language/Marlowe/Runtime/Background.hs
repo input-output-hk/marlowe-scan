@@ -18,7 +18,6 @@ import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), getContr
 start :: String -> IO ContractListCache
 start endpoint = do
   contractListCache <- newContractList $ ContractList Nothing []
-  -- Bad to discard the ThreadId here? I was thinking this thread will die when its parent (the Servant server) dies. It seems to!
   _ <- forkIO $ run endpoint contractListCache
   pure contractListCache
 
