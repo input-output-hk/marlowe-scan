@@ -157,11 +157,13 @@ renderNavNumbers :: Int -> Int -> Html
 renderNavNumbers page numContracts = mapM_ generateNumLink generatePageList
   where
     lastPage = calcLastPage numContracts
+    lastNavPage = min lastPage 11
+    midNavPage = min (div lastNavPage 2) 5
 
     generatePageList
-      | page < 6 = [1..11]
-      | page > lastPage - 5 = [lastPage - 10..lastPage]
-      | otherwise = [page - 5..page + 5]
+      | page < midNavPage + 1 = [1..lastNavPage]
+      | page > lastPage - midNavPage = [lastPage - lastNavPage + 1..lastPage]
+      | otherwise = [page - midNavPage..page + midNavPage]
 
     generateNumLink curLink
       | page == curLink = (string . show $ curLink) >> space
