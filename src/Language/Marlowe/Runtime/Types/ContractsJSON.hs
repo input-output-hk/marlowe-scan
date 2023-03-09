@@ -32,7 +32,7 @@ data Range
   deriving (Eq, Show)
 
 data ContractList = ContractList
-  { clRetrievedTime :: UTCTime
+  { clRetrievedTime :: Maybe UTCTime
   , clContracts :: [ContractInList]
   }
   deriving (Eq, Show)
@@ -86,7 +86,7 @@ runGetContracts env ev = runExceptT $ runReaderT ev env
 getContracts :: String -> [ContractInList] -> IO (Either String ContractList)
 getContracts endpoint lOldChain = do
   eresult <- runGetContracts (endpoint, fromList lOldChain) $ getContracts' (empty, Start)
-  now <- getCurrentTime
+  now <- Just <$> getCurrentTime
   return $ (Right . ContractList now . toList . fst) =<< eresult
 
 

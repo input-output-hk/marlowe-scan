@@ -5,8 +5,6 @@ module Language.Marlowe.Runtime.Background
   where
 
 import Control.Concurrent ( forkIO, threadDelay )
-import Data.Time.Clock ( secondsToNominalDiffTime )
-import Data.Time.Clock.POSIX ( posixSecondsToUTCTime )
 
 import Control.Concurrent.Var ( Var, modifyVar_, newVar, readVar )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), getContracts )
@@ -14,8 +12,7 @@ import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), getContr
 
 start :: String -> IO (Var ContractList)
 start endpoint = do
-  let bogusTime = posixSecondsToUTCTime . secondsToNominalDiffTime $ 0
-  varContractList <- newVar $ ContractList bogusTime []
+  varContractList <- newVar $ ContractList Nothing []
   -- Bad to discard the ThreadId here? I was thinking this thread will die when its parent (the Servant server) dies. It seems to!
   _ <- forkIO $ run endpoint varContractList
   pure varContractList

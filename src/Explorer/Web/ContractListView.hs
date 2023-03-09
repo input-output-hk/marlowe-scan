@@ -26,10 +26,10 @@ import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
 
 data ContractListView
   = ContractListView
-      UTCTime      -- Time of rendering (set to now when contractListView is called)
-      UTCTime      -- Time of last contracts list retrieval from Marlowe Runtime
-      (Maybe Int)  -- Page of contract ids to display
-      [CLVR]       -- Contract list view records
+      UTCTime          -- Time of rendering (set to now when contractListView is called)
+      (Maybe UTCTime)  -- Time of last contracts list retrieval from Marlowe Runtime
+      (Maybe Int)      -- Page of contract ids to display
+      [CLVR]           -- Contract list view records
   | ContractListViewError String
 
 instance ToMarkup ContractListView where
@@ -69,8 +69,12 @@ contractListView opts varContractList mbPage = do
   extractInfo timeNow blockExplHost mbPage <$> readVar varContractList
 
 
-renderTime :: UTCTime -> UTCTime -> Html
-renderTime timeNow retrievalTime = do
+renderTime :: UTCTime -> Maybe UTCTime -> Html
+
+renderTime _timeNow Nothing =
+  p ! style "color: red;" $ string "Contracts data not yet received"
+
+renderTime timeNow (Just retrievalTime) = do
   let
     -- Time formatters
     formatTime' = formatTime defaultTimeLocale "%F %T %Z"
