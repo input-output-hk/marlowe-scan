@@ -130,14 +130,14 @@ calcLastPage numContracts = div numContracts pageLength + 1
 
 renderNavBar :: Int -> Int -> Html
 renderNavBar page numContracts = p $ do
-  generateFirst page 1 "<<"
+  generateNavLink page 1 1 "<<"
   space
-  generatePrev page (page - 1) "<"
+  generateNavLink page (page - 1) 1 "<"
   space
   renderNavNumbers page numContracts
-  generateNext page (page + 1) ">"
+  generateNavLink page (page + 1) lastPage ">"
   space
-  generateLast page lastPage ">>"
+  generateNavLink page lastPage lastPage ">>"
   space
   string $ printf "| %d-%d contracts shown out of %d, (page %d out of %d)"
     ((page - 1) * pageLength + 1)
@@ -148,18 +148,9 @@ renderNavBar page numContracts = p $ do
   where
     lastPage = calcLastPage numContracts
 
-    generateFirst curPage targetPage label
-      | curPage == 1 = return ()
-      | otherwise = generateLink' targetPage label
-    generatePrev curPage targetPage label
-      | curPage == 1 = return ()
-      | otherwise = generateLink' targetPage label
-    generateNext curPage targetPage label
-      | curPage == lastPage = return ()
-      | otherwise = generateLink' targetPage label
-    generateLast curPage targetPage label
-      | curPage == lastPage = return ()
-      | otherwise = generateLink' targetPage label
+    generateNavLink curPage targetPage comparisonPage
+      | curPage == comparisonPage = string
+      | otherwise = generateLink' targetPage
 
 
 renderNavNumbers :: Int -> Int -> Html
