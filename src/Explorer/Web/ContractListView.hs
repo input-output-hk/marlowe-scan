@@ -21,7 +21,7 @@ import Language.Marlowe.Runtime.Types.ContractsJSON
   , ContractList(..)
   , Resource(..)
   )
-import Opts (BlockExplorerPrefix(..), Options(optBlockExplorerPrefix))
+import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
 
 
 data ContractListView
@@ -47,7 +47,7 @@ data CLVR = CLVR
   }
 
 extractInfo :: UTCTime -> String -> Maybe Int -> ContractList -> ContractListView
-extractInfo timeNow blockExplPrefix mbPage (ContractList retrievalTime cils) =
+extractInfo timeNow blockExplHost mbPage (ContractList retrievalTime cils) =
   ContractListView timeNow retrievalTime mbPage . map convertContract $ cils
   where
     convertContract :: ContractInList -> CLVR
@@ -57,16 +57,16 @@ extractInfo timeNow blockExplPrefix mbPage (ContractList retrievalTime cils) =
       , clvrSlot = Common.slotNo . resBlock . cilResource $ cil
       , clvrRoleMintingPolicyId = resRoleTokenMintingPolicyId . cilResource $ cil
       , clvrLink = Common.linkUrl . cilLink $ cil
-      , clvrBlockExplLink = printf "%s/%s" blockExplPrefix cid
+      , clvrBlockExplLink = printf "https://%s/transaction/%s" blockExplHost cid
       }
       where cid = resContractId . cilResource $ cil
 
 contractListView :: Options -> Var ContractList -> Maybe Int -> IO ContractListView
 contractListView opts varContractList mbPage = do
   let
-    blockExplPrefix = op BlockExplorerPrefix . optBlockExplorerPrefix $ opts
+    blockExplHost = op BlockExplorerHost . optBlockExplorerHost $ opts
   timeNow <- getCurrentTime
-  extractInfo timeNow blockExplPrefix mbPage <$> readVar varContractList
+  extractInfo timeNow blockExplHost mbPage <$> readVar varContractList
 
 
 renderTime :: UTCTime -> UTCTime -> Html

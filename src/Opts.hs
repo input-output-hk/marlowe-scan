@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Opts
-  ( BlockExplorerPrefix (..)
+  ( BlockExplorerHost (..)
   , ExplorerPort (..)
   , RuntimeHost (..)
   , RuntimePort (..)
@@ -33,16 +33,16 @@ newtype RuntimePort = RuntimePort Int
 
 instance Newtype RuntimePort
 
-newtype BlockExplorerPrefix = BlockExplorerPrefix String
+newtype BlockExplorerHost = BlockExplorerHost String
   deriving (Generic, Show)
 
-instance Newtype BlockExplorerPrefix
+instance Newtype BlockExplorerHost
 
 data Options = Options
   { optExplorerPort :: ExplorerPort
   , optRuntimeHost :: RuntimeHost
   , optRuntimePort :: RuntimePort
-  , optBlockExplorerPrefix :: BlockExplorerPrefix
+  , optBlockExplorerHost :: BlockExplorerHost
   }
   deriving Show
 
@@ -72,12 +72,12 @@ parser = Options
         <> value 8080
         )
       )
-  <*> ( BlockExplorerPrefix <$> strOption
-        (  long "block-explorer-prefix"
-        <> metavar "URL"
-        <> help "Prefix URL for exploring Cardano blockchain addresses, transactions, etc."
+  <*> ( BlockExplorerHost <$> strOption
+        (  long "block-explorer"
+        <> metavar "HOST"
+        <> help "Host for exploring Cardano blockchain addresses, transactions, etc."
         <> showDefault
-        <> value "https://preprod.cardanoscan.io/transaction"
+        <> value "preprod.cardanoscan.io"
         )
       )
 
