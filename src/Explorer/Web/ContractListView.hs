@@ -81,12 +81,12 @@ renderTime timeNow (Just retrievalTime) = do
     formatM = formatTime defaultTimeLocale "%M"
     formatS = formatTime defaultTimeLocale "%S"
 
-    oneMinute :: NominalDiffTime
-    oneMinute = 60
+    delayBeforeWarning :: NominalDiffTime
+    delayBeforeWarning = 60  -- This is one minute
 
     difference = diffUTCTime timeNow retrievalTime
 
-  if difference > oneMinute
+  if difference > delayBeforeWarning
     then do
       p ! style "color: red" $ string (printf "The list of contracts could not be updated for the last %s minute(s) and %s second(s), check the Marlowe Runtime is accessible" (formatM difference) (formatS difference))
     else p $ string ("Contracts list acquired: " <> formatTime' retrievalTime)
