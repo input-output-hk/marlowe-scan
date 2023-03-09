@@ -13,7 +13,7 @@ import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, preEsc
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf ( printf )
 
-import Control.Concurrent.Var ( Var, readVar )
+import Explorer.SharedContractCache ( ContractListCache, readContractList )
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
 import qualified Language.Marlowe.Runtime.Types.Common as Common
 import Language.Marlowe.Runtime.Types.ContractsJSON
@@ -61,12 +61,12 @@ extractInfo timeNow blockExplHost mbPage (ContractList retrievalTime cils) =
       }
       where cid = resContractId . cilResource $ cil
 
-contractListView :: Options -> Var ContractList -> Maybe Int -> IO ContractListView
-contractListView opts varContractList mbPage = do
+contractListView :: Options -> ContractListCache -> Maybe Int -> IO ContractListView
+contractListView opts contractListCache mbPage = do
   let
     blockExplHost = op BlockExplorerHost . optBlockExplorerHost $ opts
   timeNow <- getCurrentTime
-  extractInfo timeNow blockExplHost mbPage <$> readVar varContractList
+  extractInfo timeNow blockExplHost mbPage <$> readContractList contractListCache
 
 
 renderTime :: UTCTime -> Maybe UTCTime -> Html

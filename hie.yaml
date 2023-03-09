@@ -6,7 +6,7 @@ cradle:
     - path: "./app/Main.hs"
       component: "marlowe-explorer:exe:marlowe-explorer-exe"
 
-    - path: "./src/Control/Concurrent/Var.hs"
+    - path: "./src/Explorer/SharedContractCache.hs"
       component: "marlowe-explorer:lib"
 
     - path: "./src/Explorer/Web/ContractListView.hs"

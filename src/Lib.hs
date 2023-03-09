@@ -14,11 +14,10 @@ import Servant ( serve, Proxy(..), type (:>), Get, type (:<|>) ((:<|>)), QueryPa
 import Servant.HTML.Blaze ( HTML )
 import Servant.Server ( hoistServer )
 
-import Control.Concurrent.Var ( Var )
+import Explorer.SharedContractCache ( ContractListCache )
 import Explorer.Web.ContractListView ( ContractListView (..), contractListView )
 import Explorer.Web.ContractView ( ContractView (..), contractView )
 import Language.Marlowe.Runtime.Background ( start )
-import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList )
 import Opts ( Options (optExplorerPort), ExplorerPort (..), mkUrlPrefix )
 
 
@@ -27,16 +26,16 @@ startApp opts = do
   let eport = op ExplorerPort . optExplorerPort $ opts
   putStrLn $ "Marlowe Explorer server started, available at localhost:"
     <> show eport
-  varContractList <- start $ mkUrlPrefix opts
-  run eport $ app opts varContractList
+  contractListCache <- start $ mkUrlPrefix opts
+  run eport $ app opts contractListCache
 
 type API
      = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/
   :<|> "listContracts" :> QueryParam "page" Int :> Get '[HTML] ContractListView
   :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> Get '[HTML] ContractView
 
-app :: Options -> Var ContractList-> Application
-app opts varContractList = serve (Proxy :: Proxy API) $ hoistServer (Proxy :: Proxy API) liftIO $
-       contractListView opts varContractList Nothing
-  :<|> contractListView opts varContractList
+app :: Options -> ContractListCache -> Application
+app opts contractListCache = serve (Proxy :: Proxy API) $ hoistServer (Proxy :: Proxy API) liftIO $
+       contractListView opts contractListCache Nothing
+  :<|> contractListView opts contractListCache
   :<|> contractView opts

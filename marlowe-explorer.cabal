@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Control.Concurrent.Var
+      Explorer.SharedContractCache
       Explorer.Web.ContractListView
       Explorer.Web.ContractView
       Explorer.Web.Util
