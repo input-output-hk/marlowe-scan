@@ -130,7 +130,10 @@ space :: Html
 space = preEscapedToHtml ("&nbsp;&nbsp;" :: String)
 
 calcLastPage :: Int -> Int
-calcLastPage numContracts = div numContracts pageLength + 1
+calcLastPage numContracts = fullPages + partialPages
+  where fullPages = numContracts `div` pageLength
+        sizeOfPartialPage = numContracts `rem` pageLength
+        partialPages = if sizeOfPartialPage > 0 then 1 else 0
 
 renderNavBar :: Int -> Int -> Html
 renderNavBar page numContracts = p $ do
