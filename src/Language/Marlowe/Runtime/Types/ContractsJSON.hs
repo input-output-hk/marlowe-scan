@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Language.Marlowe.Runtime.Types.ContractsJSON
-  ( ContractList(..)
-  , ContractInList(..)
+  ( ContractInList(..)
+  , ContractList(..)
+  , ContractLinks(..)
   , Resource(..)
   , getContracts
   )
@@ -12,7 +14,7 @@ import Control.Exception ( try )
 import Control.Monad.Except ( ExceptT, runExceptT, throwError )
 import Control.Monad.Reader ( ReaderT, asks, runReaderT )
 import Control.Monad.Trans ( liftIO )
-import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode )
+import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode, Value )
 import Data.ByteString ( ByteString )
 import Data.List ( foldl' )
 import Data.Time.Clock ( UTCTime, getCurrentTime )
@@ -22,60 +24,70 @@ import Network.HTTP.Simple ( HttpException, Request, parseRequest,
 
 import Language.Marlowe.Runtime.AdjustTip ( BuildChain (Building, BuildDone),
   Seq, (><), empty, fromList, processTip, toList )
-import Language.Marlowe.Runtime.Types.Common ( Block, Link(..) )
+import Language.Marlowe.Runtime.Types.Common ( Block )
+import Data.Aeson.Types (Parser)
 
+data Resource = Resource
+  { block :: Block
+  , continuations :: Maybe String
+  , contractId :: String
+  , roleTokenMintingPolicyId :: String
+  , status :: String
+  , version :: String
+  } deriving (Show, Eq)
+
+instance FromJSON Resource where
+  parseJSON :: Value -> Parser Resource
+  parseJSON = withObject "Resource" $ \o ->
+    Resource <$> o .: "block"
+             <*> o .: "continuations"
+             <*> o .: "contractId"
+             <*> o .: "roleTokenMintingPolicyId"
+             <*> o .: "status"
+             <*> o .: "version"
+
+data ContractLinks = ContractLinks
+  { contract :: String
+  , transactions :: String
+  } deriving (Show, Eq)
+
+instance FromJSON ContractLinks where
+  parseJSON :: Value -> Parser ContractLinks
+  parseJSON = withObject "ContractLinks" $ \o ->
+    ContractLinks <$> o .: "contract"
+                  <*> o .: "transactions"
+
+data ContractInList = ContractInList
+  { links :: ContractLinks
+  , resource :: Resource
+  } deriving (Show, Eq)
+
+instance FromJSON ContractInList where
+  parseJSON :: Value -> Parser ContractInList
+  parseJSON = withObject "ContractInList" $ \o ->
+    ContractInList <$> o .: "links"
+                   <*> o .: "resource"
+
+newtype ResultList = ResultList
+  { results :: [ContractInList]
+  } deriving (Show, Eq)
+
+instance FromJSON ResultList where
+  parseJSON :: Value -> Parser ResultList
+  parseJSON = withObject "ResultList" $ \o ->
+    ResultList <$> o .: "results"
+
+data ContractList = ContractList
+  { clRetrievedTime :: Maybe UTCTime
+  , clContracts :: [ ContractInList ]
+  }
+  deriving (Show, Eq)
 
 data Range
   = Start
   | Next ByteString
   | Done
   deriving (Eq, Show)
-
-data ContractList = ContractList
-  { clRetrievedTime :: Maybe UTCTime
-  , clContracts :: [ContractInList]
-  }
-  deriving (Eq, Show)
-
-data ContractInList = ContractInList
-  { cilLink :: Link
-  , cilResource :: Resource
-  }
-  deriving (Eq, Show)
-
-instance FromJSON ContractInList where
-  parseJSON = withObject "ContractInList" $ \o -> ContractInList
-    <$> (Link <$> (o .: "links" >>= (.: "contract")))
-    <*> o .: "resource"
-
-
--- There's probably a simpler way to do this without an internal "dummy"
--- newtype wrapper. I had trouble understanding how to parse into a simple
--- [ContractInList] and also drill down into the "results" part of the JSON
--- document at the same time.
--- And writing instances for [ContractInList] in various ways kept leading me
--- to overlapping instance errors.
-
-newtype InternalContractList = InternalContractList [ContractInList]
-
-instance FromJSON InternalContractList where
-  parseJSON = withObject "InternalContractList" $ \o -> do
-    InternalContractList <$> o .: "results"
-
-
-data Resource = Resource
-  { resContractId :: String
-  , resBlock :: Block
-  , resRoleTokenMintingPolicyId :: String
-  }
-  deriving (Eq, Show)
-
-instance FromJSON Resource where
-  parseJSON = withObject "Resource" $ \o -> Resource
-    <$> o .: "contractId"
-    <*> o .: "block"
-    <*> o .: "roleTokenMintingPolicyId"
-
 
 type GetContracts a = ReaderT (String, Seq ContractInList) (ExceptT String IO) a
 
@@ -86,8 +98,10 @@ runGetContracts env ev = runExceptT $ runReaderT ev env
 getContracts :: String -> [ContractInList] -> IO (Either String ContractList)
 getContracts endpoint lOldChain = do
   eresult <- runGetContracts (endpoint, fromList lOldChain) $ getContracts' (empty, Start)
-  now <- Just <$> getCurrentTime
-  return $ (Right . ContractList now . toList . fst) =<< eresult
+  now <- getCurrentTime
+  return $ do (contracts, _) <- eresult
+              return (ContractList { clRetrievedTime = Just now
+                                   , clContracts = toList contracts })
 
 
 -- This code has two criteria when trying to get the latest Marlowe contract
@@ -140,6 +154,6 @@ contractsRESTCall range = do
     Left exception -> throwError . show $ (exception :: HttpException)
     Right response -> case eitherDecode (getResponseBody response) of
       Left err -> throwError err
-      Right (InternalContractList contracts) -> do
+      Right ResultList { results = contracts } -> do
         let nextRange = parseRangeHeader . getResponseHeader "Next-Range" $ response
         return (fromList contracts, nextRange)

@@ -20,7 +20,6 @@ import Explorer.Web.ContractView ( ContractView (..), contractView )
 import Language.Marlowe.Runtime.Background ( start )
 import Opts ( Options (optExplorerPort), ExplorerPort (..), mkUrlPrefix )
 
-
 startApp :: Options -> IO ()
 startApp opts = do
   let eport = op ExplorerPort . optExplorerPort $ opts
@@ -35,7 +34,9 @@ type API
   :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> Get '[HTML] ContractView
 
 app :: Options -> ContractListCache -> Application
-app opts contractListCache = serve (Proxy :: Proxy API) $ hoistServer (Proxy :: Proxy API) liftIO $
-       contractListView opts contractListCache Nothing
-  :<|> contractListView opts contractListCache
-  :<|> contractView opts
+app opts contractListCache =
+  serve (Proxy :: Proxy API) $
+    hoistServer (Proxy :: Proxy API) liftIO
+    (contractListView opts contractListCache Nothing
+    :<|> contractListView opts contractListCache
+    :<|> contractView opts)

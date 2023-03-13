@@ -15,14 +15,9 @@ import Text.Printf ( printf )
 
 import Explorer.SharedContractCache ( ContractListCache, readContractList )
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
-import qualified Language.Marlowe.Runtime.Types.Common as Common
-import Language.Marlowe.Runtime.Types.ContractsJSON
-  ( ContractInList(..)
-  , ContractList(..)
-  , Resource(..)
-  )
+import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..) )
 import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
-
+import Language.Marlowe.Runtime.Types.Common (Block(..))
 
 data ContractListView
   = ContractListView
@@ -47,19 +42,26 @@ data CLVR = CLVR
   }
 
 extractInfo :: UTCTime -> String -> Maybe Int -> ContractList -> ContractListView
-extractInfo timeNow blockExplHost mbPage (ContractList retrievalTime cils) =
+extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = retrievalTime
+                                                       , clContracts = cils }) =
   ContractListView timeNow retrievalTime mbPage . map convertContract $ cils
   where
     convertContract :: ContractInList -> CLVR
-    convertContract cil = CLVR
-      { clvrContractId = cid
-      , clvrBlock = Common.blockNo . resBlock . cilResource $ cil
-      , clvrSlot = Common.slotNo . resBlock . cilResource $ cil
-      , clvrRoleMintingPolicyId = resRoleTokenMintingPolicyId . cilResource $ cil
-      , clvrLink = Common.linkUrl . cilLink $ cil
-      , clvrBlockExplLink = printf "https://%s/transaction/%s" blockExplHost cid
+    convertContract (ContractInList { links = ContractLinks { contract = cilLinkUrl }
+                                    , resource = Resource { block = Block { blockNo = cilBlockNo
+                                                                          , slotNo = cilSlotNo
+                                                                          }
+                                                          , contractId = cilContractId
+                                                          , roleTokenMintingPolicyId = cilRoleTokenMintingPolicyId
+                                                          }
+                                    }) = CLVR
+      { clvrContractId = cilContractId
+      , clvrBlock = cilBlockNo
+      , clvrSlot = cilSlotNo
+      , clvrRoleMintingPolicyId = cilRoleTokenMintingPolicyId
+      , clvrLink = cilLinkUrl
+      , clvrBlockExplLink = printf "https://%s/transaction/%s" blockExplHost cilContractId
       }
-      where cid = resContractId . cilResource $ cil
 
 contractListView :: Options -> ContractListCache -> Maybe Int -> IO ContractListView
 contractListView opts contractListCache mbPage = do
