@@ -19,20 +19,26 @@ import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), Contr
 import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
 import Language.Marlowe.Runtime.Types.Common (Block(..))
 
+data CLVR = CLVR {
+      -- | Time of rendering (set to now when contractListView is called)
+       timeOfRendering :: UTCTime
+      -- | Time of last contracts list retrieval from Marlowe Runtime
+     , lastRetrieval :: Maybe UTCTime
+      -- | Page of contract ids to display
+     , currentPage :: Maybe Int
+      -- | Contract list view records
+     , contractList :: [CIR]
+  }
+
 data ContractListView
-  = ContractListView
-      UTCTime          -- Time of rendering (set to now when contractListView is called)
-      (Maybe UTCTime)  -- Time of last contracts list retrieval from Marlowe Runtime
-      (Maybe Int)      -- Page of contract ids to display
-      [CLVR]           -- Contract list view records
+  = ContractListView CLVR
   | ContractListViewError String
 
 instance ToMarkup ContractListView where
   toMarkup :: ContractListView -> Markup
-  toMarkup = renderCLVRs
+  toMarkup = renderCIRs
 
-
-data CLVR = CLVR
+data CIR = CIR
   { clvrContractId :: String
   , clvrBlock :: Integer
   , clvrSlot :: Integer
@@ -44,9 +50,12 @@ data CLVR = CLVR
 extractInfo :: UTCTime -> String -> Maybe Int -> ContractList -> ContractListView
 extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = retrievalTime
                                                        , clContracts = cils }) =
-  ContractListView timeNow retrievalTime mbPage . map convertContract $ cils
+  ContractListView CLVR { timeOfRendering = timeNow
+                        , lastRetrieval = retrievalTime
+                        , currentPage = mbPage
+                        , contractList = map convertContract cils }
   where
-    convertContract :: ContractInList -> CLVR
+    convertContract :: ContractInList -> CIR
     convertContract (ContractInList { links = ContractLinks { contract = cilLinkUrl }
                                     , resource = Resource { block = Block { blockNo = cilBlockNo
                                                                           , slotNo = cilSlotNo
@@ -54,7 +63,7 @@ extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = retri
                                                           , contractId = cilContractId
                                                           , roleTokenMintingPolicyId = cilRoleTokenMintingPolicyId
                                                           }
-                                    }) = CLVR
+                                    }) = CIR
       { clvrContractId = cilContractId
       , clvrBlock = cilBlockNo
       , clvrSlot = cilSlotNo
@@ -94,9 +103,13 @@ renderTime timeNow (Just retrievalTime) = do
     else p $ string ("Contracts list acquired: " <> formatTime' retrievalTime)
 
 
-renderCLVRs :: ContractListView -> Html
+renderCIRs :: ContractListView -> Html
 
-renderCLVRs (ContractListView timeNow retrievalTime mbPage clvrs) = baseDoc "Marlowe Contract List" $ do
+renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
+                                  , lastRetrieval = retrievalTime
+                                  , currentPage = mbPage
+                                  , contractList = clvrs
+            }) = baseDoc "Marlowe Contract List" $ do
   let
     page = normalizePage (length clvrs) mbPage
     pageOfClvrs = takePage page clvrs
@@ -120,7 +133,7 @@ renderCLVRs (ContractListView timeNow retrievalTime mbPage clvrs) = baseDoc "Mar
     forM_ pageOfClvrs makeRow
   renderNavBar page (length clvrs)
 
-renderCLVRs (ContractListViewError msg) =
+renderCIRs (ContractListViewError msg) =
   baseDoc "An error occurred" $ string ("Error: " <> msg)
 
 
