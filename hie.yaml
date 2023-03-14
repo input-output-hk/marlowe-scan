@@ -6,6 +6,9 @@ cradle:
     - path: "./app/Main.hs"
       component: "marlowe-explorer:exe:marlowe-explorer-exe"
 
+    - path: "./src/Explorer/SharedContractCache.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Explorer/Web/ContractListView.hs"
       component: "marlowe-explorer:lib"
 
@@ -18,6 +21,9 @@ cradle:
     - path: "./src/Language/Marlowe/Pretty.hs"
       component: "marlowe-explorer:lib"
 
+    - path: "./src/Language/Marlowe/Runtime/Background.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Language/Marlowe/Runtime/Types/Common.hs"
       component: "marlowe-explorer:lib"
 
@@ -25,6 +31,12 @@ cradle:
       component: "marlowe-explorer:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/ContractsJSON.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Language/Marlowe/Runtime/Types/IndexedSeq.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Language/Marlowe/Runtime/Types/LazyFeed.hs"
       component: "marlowe-explorer:lib"
 
     - path: "./src/Language/Marlowe/Semantics/Types.hs"

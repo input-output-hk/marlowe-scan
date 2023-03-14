@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.35.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,13 +25,17 @@ source-repository head
 
 library
   exposed-modules:
+      Explorer.SharedContractCache
       Explorer.Web.ContractListView
       Explorer.Web.ContractView
       Explorer.Web.Util
       Language.Marlowe.Pretty
+      Language.Marlowe.Runtime.Background
       Language.Marlowe.Runtime.Types.Common
       Language.Marlowe.Runtime.Types.ContractJSON
       Language.Marlowe.Runtime.Types.ContractsJSON
+      Language.Marlowe.Runtime.Types.IndexedSeq
+      Language.Marlowe.Runtime.Types.LazyFeed
       Language.Marlowe.Semantics.Types
       Lib
       Opts
@@ -51,6 +55,7 @@ library
     , http-client
     , http-conduit
     , http-types
+    , mtl
     , newtype-generics
     , optparse-applicative
     , scientific

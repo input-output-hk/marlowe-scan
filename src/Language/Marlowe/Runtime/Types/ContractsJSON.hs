@@ -1,51 +1,155 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Language.Marlowe.Runtime.Types.ContractsJSON
-  ( ContractList(..)
-  , ContractInList(..)
+  ( ContractInList(..)
+  , ContractList(..)
+  , ContractLinks(..)
   , Resource(..)
-  , getContracts
+  , refreshContracts
   )
   where
 
-import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode )
-import Network.HTTP.Simple (parseRequest, getResponseBody, httpLBS, setRequestHeader, setRequestMethod)
-
-import Language.Marlowe.Runtime.Types.Common ( Block, Link(..) )
-
-
-newtype ContractList = ContractList [ContractInList]
-  deriving (Eq, Show)
-
-instance FromJSON ContractList where
-  parseJSON = withObject "ContractList" $ \o -> do
-    ContractList <$> o .: "results"
-
-data ContractInList = ContractInList
-  { cilLink :: Link
-  , cilResource :: Resource
-  }
-  deriving (Eq, Show)
-
-instance FromJSON ContractInList where
-  parseJSON = withObject "ContractInList" $ \o -> ContractInList
-    <$> (Link <$> (o .: "links" >>= (.: "contract")))
-    <*> o .: "resource"
+import Control.Exception ( try, Exception(displayException) )
+import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode, Value )
+import Data.ByteString ( ByteString )
+import Data.List ( foldl' )
+import Data.Time.Clock ( UTCTime, getCurrentTime )
+import Network.HTTP.Simple ( HttpException, Request, parseRequest,
+  getResponseBody, httpLBS, getResponseHeader, setRequestHeader,
+  setRequestMethod )
+import Language.Marlowe.Runtime.Types.IndexedSeq (IndexedSeq)
+import Language.Marlowe.Runtime.Types.Common ( Block )
+import Data.Aeson.Types (Parser)
+import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
+import Language.Marlowe.Runtime.Types.LazyFeed (LazyFeed)
+import qualified Language.Marlowe.Runtime.Types.LazyFeed as LazyFeed
 
 data Resource = Resource
-  { resContractId :: String
-  , resBlock :: Block
-  }
-  deriving (Eq, Show)
+  { block :: Block
+  , continuations :: Maybe String
+  , contractId :: String
+  , roleTokenMintingPolicyId :: String
+  , status :: String
+  , version :: String
+  } deriving (Show, Eq)
 
 instance FromJSON Resource where
-  parseJSON = withObject "Resource" $ \o -> Resource
-    <$> o .: "contractId"
-    <*> o .: "block"
+  parseJSON :: Value -> Parser Resource
+  parseJSON = withObject "Resource" $ \o ->
+    Resource <$> o .: "block"
+             <*> o .: "continuations"
+             <*> o .: "contractId"
+             <*> o .: "roleTokenMintingPolicyId"
+             <*> o .: "status"
+             <*> o .: "version"
 
-getContracts :: String -> IO (Either String ContractList)
-getContracts endpoint = do
+data ContractLinks = ContractLinks
+  { contract :: String
+  , transactions :: String
+  } deriving (Show, Eq)
+
+instance FromJSON ContractLinks where
+  parseJSON :: Value -> Parser ContractLinks
+  parseJSON = withObject "ContractLinks" $ \o ->
+    ContractLinks <$> o .: "contract"
+                  <*> o .: "transactions"
+
+data ContractInList = ContractInList
+  { links :: ContractLinks
+  , resource :: Resource
+  } deriving (Show, Eq)
+
+instance FromJSON ContractInList where
+  parseJSON :: Value -> Parser ContractInList
+  parseJSON = withObject "ContractInList" $ \o ->
+    ContractInList <$> o .: "links"
+                   <*> o .: "resource"
+
+instance ISeq.Indexed ContractInList String where
+  getIdentifier :: ContractInList -> String
+  getIdentifier = contractId . resource
+
+newtype ResultList = ResultList
+  { results :: [ContractInList]
+  } deriving (Show, Eq)
+
+instance FromJSON ResultList where
+  parseJSON :: Value -> Parser ResultList
+  parseJSON = withObject "ResultList" $ \o ->
+    ResultList <$> o .: "results"
+
+type ContractListISeq = IndexedSeq ContractInList String
+
+data ContractList = ContractList
+  { clRetrievedTime :: Maybe UTCTime
+  , clContracts :: ContractListISeq
+  }
+  deriving (Show, Eq)
+
+refreshContracts :: String -> ContractListISeq -> IO (Either String ContractList)
+refreshContracts endpoint lOldChain = do
+  eresult <- updateContracts endpoint lOldChain
+  now <- getCurrentTime
+  return $ do contracts <- eresult
+              return (ContractList { clRetrievedTime = Just now
+                                   , clContracts = contracts })
+
+updateContracts :: String -> ContractListISeq -> IO (Either String ContractListISeq)
+updateContracts endpoint oldContracts =
+  LazyFeed.foldThroughLazyFeed (completeOldContractList oldContracts) (getAllContracts endpoint)
+
+completeOldContractList :: ContractListISeq -> Maybe ContractInList
+                        -> Either ContractListISeq (ContractListISeq -> ContractListISeq)
+completeOldContractList oldList (Just h) =
+  case ISeq.findMatchingTail h oldList of
+    Just matchingTail -> Left matchingTail
+    Nothing -> Right $ ISeq.cons h
+completeOldContractList _ Nothing = Left ISeq.empty
+
+getAllContracts :: String -> LazyFeed ContractInList
+getAllContracts endpoint = getAllContracts' endpoint Start
+
+data Range
+  = Start
+  | Next ByteString
+  | Done
+  deriving (Eq, Show)
+
+setRangeHeader :: Range -> Request -> Request
+setRangeHeader (Next bs) = setRequestHeader "Range" [bs]
+setRangeHeader _ = id
+
+parseRangeHeader :: [ByteString] -> Range
+parseRangeHeader [bs] = Next bs
+parseRangeHeader _ = Done
+
+getAllContracts' :: String -> Range -> LazyFeed ContractInList
+getAllContracts' _endpoint Done = LazyFeed.emptyLazyFeed
+getAllContracts' endpoint range = LazyFeed.fromIO $ do
   initialRequest <- parseRequest $ endpoint <> "contracts"
-  let request = setRequestMethod "GET" $ setRequestHeader "Accept" ["application/json"] initialRequest
-  response <- httpLBS request
-  return $ eitherDecode (getResponseBody response)
+  let request = foldl' (flip id) initialRequest
+        [ setRequestMethod "GET"
+        , setRequestHeader "Accept" ["application/json"]
+        , setRangeHeader range
+        ]
+  mResponse <- try (httpLBS request)
+  case mResponse of
+    Right response -> do
+       case eitherDecode (getResponseBody response) of
+         Right (ResultList { results = contracts }) -> do
+           let nextRange = parseRangeHeader . getResponseHeader "Next-Range" $ response
+           return $ LazyFeed.prependListToLazyFeed contracts (getAllContracts' endpoint nextRange)
+         Left str2 -> return $ LazyFeed.errorToLazyFeed $ "Error decoding: " ++ str2
+    Left str -> return $ LazyFeed.errorToLazyFeed $ displayException (str :: HttpException)
+
+data ContractListFetchingException = DecodingException String
+                                   | RequestException HttpException
+  deriving (Show)
+
+instance Exception ContractListFetchingException where
+  displayException :: ContractListFetchingException -> String
+  displayException (DecodingException msg) = "Decoding exception: " ++ msg
+  displayException (RequestException subException) = "Exception querying runtime for contracts: " ++ displayException subException
