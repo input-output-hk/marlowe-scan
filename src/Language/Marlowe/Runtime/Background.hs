@@ -12,20 +12,19 @@ import Explorer.SharedContractCache
   , readContractList
   , writeContractList
   )
-import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), getContracts )
-import Data.Sequence (empty)
-
+import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), refreshContracts )
+import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 
 start :: String -> IO ContractListCache
 start endpoint = do
-  contractListCache <- newContractList $ ContractList Nothing empty
+  contractListCache <- newContractList $ ContractList Nothing ISeq.empty
   _ <- forkIO $ run endpoint contractListCache
   pure contractListCache
 
 run :: String -> ContractListCache -> IO ()
 run endpoint contractListCache = do
   ContractList _ oldChain <- readContractList contractListCache
-  eresult <- getContracts endpoint oldChain
+  eresult <- refreshContracts endpoint oldChain
   case eresult of
     Left err -> putStrLn $ "ERROR retrieving contracts: " <> err
     Right newContractListContents -> do

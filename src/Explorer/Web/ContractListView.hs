@@ -22,6 +22,7 @@ import Data.Foldable (toList)
 import Data.Maybe (fromMaybe)
 import qualified Data.Sequence as Seq
 import Data.List (intersperse)
+import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 
 data PageInfo = PageInfo {
        currentPage :: Int
@@ -111,8 +112,8 @@ extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = Just 
     firstContract = contractsBefore + 1
     lastContract = contractsBefore + Seq.length contracts
     contractsBefore = pageLength * (cPage - 1)
-    contracts = Seq.take pageLength (Seq.drop contractsBefore cils)
-    numContracts = Seq.length cils
+    contracts = Seq.take pageLength $ ISeq.toSeq $ ISeq.drop contractsBefore cils
+    numContracts = ISeq.length cils
     cPage = bindVal 1 lastPage $ fromMaybe 1 mbPage
     lastPage = calcLastPage numContracts
     (minPage, maxPage) = calculateRange contextPages cPage lastPage
