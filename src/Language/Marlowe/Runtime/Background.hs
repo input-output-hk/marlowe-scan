@@ -13,11 +13,12 @@ import Explorer.SharedContractCache
   , writeContractList
   )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), getContracts )
+import Data.Sequence (empty)
 
 
 start :: String -> IO ContractListCache
 start endpoint = do
-  contractListCache <- newContractList $ ContractList Nothing []
+  contractListCache <- newContractList $ ContractList Nothing empty
   _ <- forkIO $ run endpoint contractListCache
   pure contractListCache
 

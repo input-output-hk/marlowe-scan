@@ -21,3 +21,5 @@ writeContractList contractListCache contractList =
 
 readContractList :: ContractListCache -> IO ContractList
 readContractList = readMVar
+
+

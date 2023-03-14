@@ -23,7 +23,7 @@ import Network.HTTP.Simple ( HttpException, Request, parseRequest,
   setRequestMethod )
 
 import Language.Marlowe.Runtime.AdjustTip ( BuildChain (Building, BuildDone),
-  Seq, (><), empty, fromList, processTip, toList )
+  Seq, (><), empty, fromList, processTip )
 import Language.Marlowe.Runtime.Types.Common ( Block )
 import Data.Aeson.Types (Parser)
 
@@ -79,7 +79,7 @@ instance FromJSON ResultList where
 
 data ContractList = ContractList
   { clRetrievedTime :: Maybe UTCTime
-  , clContracts :: [ ContractInList ]
+  , clContracts :: Seq ContractInList
   }
   deriving (Show, Eq)
 
@@ -95,13 +95,13 @@ runGetContracts :: (String, Seq ContractInList) -> GetContracts a -> IO (Either 
 runGetContracts env ev = runExceptT $ runReaderT ev env
 
 
-getContracts :: String -> [ContractInList] -> IO (Either String ContractList)
+getContracts :: String -> Seq ContractInList -> IO (Either String ContractList)
 getContracts endpoint lOldChain = do
-  eresult <- runGetContracts (endpoint, fromList lOldChain) $ getContracts' (empty, Start)
+  eresult <- runGetContracts (endpoint, lOldChain) $ getContracts' (empty, Start)
   now <- getCurrentTime
   return $ do (contracts, _) <- eresult
               return (ContractList { clRetrievedTime = Just now
-                                   , clContracts = toList contracts })
+                                   , clContracts = contracts })
 
 
 -- This code has two criteria when trying to get the latest Marlowe contract

@@ -18,21 +18,34 @@ import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..) )
 import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
 import Language.Marlowe.Runtime.Types.Common (Block(..))
+import Data.Foldable (toList)
+import Data.Maybe (fromMaybe)
+import qualified Data.Sequence as Seq
+import Data.List (intersperse)
+
+data PageInfo = PageInfo {
+       currentPage :: Int
+     , pageRange :: (Int, Int)
+     , totalContracts :: Int
+     , contractRange :: (Int, Int)
+     , numPages :: Int
+} deriving (Show, Eq)
 
 data CLVR = CLVR {
       -- | Time of rendering (set to now when contractListView is called)
        timeOfRendering :: UTCTime
       -- | Time of last contracts list retrieval from Marlowe Runtime
-     , lastRetrieval :: Maybe UTCTime
-      -- | Page of contract ids to display
-     , currentPage :: Maybe Int
+     , lastRetrieval :: UTCTime
+      -- | Info about current page
+     , pageInfo :: PageInfo
       -- | Contract list view records
      , contractList :: [CIR]
-  }
+  } deriving (Show, Eq)
 
 data ContractListView
   = ContractListView CLVR
   | ContractListViewError String
+  deriving (Show, Eq)
 
 instance ToMarkup ContractListView where
   toMarkup :: ContractListView -> Markup
@@ -46,15 +59,64 @@ data CIR = CIR
   , clvrLink :: String
   , clvrBlockExplLink :: String
   }
+  deriving (Show, Eq)
+
+-- Number of contracts per page
+pageLength :: Int
+pageLength = 20
+
+-- Number of pages to each side to show (unless close to border)
+contextPages :: Int
+contextPages = 5
+
+-- Make sure a value is inside an interval
+bindVal :: Int -> Int -> Int -> Int
+bindVal minVal maxVal val = max (min val maxVal) minVal
+
+-- Calculte the range of pages to display assuming:
+-- * contextPages >= 0
+-- * 1 >= page <= lastPage
+-- * lastPage >= 1
+calculateRange :: Int -> Int -> Int -> (Int, Int)
+calculateRange ctxt page lastPage =
+  if lastPage < 2 * ctxt + 1
+  then (1, max 1 lastPage)
+  else let centerPage = bindVal (ctxt + 1) (lastPage - ctxt) page
+       in (centerPage - ctxt, centerPage + ctxt)
+
+-- Calculates the number of pages available given the number of contracts and pageLength
+calcLastPage :: Int -> Int
+calcLastPage numContracts = fullPages + partialPages
+  where fullPages = numContracts `div` pageLength
+        sizeOfPartialPage = numContracts `rem` pageLength
+        partialPages = if sizeOfPartialPage > 0 then 1 else 0
 
 extractInfo :: UTCTime -> String -> Maybe Int -> ContractList -> ContractListView
-extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = retrievalTime
-                                                       , clContracts = cils }) =
+extractInfo _timeNow _blockExplHost _mbPage (ContractList { clRetrievedTime = Nothing }) =
+    ContractListViewError "Contracts have not been received (still polling Marlowe Runtime)"
+extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = Just retrievalTime
+                                                       , clContracts = cils })
+    | numContracts == 0 = ContractListViewError "There are no contracts in this network"
+    | otherwise =
   ContractListView CLVR { timeOfRendering = timeNow
                         , lastRetrieval = retrievalTime
-                        , currentPage = mbPage
-                        , contractList = map convertContract cils }
+                        , pageInfo = PageInfo { currentPage = cPage
+                                              , pageRange = (minPage, maxPage)
+                                              , totalContracts = numContracts
+                                              , contractRange = (firstContract, lastContract)
+                                              , numPages = lastPage
+                                              }
+                        , contractList = map convertContract $ toList contracts }
   where
+    firstContract = contractsBefore + 1
+    lastContract = contractsBefore + Seq.length contracts
+    contractsBefore = pageLength * (cPage - 1)
+    contracts = Seq.take pageLength (Seq.drop contractsBefore cils)
+    numContracts = Seq.length cils
+    cPage = bindVal 1 lastPage $ fromMaybe 1 mbPage
+    lastPage = calcLastPage numContracts
+    (minPage, maxPage) = calculateRange contextPages cPage lastPage
+
     convertContract :: ContractInList -> CIR
     convertContract (ContractInList { links = ContractLinks { contract = cilLinkUrl }
                                     , resource = Resource { block = Block { blockNo = cilBlockNo
@@ -77,15 +139,13 @@ contractListView opts contractListCache mbPage = do
   let
     blockExplHost = op BlockExplorerHost . optBlockExplorerHost $ opts
   timeNow <- getCurrentTime
-  extractInfo timeNow blockExplHost mbPage <$> readContractList contractListCache
+  cl <- readContractList contractListCache
+  return $ extractInfo timeNow blockExplHost mbPage cl
 
 
-renderTime :: UTCTime -> Maybe UTCTime -> Html
+renderTime :: UTCTime -> UTCTime -> Html
 
-renderTime _timeNow Nothing =
-  p ! style "color: red;" $ string "Contracts data not yet received"
-
-renderTime timeNow (Just retrievalTime) = do
+renderTime timeNow retrievalTime = do
   let
     -- Time formatters
     formatTime' = formatTime defaultTimeLocale "%F %T %Z"
@@ -104,16 +164,18 @@ renderTime timeNow (Just retrievalTime) = do
 
 
 renderCIRs :: ContractListView -> Html
-
 renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
                                   , lastRetrieval = retrievalTime
-                                  , currentPage = mbPage
+                                  , pageInfo = pinf@(PageInfo { currentPage = page
+                                                              , totalContracts = numContracts
+                                                              , contractRange = (firstContract, lastContract)
+                                                              , numPages = lastPage
+                                                              })
                                   , contractList = clvrs
             }) = baseDoc "Marlowe Contract List" $ do
-  let
-    page = normalizePage (length clvrs) mbPage
-    pageOfClvrs = takePage page clvrs
   renderTime timeNow retrievalTime
+  p $ string $ printf "%d-%d contracts shown out of %d, (page %d out of %d)"
+                        firstContract lastContract numContracts page lastPage
   table $ do
     tr $ do
       th $ b "Contract ID"
@@ -130,8 +192,8 @@ renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
             td $ toHtml . clvrBlock $ clvr
             td $ toHtml . clvrSlot $ clvr
             td $ a ! href (toValue $ clvrBlockExplLink clvr) $ string "Explore"
-    forM_ pageOfClvrs makeRow
-  renderNavBar page (length clvrs)
+    forM_ clvrs makeRow
+  renderNavBar pinf
 
 renderCIRs (ContractListViewError msg) =
   baseDoc "An error occurred" $ string ("Error: " <> msg)
@@ -144,70 +206,25 @@ generateLink' targetPage label =
 space :: Html
 space = preEscapedToHtml ("&nbsp;&nbsp;" :: String)
 
-calcLastPage :: Int -> Int
-calcLastPage numContracts = fullPages + partialPages
-  where fullPages = numContracts `div` pageLength
-        sizeOfPartialPage = numContracts `rem` pageLength
-        partialPages = if sizeOfPartialPage > 0 then 1 else 0
+renderNavBar :: PageInfo -> Html
+renderNavBar pinf@(PageInfo { currentPage = page
+                            , pageRange = (minPage, maxPage)
+                            , numPages = lastPage
+                            }) =
+  p $ sequence_ $ intersperse space $ [ generateNavLink pinf 1 "<<"
+                                      , generateNavLink pinf (page - 1) "<"
+                                      ] ++ [ generateNavLink pinf np (show np) | np <- [minPage..maxPage] ] ++
+                                      [ generateNavLink pinf (page + 1) ">"
+                                      , generateNavLink pinf lastPage ">>"
+                                      ]
 
-renderNavBar :: Int -> Int -> Html
-renderNavBar page numContracts = p $ do
-  generateNavLink page 1 1 "<<"
-  space
-  generateNavLink page (page - 1) 1 "<"
-  space
-  renderNavNumbers page numContracts
-  generateNavLink page (page + 1) lastPage ">"
-  space
-  generateNavLink page lastPage lastPage ">>"
-  space
-  string $ printf "| %d-%d contracts shown out of %d, (page %d out of %d)"
-    ((page - 1) * pageLength + 1)
-    (min (((page - 1) * pageLength) + pageLength) numContracts)
-    numContracts
-    page lastPage
-
-  where
-    lastPage = calcLastPage numContracts
-
-    generateNavLink curPage targetPage comparisonPage
-      | curPage == comparisonPage = string
-      | otherwise = generateLink' targetPage
-
-
-renderNavNumbers :: Int -> Int -> Html
-renderNavNumbers page numContracts = mapM_ generateNumLink generatePageList
-  where
-    lastPage = calcLastPage numContracts
-    lastNavPage = min lastPage 11
-    midNavPage = min (div lastNavPage 2) 5
-
-    generatePageList
-      | page < midNavPage + 1 = [1..lastNavPage]
-      | page > lastPage - midNavPage = [lastPage - lastNavPage + 1..lastPage]
-      | otherwise = [page - midNavPage..page + midNavPage]
-
-    generateNumLink curLink
-      | page == curLink = (string . show $ curLink) >> space
-      | otherwise = generateLink' curLink (show curLink) >> space
-
-
--- We're using this all over the place, setting it once here. Could be
--- parameterized in the future.
-pageLength :: Int
-pageLength = 20
-
--- Given the length of the data we have to show, make sure the page value we
--- received makes sense, or set it to 1
-normalizePage :: Int -> Maybe Int -> Int
-normalizePage 0            _           = 1  -- Sometimes the list hasn't loaded from the Runtime yet!
-normalizePage numContracts (Just page) = if page <= calcLastPage numContracts then page else 1
-normalizePage _            Nothing     = 1
-
--- Take the section of the given list corresponding to the page specified
-takePage :: Int -> [a] -> [a]
-takePage page = take pageLength . drop ((page - 1) * pageLength)
-
+generateNavLink :: PageInfo -> Int -> String -> Html
+generateNavLink (PageInfo { currentPage = page
+                          , numPages = lastPage
+                          }) targetPage linkText
+  | page == boundPage = string linkText
+  | otherwise = generateLink' boundPage linkText
+  where boundPage = bindVal 1 lastPage targetPage
 
 renderStr :: String -> Html
 renderStr "" = string "-"
