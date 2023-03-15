@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, generateLink, mkNavLink, prettyPrintAmount, stringToHtml, table, td, th, tr )
+  ( baseDoc, formatTimeDiff, generateLink, makeLocalDateTime, mkNavLink, prettyPrintAmount, stringToHtml, table, td, th, tr )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -10,8 +10,9 @@ import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ( body, docTypeHtml, h1, head, html, title,
-                          string, Html, (!), br, preEscapedString, a, ToValue (toValue) )
-import Text.Blaze.Html5.Attributes ( style, lang, href )
+                          string, Html, (!), br, preEscapedString, a, ToValue (toValue), Markup, script )
+import Text.Blaze.Html5.Attributes ( style, lang, href, type_ )
+import Data.Time (UTCTime, NominalDiffTime)
 
 baseDoc :: String -> Html -> Html
 baseDoc caption content = docTypeHtml
@@ -71,3 +72,33 @@ padWithZeroesTill :: Int -> String -> String
 padWithZeroesTill x [] = replicate x '0'
 padWithZeroesTill x l@(h:t) | x <= 0 = l
                             | otherwise = h:padWithZeroesTill (x - 1) t
+
+formatTimeDiff :: NominalDiffTime -> String
+formatTimeDiff diff =
+  let rdiff = ceiling diff
+      (hours, hrem) = rdiff `divMod` (60 * 60)
+      (mins, secs) = hrem `divMod` 60
+      hourStr = show hours ++ if hours == 1 then " hour" else " hours"
+      minStr = show mins ++ if mins == 1 then " minute" else " minutes"
+      secStr = show secs ++ if secs == 1 then " second" else " seconds"
+  in case [s | (x, s) <- [(hours, hourStr), (mins, minStr), (secs, secStr)], x /= (0 :: Integer) ] of
+       [] -> "just now"
+       [x] -> x ++ " ago"
+       [x, y] -> x ++ " and " ++ y ++ " ago"
+       [x, y, z] -> x ++ ", " ++ y ++ ", and " ++ z ++ " ago"
+       _ -> error "A constant list became longer after filtering somehow"
+
+makeLocalDateTime :: UTCTime -> Markup
+makeLocalDateTime timestampToRender =
+  script ! type_ "text/javascript"
+         $ string
+  ("(function() {" ++
+        "var scripts = document.getElementsByTagName('script');" ++
+        "var script = scripts[scripts.length-1];" ++
+        "var div = document.createElement('div');" ++
+        "div.style = \"display: inline;\";" ++
+        "var date = new Date('" ++ show timestampToRender ++ "');" ++
+        "div.innerHTML = date.toString().split(' (')[0];" ++
+        "script.parentNode.insertBefore(div, script);" ++
+      "})();")
+

@@ -8,13 +8,12 @@ module Explorer.Web.ContractListView
 import Control.Monad (forM_)
 import Control.Newtype.Generics (op)
 import Data.Time.Clock ( NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime )
-import Data.Time.Format ( defaultTimeLocale, formatTime )
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, preEscapedToHtml, string, toHtml, toValue )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf ( printf )
 
 import Explorer.SharedContractCache ( ContractListCache, readContractList )
-import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr )
+import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr, formatTimeDiff, makeLocalDateTime )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..) )
 import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
 import Language.Marlowe.Runtime.Types.Common (Block(..))
@@ -45,6 +44,7 @@ data CLVR = CLVR {
 
 data ContractListView
   = ContractListView CLVR
+  | ContractListViewStillSyncing
   | ContractListViewError String
   deriving (Show, Eq)
 
@@ -93,8 +93,7 @@ calcLastPage numContracts = fullPages + partialPages
         partialPages = if sizeOfPartialPage > 0 then 1 else 0
 
 extractInfo :: UTCTime -> String -> Maybe Int -> ContractList -> ContractListView
-extractInfo _timeNow _blockExplHost _mbPage (ContractList { clRetrievedTime = Nothing }) =
-    ContractListViewError "Contracts have not been received (still polling Marlowe Runtime)"
+extractInfo _timeNow _blockExplHost _mbPage (ContractList { clRetrievedTime = Nothing }) = ContractListViewStillSyncing
 extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = Just retrievalTime
                                                        , clContracts = cils })
     | numContracts == 0 = ContractListViewError "There are no contracts in this network"
@@ -146,23 +145,18 @@ contractListView opts contractListCache mbPage = do
 
 renderTime :: UTCTime -> UTCTime -> Html
 
-renderTime timeNow retrievalTime = do
-  let
-    -- Time formatters
-    formatTime' = formatTime defaultTimeLocale "%F %T %Z"
-    formatM = formatTime defaultTimeLocale "%M"
-    formatS = formatTime defaultTimeLocale "%S"
-
-    delayBeforeWarning :: NominalDiffTime
-    delayBeforeWarning = 60  -- This is one minute
-
-    difference = diffUTCTime timeNow retrievalTime
-
+renderTime timeNow retrievalTime =
   if difference > delayBeforeWarning
     then do
-      p ! style "color: red" $ string (printf "The list of contracts could not be updated for the last %s minute(s) and %s second(s), check the Marlowe Runtime is accessible" (formatM difference) (formatS difference))
-    else p $ string ("Contracts list acquired: " <> formatTime' retrievalTime)
+      p ! style "color: red" $ string (printf "The list of contracts could not be updated since " ++ formatTimeDiff difference ++ ", check the Marlowe Runtime is accessible")
+    else p $ do string "Contracts list acquired: "
+                makeLocalDateTime retrievalTime
 
+  where
+    delayBeforeWarning :: NominalDiffTime
+    delayBeforeWarning = 60  -- This is one minute
+    
+    difference = diffUTCTime timeNow retrievalTime
 
 renderCIRs :: ContractListView -> Html
 renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
@@ -195,6 +189,9 @@ renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
             td $ a ! href (toValue $ clvrBlockExplLink clvr) $ string "Explore"
     forM_ clvrs makeRow
   renderNavBar pinf
+
+renderCIRs ContractListViewStillSyncing =
+  baseDoc "Marlowe Contract List" $ string "The explorer is still synchronising with the chain. Please, try again later"
 
 renderCIRs (ContractListViewError msg) =
   baseDoc "An error occurred" $ string ("Error: " <> msg)
