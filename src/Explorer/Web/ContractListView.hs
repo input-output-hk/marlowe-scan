@@ -14,14 +14,14 @@ import Text.Printf ( printf )
 
 import Explorer.SharedContractCache ( ContractListCache, readContractList )
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr, formatTimeDiff, makeLocalDateTime )
-import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..) )
+import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..), ContractInList (..) )
 import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
-import Language.Marlowe.Runtime.Types.Common (Block(..))
 import Data.Foldable (toList)
 import Data.Maybe (fromMaybe)
 import qualified Data.Sequence as Seq
 import Data.List (intersperse)
 import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
+import qualified Language.Marlowe.Runtime.Types.ContractsJSON as CSJ
 
 data PageInfo = PageInfo {
        currentPage :: Int
@@ -118,14 +118,14 @@ extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = Just 
     (minPage, maxPage) = calculateRange contextPages cPage lastPage
 
     convertContract :: ContractInList -> CIR
-    convertContract (ContractInList { links = ContractLinks { contract = cilLinkUrl }
-                                    , resource = Resource { block = Block { blockNo = cilBlockNo
-                                                                          , slotNo = cilSlotNo
-                                                                          }
-                                                          , contractId = cilContractId
-                                                          , roleTokenMintingPolicyId = cilRoleTokenMintingPolicyId
-                                                          }
-                                    }) = CIR
+    convertContract ContractInList { links = ContractLinks { contract = cilLinkUrl }
+                                   , resource = Resource { block = CSJ.Block { CSJ.blockNo = cilBlockNo
+                                                                             , CSJ.slotNo = cilSlotNo
+                                                                             }
+                                                         , contractId = cilContractId
+                                                         , roleTokenMintingPolicyId = cilRoleTokenMintingPolicyId
+                                                         }
+                                   } = CIR
       { clvrContractId = cilContractId
       , clvrBlock = cilBlockNo
       , clvrSlot = cilSlotNo
@@ -151,7 +151,6 @@ renderTime timeNow retrievalTime =
       p ! style "color: red" $ string (printf "The list of contracts could not be updated since " ++ formatTimeDiff difference ++ ", check the Marlowe Runtime is accessible")
     else p $ do string "Contracts list acquired: "
                 makeLocalDateTime retrievalTime
-
   where
     delayBeforeWarning :: NominalDiffTime
     delayBeforeWarning = 60  -- This is one minute

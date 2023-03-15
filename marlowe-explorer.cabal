@@ -31,11 +31,12 @@ library
       Explorer.Web.Util
       Language.Marlowe.Pretty
       Language.Marlowe.Runtime.Background
-      Language.Marlowe.Runtime.Types.Common
+      Language.Marlowe.Runtime.ContractCaching
       Language.Marlowe.Runtime.Types.ContractJSON
       Language.Marlowe.Runtime.Types.ContractsJSON
       Language.Marlowe.Runtime.Types.IndexedSeq
       Language.Marlowe.Runtime.Types.LazyFeed
+      Language.Marlowe.Runtime.Types.TransactionsJSON
       Language.Marlowe.Semantics.Types
       Lib
       Opts
