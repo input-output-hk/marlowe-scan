@@ -35,6 +35,8 @@ import           Data.Scientific (Scientific, floatingOrInteger)
 import qualified Data.Text.Encoding as T
 import qualified Data.Aeson.Types as JSON
 import           Data.Text (Text)
+import qualified Data.ByteString.Base16 as Base16
+import Data.Either (fromRight)
 
 newtype POSIXTime = POSIXTime { getPOSIXTime :: Integer }
   deriving stock (Eq,Ord,Generic)
@@ -399,7 +401,7 @@ instance FromJSON Case where
       (Case <$> (v .: "case") <*> (v .: "then"))
       <|> (MerkleizedCase
         <$> v .: "case"
-        <*> (T.encodeUtf8 <$> v .: "merkleized_then")))
+        <*> (fromRight (error "Couldn't decode MerkleizedCase") . Base16.decode . T.encodeUtf8 <$> v .: "merkleized_then")))
 
 instance ToJSON Case where
   toJSON (Case act cont) = object
@@ -408,9 +410,8 @@ instance ToJSON Case where
       ]
   toJSON (MerkleizedCase act bs) = object
       [ "case" .= act
-      , "merkleized_then" .= T.decodeUtf8 bs
+      , "merkleized_then" .= (T.decodeUtf8 . Base16.encode) bs
       ]
-
 
 instance FromJSON Payee where
   parseJSON = withObject "Payee" (\v ->

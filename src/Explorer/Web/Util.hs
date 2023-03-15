@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, generateLink, mkNavLink, stringToHtml, table, td, th, tr )
+  ( baseDoc, generateLink, mkNavLink, prettyPrintAmount, stringToHtml, table, td, th, tr )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -55,3 +55,19 @@ stringToHtml str = mconcat $ map processLine $ lines str
 
 generateLink :: String -> [(String, String)] -> String
 generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap pack pack) params))
+
+
+prettyPrintAmount :: Int -> Integer -> String
+prettyPrintAmount decimalPositions amount = if decimals /= [] then integers ++ '.':decimals else integers
+  where (revDecimals, revIntegers) = splitAt decimalPositions $ reverse (show amount)
+        decimals = reverse $ padWithZeroesTill decimalPositions revDecimals
+        integers = reverse $ addThousandSeparators $ padWithZeroesTill 1 revIntegers
+
+addThousandSeparators :: String -> String
+addThousandSeparators (c1:c2:c3:t@(_:_)) = c1:c2:c3:',':addThousandSeparators t
+addThousandSeparators r = r
+
+padWithZeroesTill :: Int -> String -> String
+padWithZeroesTill x [] = replicate x '0'
+padWithZeroesTill x l@(h:t) | x <= 0 = l
+                            | otherwise = h:padWithZeroesTill (x - 1) t
