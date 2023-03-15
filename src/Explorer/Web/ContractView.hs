@@ -17,7 +17,7 @@ import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, 
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
 
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml, prettyPrintAmount )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import Language.Marlowe.Runtime.Types.ContractJSON
@@ -219,10 +219,6 @@ renderParty :: Party -> String
 renderParty (Address ad) = printf "Address: %s" $ unpack ad
 renderParty (Role ro) = printf "Role: %s" $ unpack ro
 
-renderToken :: Token -> String
-renderToken (Token "" "") = "ADA (Lovelace)"
-renderToken (Token currSymbol tokenName) = printf "%s (%s)" currSymbol tokenName
-
 renderMAccounts :: Map (Party, Token) Money -> Html
 renderMAccounts mapAccounts = table $ do
   tr $ do
@@ -230,11 +226,16 @@ renderMAccounts mapAccounts = table $ do
     th $ b "currency (token name)"
     th $ b "amount"
   let mkRow ((party, token), money) =
+        let (tokenString, moneyString) = renderToken token money in
         tr $ do
           td . string . renderParty $ party
-          td . string . renderToken $ token
-          td . string . show $ money
+          td . string $ tokenString
+          td . string $ moneyString
   mapM_ mkRow $ Map.toList mapAccounts
+
+renderToken :: Token -> Money -> (String, String)
+renderToken (Token "" "") money = ("ADA", prettyPrintAmount 6 money)
+renderToken (Token currSymbol tokenName) money = (printf "%s (%s)" currSymbol tokenName, prettyPrintAmount 0 money)
 
 renderBoundValues :: Map ValueId Integer -> String
 renderBoundValues mapBoundValues = case Map.toList mapBoundValues of
