@@ -24,7 +24,7 @@ cradle:
     - path: "./src/Language/Marlowe/Runtime/Background.hs"
       component: "marlowe-explorer:lib"
 
-    - path: "./src/Language/Marlowe/Runtime/Types/Common.hs"
+    - path: "./src/Language/Marlowe/Runtime/ContractCaching.hs"
       component: "marlowe-explorer:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/ContractJSON.hs"
@@ -37,6 +37,9 @@ cradle:
       component: "marlowe-explorer:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/LazyFeed.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Language/Marlowe/Runtime/Types/TransactionsJSON.hs"
       component: "marlowe-explorer:lib"
 
     - path: "./src/Language/Marlowe/Semantics/Types.hs"

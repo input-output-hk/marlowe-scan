@@ -1,4 +1,4 @@
-module Language.Marlowe.Runtime.Types.LazyFeed(LazyFeed, errorToLazyFeed, emptyLazyFeed, foldThroughLazyFeed, prependListToLazyFeed, fromIO, unConsLazyFeed) where
+module Language.Marlowe.Runtime.Types.LazyFeed(LazyFeed, consToLazyFeed, errorToLazyFeed, emptyLazyFeed, foldThroughLazyFeed, prependListToLazyFeed, fromIO, unConsLazyFeed) where
 
 newtype LazyFeed a = LazyFeed (IO (LazyResult a))
 

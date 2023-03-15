@@ -20,38 +20,29 @@ import Text.Printf (printf)
 import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml, prettyPrintAmount )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
-import Language.Marlowe.Runtime.Types.ContractJSON
-  ( ContractJSON(..), getContractJSON
-  , Transaction(..), Transactions(..), getContractTransactions
-  )
-import qualified Language.Marlowe.Runtime.Types.Common as Common
+import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJ
 import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money,
   POSIXTime(..), Party(..), State(..), Token(..), ValueId(..))
 import Opts (Options, mkUrlPrefix)
 
-
 contractView :: Options -> Maybe String -> Maybe String -> IO ContractView
-
 contractView opts tab@(Just "txs") (Just cid) = do
   let urlPrefix = mkUrlPrefix opts
-  cjs <- getContractJSON urlPrefix cid
+  cjs <- CJ.getContractJSON urlPrefix cid
   case cjs of
     Left str -> pure $ ContractViewError str
     Right cjson -> do
-      let link = CJ.linkUrl . CJ.links $ cjson
-      etx <- getContractTransactions urlPrefix link
+      let link = CJ.transactions $ CJ.links cjson
+      etx <- TJ.getContractTransactions urlPrefix link
       pure $ case etx of
         Left str -> ContractViewError str
         Right tx -> extractInfo (parseTab tab) cjson (Just tx)
-
 contractView opts tab@(Just _) (Just cid) = do
-  cjs <- getContractJSON (mkUrlPrefix opts) cid
+  cjs <- CJ.getContractJSON (mkUrlPrefix opts) cid
   return $ case cjs of
     Left str -> ContractViewError str
     Right cjson -> extractInfo (parseTab tab) cjson Nothing
-
 contractView opts Nothing cid = contractView opts (Just "info") cid
-
 contractView _opts _tab Nothing = return $ ContractViewError "Need to specify a contractId"
 
 
@@ -61,21 +52,19 @@ parseTab (Just "txs") = CTxView
 parseTab _ = CInfoView
 
 
-extractInfo :: ContractViews -> ContractJSON -> Maybe Transactions -> ContractView
-
+extractInfo :: ContractViews -> CJ.ContractJSON -> Maybe TJ.Transactions -> ContractView
 extractInfo CInfoView cv _ =
   ContractInfoView
       (CIVR { civrContractId = CJ.contractId res
-            , blockHeaderHash = Common.blockHeaderHash block
-            , blockNo = Common.blockNo block
-            , slotNo = Common.slotNo block
+            , blockHeaderHash = CJ.blockHeaderHash block
+            , blockNo = CJ.blockNo block
+            , slotNo = CJ.slotNo block
             , roleTokenMintingPolicyId = CJ.roleTokenMintingPolicyId res
             , status = CJ.status res
             , version = CJ.version res
             })
   where res = CJ.resource cv
         block = CJ.block res
-
 extractInfo CStateView cv _ =
   ContractStateView
       (CSVR { csvrContractId = CJ.contractId res
@@ -84,18 +73,17 @@ extractInfo CStateView cv _ =
             , currentState = CJ.state res
             })
   where res = CJ.resource cv
-
-extractInfo CTxView cv (Just (Transactions txs)) =
-  ContractTxView . CTVRs (CJ.contractId . CJ.resource $ cv) . map convertTx $ txs
+extractInfo CTxView cv (Just (TJ.Transactions txs)) =
+  ContractTxView . CTVRs (CJ.contractId res) $ map convertTx txs
   where
-    convertTx tx = CTVR
-      { ctvrLink = CJ.linkUrl . txLink $ tx
-      , ctvrBlock = Common.blockNo . txBlock $ tx
-      , ctvrSlot = Common.slotNo . txBlock $ tx
-      , ctvrContractId = txContractId tx
-      , ctvrTransactionId = txTransactionId tx
-      }
-
+    res = CJ.resource cv
+    convertTx tx = CTVR { ctvrLink = TJ.transaction $ TJ.links tx
+                        , ctvrBlock = TJ.blockNo $ TJ.block tRes
+                        , ctvrSlot = TJ.slotNo $ TJ.block tRes
+                        , ctvrContractId = TJ.contractId tRes
+                        , ctvrTransactionId = TJ.transactionId tRes
+                        }
+      where tRes = TJ.resource tx
 extractInfo _ _ Nothing = ContractViewError "Something went wrong, unable to display"
 
 
