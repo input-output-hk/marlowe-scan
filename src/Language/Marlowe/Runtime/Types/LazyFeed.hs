@@ -23,9 +23,6 @@ fromExceptTIO :: ExceptT String IO (LazyFeed a) -> LazyFeed a
 fromExceptTIO h = fromIO $ do x <- runExceptT h
                               return $ either errorToLazyFeed id x
 
-
-                     
-
 errorToLazyFeed :: String -> LazyFeed a
 errorToLazyFeed str = LazyFeed $ do return $ ErrorReading str
 
