@@ -11,13 +11,11 @@ import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (unpack)
-import Data.Time (formatTime)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
-import Data.Time.Format (defaultTimeLocale)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml, prettyPrintAmount )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml, prettyPrintAmount, makeLocalDateTime )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJ
@@ -231,9 +229,9 @@ renderChoices mapChoices = case Map.keys mapChoices of
     . map (\(ChoiceId choiceName party) -> show party <> ": " <> unpack choiceName)
     $ listChoiceIds
 
-renderTime :: POSIXTime -> String
+renderTime :: POSIXTime -> Html
 renderTime =
-  formatTime defaultTimeLocale "%s [%A, %d %B %Y %T %Z]"  -- ..and format it.
+  makeLocalDateTime  -- ..and format it.
   . posixSecondsToUTCTime  -- ..convert to UTCTime for the formatting function..
   . realToFrac . (/ (1000 :: Double)) . fromIntegral  -- ..convert from millis to epoch seconds..
   . getPOSIXTime  -- Get the Integer out of our custom type..
@@ -248,7 +246,7 @@ renderMState (Just st) = table $ do
   tr $ do td $ b "choices"
           td . string . renderChoices . choices $ st
   tr $ do td $ b "minTime"
-          td . string . renderTime . minTime $ st
+          td . renderTime . minTime $ st
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"
