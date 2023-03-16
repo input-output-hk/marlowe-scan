@@ -57,7 +57,6 @@ stringToHtml str = mconcat $ map processLine $ lines str
 generateLink :: String -> [(String, String)] -> String
 generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap pack pack) params))
 
-
 prettyPrintAmount :: Int -> Integer -> String
 prettyPrintAmount decimalPositions amount = if decimals /= [] then integers ++ '.':decimals else integers
   where (revDecimals, revIntegers) = splitAt decimalPositions $ reverse (show amount)

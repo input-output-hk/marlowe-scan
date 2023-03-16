@@ -238,15 +238,19 @@ renderTime =
 
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
-renderMState (Just st) = table $ do
-  tr $ do td $ b "accounts"
-          td . renderMAccounts . accounts $ st
-  tr $ do td $ b "bound values"
-          td . string . renderBoundValues . boundValues $ st
-  tr $ do td $ b "choices"
-          td . string . renderChoices . choices $ st
-  tr $ do td $ b "minTime"
-          td . renderTime . minTime $ st
+renderMState (Just (State { accounts    = accs
+                          , choices     = chos
+                          , boundValues = boundVals
+                          , minTime     = mtime })) =
+  table $ do tr $ do td $ b "accounts"
+                     td $ renderMAccounts accs
+             tr $ do td $ b "bound values"
+                     td $ string $ renderBoundValues boundVals
+             tr $ do td $ b "choices"
+                     td $ string $ renderChoices chos
+             tr $ do td $ b "minTime"
+                     td $ do renderTime mtime
+                             string $ " (POSIX: " ++ show mtime ++ ")"
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"
