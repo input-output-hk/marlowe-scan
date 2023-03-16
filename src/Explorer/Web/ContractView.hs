@@ -6,6 +6,7 @@ module Explorer.Web.ContractView
   where
 
 import Control.Monad (forM_)
+import Control.Monad.Extra (whenMaybe)
 import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -16,35 +17,28 @@ import Data.Time.Format (defaultTimeLocale)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-
 import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml, prettyPrintAmount )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJ
-import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money,
-  POSIXTime(..), Party(..), State(..), Token(..), ValueId(..))
+import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money, POSIXTime(..), Party(..),
+                                         State(..), Token(..), ValueId(..))
 import Opts (Options, mkUrlPrefix)
+import Control.Monad.Except (runExceptT, ExceptT (ExceptT))
 
 contractView :: Options -> Maybe String -> Maybe String -> IO ContractView
-contractView opts tab@(Just "txs") (Just cid) = do
+contractView opts mTab (Just cid) = do
   let urlPrefix = mkUrlPrefix opts
-  cjs <- CJ.getContractJSON urlPrefix cid
-  case cjs of
-    Left str -> pure $ ContractViewError str
-    Right cjson -> do
-      let link = CJ.transactions $ CJ.links cjson
-      etx <- TJ.getContractTransactions urlPrefix link
-      pure $ case etx of
-        Left str -> ContractViewError str
-        Right tx -> extractInfo (parseTab tab) cjson (Just tx)
-contractView opts tab@(Just _) (Just cid) = do
-  cjs <- CJ.getContractJSON (mkUrlPrefix opts) cid
-  return $ case cjs of
-    Left str -> ContractViewError str
-    Right cjson -> extractInfo (parseTab tab) cjson Nothing
-contractView opts Nothing cid = contractView opts (Just "info") cid
-contractView _opts _tab Nothing = return $ ContractViewError "Need to specify a contractId"
+      tab = parseTab mTab
+  r <- runExceptT (do cjson <- ExceptT $ CJ.getContractJSON urlPrefix cid
+                      let link = CJ.transactions $ CJ.links cjson
+                      txjson <- whenMaybe (tab == CTxView)
+                                        $ ExceptT $ TJ.getContractTransactions urlPrefix link
+                      return $ extractInfo tab cjson txjson)
+  return $ either ContractViewError id r
 
+contractView opts Nothing cid = contractView opts (Just "state") cid
+contractView _opts _tab Nothing = return $ ContractViewError "Need to specify a contractId"
 
 parseTab :: Maybe String -> ContractViews
 parseTab (Just "state") = CStateView

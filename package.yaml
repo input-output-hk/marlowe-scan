@@ -19,6 +19,7 @@ dependencies:
 - blaze-markup
 - bytestring
 - containers
+- extra
 - http-client
 - http-conduit
 - http-types
