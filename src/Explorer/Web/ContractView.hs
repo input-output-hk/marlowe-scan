@@ -182,9 +182,7 @@ data CTVRs = CTVRs String [CTVR]
 
 
 renderCTVRs :: [CTVR] -> Html
-
 renderCTVRs [] = p ! style "color: red" $ string "There are no transactions"
-
 renderCTVRs ctvrs = table $ do
     tr $ do
       th $ b "Transaction ID"

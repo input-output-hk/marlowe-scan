@@ -53,6 +53,7 @@ library
     , blaze-markup
     , bytestring
     , containers
+    , errors
     , extra
     , http-client
     , http-conduit
@@ -85,6 +86,7 @@ executable marlowe-explorer-exe
     , blaze-markup
     , bytestring
     , containers
+    , errors
     , extra
     , http-client
     , http-conduit
@@ -116,6 +118,7 @@ test-suite marlowe-explorer-test
     , blaze-markup
     , bytestring
     , containers
+    , errors
     , extra
     , hspec
     , hspec-wai

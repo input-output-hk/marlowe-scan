@@ -1,4 +1,7 @@
-module Language.Marlowe.Runtime.Types.LazyFeed(LazyFeed, consToLazyFeed, errorToLazyFeed, emptyLazyFeed, foldThroughLazyFeed, prependListToLazyFeed, fromIO, unConsLazyFeed) where
+module Language.Marlowe.Runtime.Types.LazyFeed(LazyFeed, consToLazyFeed, errorToLazyFeed, emptyLazyFeed,
+                                               foldThroughLazyFeed, fromExceptTIO, prependListToLazyFeed,
+                                               fromIO, unConsLazyFeed) where
+import Control.Monad.Except (ExceptT, runExceptT)
 
 newtype LazyFeed a = LazyFeed (IO (LazyResult a))
 
@@ -15,6 +18,13 @@ consToLazyFeed h c = LazyFeed $ do return $ NonEmptyFeed h c
 fromIO :: IO (LazyFeed a) -> LazyFeed a
 fromIO h = LazyFeed $ do LazyFeed x <- h
                          x
+
+fromExceptTIO :: ExceptT String IO (LazyFeed a) -> LazyFeed a
+fromExceptTIO h = fromIO $ do x <- runExceptT h
+                              return $ either errorToLazyFeed id x
+
+
+                     
 
 errorToLazyFeed :: String -> LazyFeed a
 errorToLazyFeed str = LazyFeed $ do return $ ErrorReading str
@@ -42,5 +52,5 @@ foldThroughLazyFeed f lf = do res <- unConsLazyFeed lf
                                 Right Nothing -> case f Nothing of
                                                    Right _ -> error "Function in foldThroughLazyFeed returned Right for Nothing"
                                                    Left x -> return $ Right x
-                                                   
+
 
