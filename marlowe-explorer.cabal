@@ -36,6 +36,7 @@ library
       Language.Marlowe.Runtime.Types.ContractsJSON
       Language.Marlowe.Runtime.Types.IndexedSeq
       Language.Marlowe.Runtime.Types.LazyFeed
+      Language.Marlowe.Runtime.Types.TransactionJSON
       Language.Marlowe.Runtime.Types.TransactionsJSON
       Language.Marlowe.Semantics.Types
       Lib
@@ -53,6 +54,9 @@ library
     , blaze-markup
     , bytestring
     , containers
+    , errors
+    , extra
+    , ghc
     , http-client
     , http-conduit
     , http-types
@@ -84,6 +88,9 @@ executable marlowe-explorer-exe
     , blaze-markup
     , bytestring
     , containers
+    , errors
+    , extra
+    , ghc
     , http-client
     , http-conduit
     , http-types
@@ -114,6 +121,9 @@ test-suite marlowe-explorer-test
     , blaze-markup
     , bytestring
     , containers
+    , errors
+    , extra
+    , ghc
     , hspec
     , hspec-wai
     , http-client

@@ -5,45 +5,49 @@ module Explorer.Web.ContractView
   (ContractView(..), contractView)
   where
 
-import Control.Monad (forM_)
+import Control.Monad (forM_, forM)
+import Control.Monad.Extra (whenMaybe)
 import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (unpack)
-import Data.Time (formatTime)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
-import Data.Time.Format (defaultTimeLocale)
-import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, toHtml )
+import GHC.Utils.Misc (split)
+import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, mkNavLink, stringToHtml, prettyPrintAmount )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
-import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJ
-import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Money,
-  POSIXTime(..), Party(..), State(..), Token(..), ValueId(..))
+import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
+import qualified Language.Marlowe.Runtime.Types.TransactionJSON as TJ
+import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Input(..), Money, POSIXTime(..), Party(..),
+                                         State(..), Token(..), ValueId(..))
 import Opts (Options, mkUrlPrefix)
+import Control.Monad.Except (runExceptT, ExceptT (ExceptT))
+import Prelude hiding (div)
+import Data.Time (UTCTime)
 
-contractView :: Options -> Maybe String -> Maybe String -> IO ContractView
-contractView opts tab@(Just "txs") (Just cid) = do
+contractView :: Options -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
+contractView opts mTab (Just cid) mTxId = do
   let urlPrefix = mkUrlPrefix opts
-  cjs <- CJ.getContractJSON urlPrefix cid
-  case cjs of
-    Left str -> pure $ ContractViewError str
-    Right cjson -> do
-      let link = CJ.transactions $ CJ.links cjson
-      etx <- TJ.getContractTransactions urlPrefix link
-      pure $ case etx of
-        Left str -> ContractViewError str
-        Right tx -> extractInfo (parseTab tab) cjson (Just tx)
-contractView opts tab@(Just _) (Just cid) = do
-  cjs <- CJ.getContractJSON (mkUrlPrefix opts) cid
-  return $ case cjs of
-    Left str -> ContractViewError str
-    Right cjson -> extractInfo (parseTab tab) cjson Nothing
-contractView opts Nothing cid = contractView opts (Just "info") cid
-contractView _opts _tab Nothing = return $ ContractViewError "Need to specify a contractId"
+      tab = parseTab mTab
+  r <- runExceptT (do cjson <- ExceptT $ CJ.getContractJSON urlPrefix cid
+                      let link = CJ.transactions $ CJ.links cjson
+                      txsjson <- whenMaybe (tab == CTxView)
+                                           $ ExceptT $ TJs.getContractTransactions urlPrefix link
+                      let mTxId2 = getIfInContract mTxId txsjson
+                      txjson <- forM mTxId2 (ExceptT . TJ.getTransaction urlPrefix link)
+                      return $ extractInfo tab cjson txsjson txjson)
+  return $ either ContractViewError id r
+contractView opts Nothing cid txId = contractView opts (Just "state") cid txId
+contractView _opts _tab Nothing _txId = return $ ContractViewError "Need to specify a contractId"
+
+
+getIfInContract :: Maybe String -> Maybe TJs.Transactions -> Maybe String
+getIfInContract mTxId@(Just txId) (Just (TJs.Transactions { TJs.transactions = txList })) =
+  if any ((== txId) . TJs.transactionId . TJs.resource) txList then mTxId else Nothing
+getIfInContract _ _ = Nothing
 
 
 parseTab :: Maybe String -> ContractViews
@@ -52,20 +56,21 @@ parseTab (Just "txs") = CTxView
 parseTab _ = CInfoView
 
 
-extractInfo :: ContractViews -> CJ.ContractJSON -> Maybe TJ.Transactions -> ContractView
-extractInfo CInfoView cv _ =
+extractInfo :: ContractViews -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> ContractView
+extractInfo CInfoView cv _ _ =
   ContractInfoView
       (CIVR { civrContractId = CJ.contractId res
-            , blockHeaderHash = CJ.blockHeaderHash block
-            , blockNo = CJ.blockNo block
-            , slotNo = CJ.slotNo block
-            , roleTokenMintingPolicyId = CJ.roleTokenMintingPolicyId res
-            , status = CJ.status res
-            , version = CJ.version res
+            , civrBlockHeaderHash = CJ.blockHeaderHash block
+            , civrBlockNo = CJ.blockNo block
+            , civrSlotNo = CJ.slotNo block
+            , civrRoleTokenMintingPolicyId = CJ.roleTokenMintingPolicyId res
+            , civrTags = CJ.tags res
+            , civrStatus = CJ.status res
+            , civrVersion = CJ.version res
             })
   where res = CJ.resource cv
         block = CJ.block res
-extractInfo CStateView cv _ =
+extractInfo CStateView cv _ _ =
   ContractStateView
       (CSVR { csvrContractId = CJ.contractId res
             , currentContract = CJ.currentContract res
@@ -73,18 +78,60 @@ extractInfo CStateView cv _ =
             , currentState = CJ.state res
             })
   where res = CJ.resource cv
-extractInfo CTxView cv (Just (TJ.Transactions txs)) =
-  ContractTxView . CTVRs (CJ.contractId res) $ map convertTx txs
+extractInfo CTxView CJ.ContractJSON { CJ.resource = CJ.Resource { CJ.contractId = contractId' }
+                                    }
+            (Just (TJs.Transactions { TJs.transactions = txs })) mTx =
+  ContractTxView $ CTVRs { ctvrsContractId = contractId'
+                         , ctvrs = map convertTx $ reverse txs
+                         , ctvrsSelectedTransactionInfo = fmap convertTxDetails mTx
+                         }
   where
-    res = CJ.resource cv
-    convertTx tx = CTVR { ctvrLink = TJ.transaction $ TJ.links tx
-                        , ctvrBlock = TJ.blockNo $ TJ.block tRes
-                        , ctvrSlot = TJ.slotNo $ TJ.block tRes
-                        , ctvrContractId = TJ.contractId tRes
-                        , ctvrTransactionId = TJ.transactionId tRes
+    convertTx TJs.Transaction { TJs.resource = TJs.Resource { TJs.block = TJs.Block { TJs.blockNo = blockNo'
+                                                                                    , TJs.slotNo = slotNo'
+                                                                                    }
+                                                            , TJs.contractId = txContractId
+                                                            , TJs.transactionId = transactionId'
+                                                            }
+                              } =
+                   CTVR { ctvrBlock = blockNo'
+                        , ctvrSlot = slotNo'
+                        , ctvrContractId = txContractId
+                        , ctvrTransactionId = transactionId'
                         }
-      where tRes = TJ.resource tx
-extractInfo _ _ Nothing = ContractViewError "Something went wrong, unable to display"
+extractInfo _ _ Nothing _ = ContractViewError "Something went wrong, unable to display"
+
+convertTxDetails :: TJ.Transaction -> CTVRTDetail
+convertTxDetails TJ.Transaction { TJ.links = TJ.Link { TJ.next = mNext
+                                                     , TJ.previous = mPrev
+                                                     }
+                                , TJ.resource = TJ.Resource { TJ.block = TJ.Block { TJ.blockHeaderHash = txDetailBlockHeaderHash
+                                                                                  , TJ.blockNo = txDetailBlockNo
+                                                                                  , TJ.slotNo = txDetailSlotNo
+                                                                                  }
+                                                            , TJ.inputs = txDetailInputs
+                                                            , TJ.invalidBefore = txDetailInvalidBefore
+                                                            , TJ.invalidHereafter = txDetailInvalidHereafter
+                                                            , TJ.outputContract = txDetailOutputContract
+                                                            , TJ.outputState = txDetailOutputState
+                                                            , TJ.status = txDetailStatus
+                                                            , TJ.tags = txDetailTags
+                                                            , TJ.transactionId = txDetailTransactionId
+                                                            }
+                                }
+  = CTVRTDetail { txPrev= mPrev
+                , txNext= mNext
+                , txBlockHeaderHash = txDetailBlockHeaderHash
+                , txBlockNo = txDetailBlockNo
+                , txSlotNo = txDetailSlotNo
+                , inputs = txDetailInputs
+                , invalidBefore = txDetailInvalidBefore
+                , invalidHereafter = txDetailInvalidHereafter
+                , outputContract = txDetailOutputContract
+                , outputState = txDetailOutputState
+                , txStatus = txDetailStatus
+                , txTags = txDetailTags
+                , transactionId = txDetailTransactionId
+                }
 
 
 allContractViews :: [ContractViews]
@@ -103,7 +150,7 @@ getNavTitle CTxView = "Transactions"
 data ContractViews = CInfoView
                    | CStateView
                    | CTxView
-  deriving (Eq)
+  deriving (Show, Eq)
 
 data ContractView = ContractInfoView CIVR
                   | ContractStateView CSVR
@@ -116,28 +163,30 @@ instance ToMarkup ContractView where
     baseDoc ("Contract - " ++ cid) $ addNavBar CInfoView cid $ renderCIVR cvr
   toMarkup (ContractStateView ccsr@(CSVR {csvrContractId = cid})) =
     baseDoc ("Contract - " ++ cid) $ addNavBar CStateView cid $ renderCSVR ccsr
-  toMarkup (ContractTxView (CTVRs cid ctvrs)) =
-    baseDoc ("Contract - " ++ cid) $ addNavBar CTxView cid $ renderCTVRs ctvrs
+  toMarkup (ContractTxView ctvrs'@CTVRs { ctvrsContractId = cid }) =
+    baseDoc ("Contract - " ++ cid) $ addNavBar CTxView cid $ renderCTVRs ctvrs'
   toMarkup (ContractViewError str) =
     baseDoc "An error occurred" (string ("Error: " ++ str))
 
 data CIVR = CIVR { civrContractId :: String
-                 , blockHeaderHash :: String
-                 , blockNo :: Integer
-                 , slotNo :: Integer
-                 , roleTokenMintingPolicyId :: String
-                 , status :: String
-                 , version :: String
+                 , civrBlockHeaderHash :: String
+                 , civrBlockNo :: Integer
+                 , civrSlotNo :: Integer
+                 , civrRoleTokenMintingPolicyId :: String
+                 , civrTags :: Map String String
+                 , civrStatus :: String
+                 , civrVersion :: String
                  }
 
 renderCIVR :: CIVR -> Html
 renderCIVR (CIVR { civrContractId = cid
-                 , blockHeaderHash = blockHash
-                 , blockNo = blockNum
-                 , slotNo = slotNum
-                 , roleTokenMintingPolicyId = roleMintingPolicyId
-                 , status = contractStatus
-                 , version = marloweVersion
+                 , civrBlockHeaderHash = blockHash
+                 , civrBlockNo = blockNum
+                 , civrSlotNo = slotNum
+                 , civrRoleTokenMintingPolicyId = roleMintingPolicyId
+                 , civrTags = civrTags'
+                 , civrStatus = contractStatus
+                 , civrVersion = marloweVersion
                  }) =
   table $ do tr $ do td $ b "Contract ID"
                      td $ string cid
@@ -149,6 +198,8 @@ renderCIVR (CIVR { civrContractId = cid
                      td $ string (show slotNum)
              tr $ do td $ b "Role Token Minting Policy ID"
                      td $ string roleMintingPolicyId
+             tr $ do td $ b "Tags"
+                     td $ renderTags civrTags'
              tr $ do td $ b "Status"
                      td $ string contractStatus
              tr $ do td $ b "Version"
@@ -175,33 +226,137 @@ renderCSVR (CSVR { csvrContractId = cid
              tr $ do td $ b "Initial contract"
                      td $ renderMContract (Just ic)
 
+data CTVRTDetail = CTVRTDetail
+  {
+    txPrev :: Maybe String,
+    txNext :: Maybe String,
+    txBlockHeaderHash :: String,
+    txBlockNo :: Int,
+    txSlotNo :: Int,
+    inputs :: [Input],
+    invalidBefore :: UTCTime,
+    invalidHereafter :: UTCTime,
+    outputContract :: Maybe Contract,
+    outputState :: Maybe State,
+    txStatus :: String,
+    txTags :: Map String String,
+    transactionId :: String
+  }
+  deriving Show
+
 data CTVR = CTVR
-  { ctvrLink :: String
-  , ctvrBlock :: Integer
+  { ctvrBlock :: Integer
   , ctvrSlot :: Integer
   , ctvrContractId :: String
   , ctvrTransactionId :: String
   }
   deriving Show
 
-data CTVRs = CTVRs String [CTVR]
+data CTVRs = CTVRs {
+    ctvrsContractId ::String
+  , ctvrs :: [CTVR]
+  , ctvrsSelectedTransactionInfo :: Maybe CTVRTDetail
+}
 
 
-renderCTVRs :: [CTVR] -> Html
-
-renderCTVRs [] = p ! style "color: red" $ string "There are no transactions"
-
-renderCTVRs ctvrs = table $ do
+renderCTVRs :: CTVRs -> Html
+renderCTVRs CTVRs { ctvrs = [] } = p ! style "color: red" $ string "There are no transactions"
+renderCTVRs CTVRs { ctvrsContractId = ctvrsContractId'
+                  , ctvrs = ctvrs'
+                  , ctvrsSelectedTransactionInfo = ctvrsSelectedTransactionInfo'
+                  } = do
+  table $ do
     tr $ do
       th $ b "Transaction ID"
       th $ b "Block No"
       th $ b "Slot No"
-    forM_ ctvrs makeRow
-  where makeRow ctvr = do
+    forM_ ctvrs' makeRow
+  renderCTVRTDetail ctvrsContractId' ctvrsSelectedTransactionInfo'
+  where makeRow CTVR { ctvrBlock = ctvrBlock'
+                     , ctvrSlot = ctvrSlot'
+                     , ctvrContractId = ctvrContractId'
+                     , ctvrTransactionId = ctvrTransactionId'
+                     } = do
           tr $ do
-            td $ string . ctvrTransactionId $ ctvr
-            td $ toHtml . ctvrBlock $ ctvr
-            td $ toHtml . ctvrSlot $ ctvr
+            td $ if Just ctvrTransactionId' /= fmap transactionId ctvrsSelectedTransactionInfo'
+                 then linkToTransaction ctvrContractId' ctvrTransactionId' ctvrTransactionId'
+                 else string ctvrTransactionId'
+            td $ string $ show ctvrBlock'
+            td $ string $ show ctvrSlot'
+
+renderCTVRTDetail :: String -> Maybe CTVRTDetail -> Html
+renderCTVRTDetail _cid Nothing = do p $ string "Select a transaction to view its details"
+renderCTVRTDetail cid (Just CTVRTDetail { txPrev = txPrev'
+                                        , txNext = txNext'
+                                        , txBlockHeaderHash = txBlockHeaderHash'
+                                        , txBlockNo = txBlockNo'
+                                        , txSlotNo = txSlotNo'
+                                        , inputs = inputs'
+                                        , invalidBefore = invalidBefore'
+                                        , invalidHereafter = invalidHereafter'
+                                        , outputContract = outputContract'
+                                        , outputState = outputState'
+                                        , txStatus = txStatus'
+                                        , txTags = tags'
+                                        , transactionId = transactionId'
+                                        }) =
+  table $ do
+  tr $ do
+    td $ maybe (string previousTransactionLabel) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
+    td $ maybe (string nextTransactionLabel) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
+  table $ do
+    tr $ do
+      td $ b "Block header hash"
+      td $ string txBlockHeaderHash'
+    tr $ do
+      td $ b "Block number"
+      td $ string $ show txBlockNo'
+    tr $ do
+      td $ b "Slot number"
+      td $ string $ show txSlotNo'
+    tr $ do
+      td $ b "Inputs"
+      td $ do if null inputs' 
+              then string "No inputs"
+              else table $ do
+                     mapM_ (\inp -> do tr $ td $ code $ stringToHtml $ show $ pretty inp) inputs'
+    tr $ do
+      td $ b "Invalid before"
+      td $ makeLocalDateTime invalidBefore'
+    tr $ do
+      td $ b "Invalid after"
+      td $ makeLocalDateTime invalidHereafter'
+    tr $ do
+      td $ b "Output Contract"
+      td $ renderMContract outputContract'
+    tr $ do
+      td $ b "Output State"
+      td $ renderMState outputState'
+    tr $ do
+      td $ b "Status"
+      td $ string txStatus'
+    tr $ do
+      td $ b "Tags"
+      td $ renderTags tags'
+    tr $ do
+      td $ b "Transaction Id"
+      td $ string transactionId'
+  where previousTransactionLabel = "< Previous Transaction"
+        nextTransactionLabel = "Next Transaction >"
+        explorerTransactionLinkFromRuntimeLink label rtTxLink =
+          case split '/' rtTxLink of
+            [_, _, _, tTransactionId] -> linkToTransaction cid tTransactionId label
+            _ -> string label
+
+renderTags :: Map String String -> Html
+renderTags tagMap | Map.null tagMap = string "No tags"
+                  | otherwise = table $ do tr $ do
+                                             th $ b "Tag"
+                                             th $ b "Value"
+                                           mapM_ (\(t, v) -> tr $ do
+                                                               td $ string t
+                                                               td $ string (show v)
+                                                 ) (Map.toList tagMap)
 
 renderParty :: Party -> String
 renderParty (Address ad) = printf "Address: %s" $ unpack ad
@@ -239,33 +394,49 @@ renderChoices mapChoices = case Map.keys mapChoices of
     . map (\(ChoiceId choiceName party) -> show party <> ": " <> unpack choiceName)
     $ listChoiceIds
 
-renderTime :: POSIXTime -> String
+renderTime :: POSIXTime -> Html
 renderTime =
-  formatTime defaultTimeLocale "%s [%A, %d %B %Y %T %Z]"  -- ..and format it.
+  makeLocalDateTime  -- ..and format it.
   . posixSecondsToUTCTime  -- ..convert to UTCTime for the formatting function..
   . realToFrac . (/ (1000 :: Double)) . fromIntegral  -- ..convert from millis to epoch seconds..
   . getPOSIXTime  -- Get the Integer out of our custom type..
 
 renderMState :: Maybe State -> Html
 renderMState Nothing = string "Contract closed"
-renderMState (Just st) = table $ do
-  tr $ do td $ b "accounts"
-          td . renderMAccounts . accounts $ st
-  tr $ do td $ b "bound values"
-          td . string . renderBoundValues . boundValues $ st
-  tr $ do td $ b "choices"
-          td . string . renderChoices . choices $ st
-  tr $ do td $ b "minTime"
-          td . string . renderTime . minTime $ st
+renderMState (Just (State { accounts    = accs
+                          , choices     = chos
+                          , boundValues = boundVals
+                          , minTime     = mtime })) =
+  table $ do tr $ do td $ b "accounts"
+                     td $ renderMAccounts accs
+             tr $ do td $ b "bound values"
+                     td $ string $ renderBoundValues boundVals
+             tr $ do td $ b "choices"
+                     td $ string $ renderChoices chos
+             tr $ do td $ b "minTime"
+                     td $ do renderTime mtime
+                             string $ " (POSIX: " ++ show mtime ++ ")"
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"
 renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
-addNavBar cv cid c =
+addNavBar cv cid c = do
   table $ do tr $ do td $ b $ a ! href "listContracts" $ "Contracts List"
                      td $ b "Navigation bar"
                      mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
                            allContractViews
-                     c
+  c
+
+linkToTransaction :: String -> String -> String -> Html
+linkToTransaction contractId transactionId' linkText =
+  a ! href (toValue $ generateLink "contractView" [("tab", getNavTab CTxView), ("contractId", contractId), ("transactionId", transactionId')])
+    $ string linkText
+
+mkNavLink :: Bool -> String -> String -> String -> Html
+mkNavLink True _ _ tabTitle =
+  td $ string tabTitle
+mkNavLink False cid tabName tabTitle =
+  td $ a ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
+         $ string tabTitle

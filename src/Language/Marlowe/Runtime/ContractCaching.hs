@@ -11,6 +11,9 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Foldable (foldl')
 import Control.Exception (try, Exception (displayException))
 import Data.Aeson (eitherDecode)
+import Control.Monad.Except (ExceptT(ExceptT))
+import Control.Error.Util (hoistEither)
+import Data.Either.Extra (mapLeft)
 
 refreshContracts :: String -> ContractListISeq -> IO (Either String ContractList)
 refreshContracts endpoint lOldChain = do
@@ -45,20 +48,18 @@ parseRangeHeader _ = Done
 
 getAllContracts' :: String -> Range -> LazyFeed ContractInList
 getAllContracts' _endpoint Done = LazyFeed.emptyLazyFeed
-getAllContracts' endpoint range = LazyFeed.fromIO $ do
+getAllContracts' endpoint range = LazyFeed.fromExceptTIO $ do
   initialRequest <- parseRequest $ endpoint <> "contracts"
   let request = foldl' (flip id) initialRequest
         [ setRequestMethod "GET"
         , setRequestHeader "Accept" ["application/json"]
         , setRangeHeader range
         ]
-  mResponse <- try (httpLBS request)
-  case mResponse of
-    Right response -> do
-       case eitherDecode (getResponseBody response) of
-         Right (ResultList { results = contracts }) -> do
-           let nextRange = parseRangeHeader . getResponseHeader "Next-Range" $ response
-           return $ LazyFeed.prependListToLazyFeed contracts (getAllContracts' endpoint nextRange)
-         Left str2 -> return $ LazyFeed.errorToLazyFeed $ "Error decoding: " ++ str2
-    Left str -> return $ LazyFeed.errorToLazyFeed $ displayException (str :: HttpException)
-
+  response <- ExceptT $ httpExceptionToString <$> try (httpLBS request)
+  (ResultList { results = contracts }) <- hoistEither $ eitherDecode (getResponseBody response)
+  let nextRange = parseRangeHeader $ getResponseHeader "Next-Range" response
+  return $ LazyFeed.prependListToLazyFeed contracts (getAllContracts' endpoint nextRange)
+    
+  where
+    httpExceptionToString :: Either HttpException a -> Either String a
+    httpExceptionToString = mapLeft displayException
