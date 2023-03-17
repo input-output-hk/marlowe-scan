@@ -21,6 +21,7 @@ dependencies:
 - containers
 - errors
 - extra
+- ghc
 - http-client
 - http-conduit
 - http-types

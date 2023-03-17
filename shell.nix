@@ -5,7 +5,7 @@ let
   f = { mkDerivation, base, blaze-html, gtk, lib, process
       , temporary, zlib, aeson, servant-server, wai, warp, haskell-language-server
       , hspec, hspec-wai, servant-blaze, http-client, wl-pprint
-      , http-conduit, http-types
+      , http-conduit, http-types, errors
       }:
       mkDerivation {
         pname = "marlowe-explorer";
@@ -16,7 +16,7 @@ let
         executableHaskellDepends = [
           base blaze-html gtk process temporary zlib
           aeson servant-server wai warp
-          haskell-language-server 
+          haskell-language-server errors
           hspec hspec-wai servant-blaze
           http-client wl-pprint http-conduit http-types
         ];

@@ -3,11 +3,13 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Language.Marlowe.Semantics.Types
   ( ChoiceId(..)
   , ChoiceName
   , Contract(..)
+  , Input(..)
   , Money
   , Party(..)
   , POSIXTime(..)
@@ -37,22 +39,33 @@ import qualified Data.Aeson.Types as JSON
 import           Data.Text (Text)
 import qualified Data.ByteString.Base16 as Base16
 import Data.Either (fromRight)
+import Data.Aeson ()
+import qualified Control.Monad as Haskell
+import qualified Data.Aeson.KeyMap as KeyMap
 
 newtype POSIXTime = POSIXTime { getPOSIXTime :: Integer }
   deriving stock (Eq,Ord,Generic)
   deriving newtype (Pretty)
 
 instance Show POSIXTime where
+  showsPrec :: Int -> POSIXTime -> ShowS
   showsPrec p (POSIXTime n) = showsPrec p n
 instance Read POSIXTime where
+  readsPrec :: Int -> ReadS POSIXTime
   readsPrec p x = [(POSIXTime v, s) | (v, s) <- readsPrec p x]
 
 instance Num POSIXTime where
+    (+) :: POSIXTime -> POSIXTime -> POSIXTime
     POSIXTime l + POSIXTime r = POSIXTime (l + r)
+    (*) :: POSIXTime -> POSIXTime -> POSIXTime
     POSIXTime l * POSIXTime r = POSIXTime (l * r)
+    abs :: POSIXTime -> POSIXTime
     abs (POSIXTime l) = POSIXTime (abs l)
+    signum :: POSIXTime -> POSIXTime
     signum (POSIXTime l) = POSIXTime (signum l)
+    fromInteger :: Integer -> POSIXTime
     fromInteger = POSIXTime
+    negate :: POSIXTime -> POSIXTime
     negate (POSIXTime l) = POSIXTime (negate l)
 
 data Party = Address Text
@@ -60,9 +73,11 @@ data Party = Address Text
   deriving (Eq,Ord,Show,Read,Generic,Pretty)
 
 instance FromJSON Party where
+  parseJSON :: JSON.Value -> Parser Party
   parseJSON = withObject "Party" (\v -> (Address <$> (v .: "address"))
     <|> (Role <$> (v .: "role_token")))
 instance ToJSON Party where
+    toJSON :: Party -> JSON.Value
     toJSON (Address address) = object
         [ "address" .= JSON.String address ]
     toJSON (Role name) = object
@@ -77,11 +92,13 @@ data ChoiceId = ChoiceId ChoiceName Party
   deriving (Eq,Ord,Show,Read,Generic,Pretty)
 
 instance FromJSON ChoiceId where
+  parseJSON :: JSON.Value -> Parser ChoiceId
   parseJSON = withObject "ChoiceId" (\v ->
        ChoiceId <$> (v .: "choice_name")
                 <*> (v .: "choice_owner"))
 
 instance ToJSON ChoiceId where
+  toJSON :: ChoiceId -> JSON.Value
   toJSON (ChoiceId name party) = object [ "choice_name" .= JSON.String name
                                         , "choice_owner" .= party
                                         ]
@@ -90,20 +107,24 @@ newtype ValueId = ValueId Text
   deriving stock (Eq,Ord,Generic)
 
 instance FromJSON ValueId where
+    parseJSON :: JSON.Value -> Parser ValueId
     parseJSON = JSON.withText "ValueId" $ \t ->
         pure (ValueId t)
 instance ToJSON ValueId where
+    toJSON :: ValueId -> JSON.Value
     toJSON (ValueId x) = JSON.String x
 
 data Token = Token Text Text
   deriving (Eq,Ord,Show,Read,Generic,Pretty)
 
 instance FromJSON Token where
+  parseJSON :: JSON.Value -> Parser Token
   parseJSON = withObject "Token" (\v ->
        Token <$> (v .: "currency_symbol")
              <*> (v .: "token_name"))
 
 instance ToJSON Token where
+  toJSON :: Token -> JSON.Value
   toJSON (Token currSym tokName) = object
       [ "currency_symbol" .= JSON.String currSym
       , "token_name" .= JSON.String tokName
@@ -155,11 +176,13 @@ data Bound = Bound Integer Integer
   deriving (Eq,Ord,Show,Read,Generic,Pretty)
 
 instance FromJSON Bound where
+  parseJSON :: JSON.Value -> Parser Bound
   parseJSON = withObject "Bound" (\v ->
        Bound <$> (getInteger "lower bound"=<< (v .: "from"))
              <*> (getInteger "higher bound" =<< (v .: "to"))
                                  )
 instance ToJSON Bound where
+  toJSON :: Bound -> JSON.Value
   toJSON (Bound from to) = object
       [ "from" .= from
       , "to" .= to
@@ -213,6 +236,7 @@ fromJSONAssocMap :: Ord k => FromJSON k => FromJSON v => JSON.Value -> JSON.Pars
 fromJSONAssocMap v = Map.fromList <$> parseJSON v
 
 instance FromJSON State where
+  parseJSON :: JSON.Value -> Parser State
   parseJSON = withObject "State" (\v ->
          State <$> (v .: "accounts" >>= fromJSONAssocMap)
                <*> (v .: "choices" >>= fromJSONAssocMap)
@@ -221,6 +245,7 @@ instance FromJSON State where
                                  )
 
 instance ToJSON State where
+  toJSON :: State -> JSON.Value
   toJSON State { accounts = a
                , choices = c
                , boundValues = bv
@@ -236,15 +261,69 @@ newtype Environment = Environment { timeInterval :: TimeInterval }
 data InputContent = IDeposit Party Party Token Money
                   | IChoice ChoiceId ChosenNum
                   | INotify
-  deriving (Eq,Ord,Show,Read)
+  deriving (Eq,Ord,Show,Read,Generic,Pretty)
+
+instance FromJSON InputContent where
+  parseJSON :: JSON.Value -> Parser InputContent
+  parseJSON (JSON.String "input_notify") = return INotify
+  parseJSON (JSON.Object v) =
+    IChoice <$> v .: "for_choice_id"
+                <*> v .: "input_that_chooses_num"
+    <|> IDeposit  <$> v .: "into_account"
+              <*> v .: "input_from_party"
+              <*> v .: "of_token"
+              <*> v .: "that_deposits"
+  parseJSON _ = Haskell.fail "Input must be either an object or the string \"input_notify\""
+
+instance ToJSON InputContent where
+  toJSON :: InputContent -> JSON.Value
+  toJSON (IDeposit accId party tok amount) = object
+      [ "input_from_party" .= party
+      , "that_deposits" .= amount
+      , "of_token" .= tok
+      , "into_account" .= accId
+      ]
+  toJSON (IChoice choiceId chosenNum) = object
+      [ "input_that_chooses_num" .= chosenNum
+      , "for_choice_id" .= choiceId
+      ]
+  toJSON INotify = JSON.String "input_notify"
+
 
 data Input = NormalInput InputContent
-           | MerkleizedInput InputContent ByteString
-  deriving (Eq,Ord,Show,Read)
+           | MerkleizedInput InputContent ByteString Contract
+  deriving (Eq,Ord,Show,Read,Generic,Pretty)
+
+instance FromJSON Input where
+  parseJSON :: JSON.Value -> Parser Input
+  parseJSON (JSON.String s) = NormalInput <$> parseJSON (JSON.String s)
+  parseJSON (JSON.Object v) =
+    let parseContinuationHash = (fromRight (error "Couldn't decode merkleized continuation") . Base16.decode . T.encodeUtf8) in
+      MerkleizedInput <$> parseJSON (JSON.Object v)
+                    <*> (parseContinuationHash <$> v .: "continuation_hash")
+                    <*> v .: "merkleized_continuation"
+      <|> MerkleizedInput INotify <$> (parseContinuationHash <$> v .: "continuation_hash") <*> v .: "merkleized_continuation"
+      <|> NormalInput <$> parseJSON (JSON.Object v)
+
+  parseJSON _ = Haskell.fail "Input must be either an object or the string \"input_notify\""
+
+instance ToJSON Input where
+  toJSON :: Input -> JSON.Value
+  toJSON (NormalInput content) = toJSON content
+  toJSON (MerkleizedInput content hash continuation) =
+    let
+      obj = case toJSON content of
+        JSON.Object obje -> obje
+        _          -> KeyMap.empty
+    in JSON.Object $ obj `KeyMap.union` KeyMap.fromList
+        [ ("merkleized_continuation", toJSON continuation)
+        , ("continuation_hash", toJSON $ (T.decodeUtf8 . Base16.encode) hash)
+        ]
+
 
 getInputContent :: Input -> InputContent
 getInputContent (NormalInput inputContent) = inputContent
-getInputContent (MerkleizedInput inputContent _) = inputContent
+getInputContent (MerkleizedInput inputContent _ _) = inputContent
 
 -- Processing of time interval
 data IntervalError = InvalidInterval TimeInterval
@@ -372,6 +451,7 @@ instance ToJSON Observation where
   toJSON FalseObs = toJSON False
 
 instance FromJSON Action where
+  parseJSON :: JSON.Value -> Parser Action
   parseJSON = withObject "Action" (\v ->
        (Deposit <$> (v .: "into_account")
                 <*> (v .: "party")
@@ -383,6 +463,7 @@ instance FromJSON Action where
    <|> (Notify <$> (v .: "notify_if"))
                                   )
 instance ToJSON Action where
+  toJSON :: Action -> JSON.Value
   toJSON (Deposit accountId party token val) = object
       [ "into_account" .= accountId
       , "party" .= party

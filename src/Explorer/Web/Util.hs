@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, formatTimeDiff, generateLink, makeLocalDateTime, mkNavLink, prettyPrintAmount, stringToHtml, table, td, th, tr )
+  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -20,13 +20,6 @@ baseDoc caption content = docTypeHtml
                                  $ do head $ title $ string caption
                                       body $ do h1 $ string caption
                                                 content
-
-mkNavLink :: Bool -> String -> String -> String -> Html
-mkNavLink True _ _ tabTitle =
-  td $ string tabTitle
-mkNavLink False cid tabName tabTitle =
-  td $ a ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
-         $ string tabTitle
 
 table :: Html -> Html
 table = H.table ! style "border: 1px solid black"
@@ -100,4 +93,8 @@ makeLocalDateTime timestampToRender =
         "div.innerHTML = date.toString().split(' (')[0];" ++
         "script.parentNode.insertBefore(div, script);" ++
       "})();")
+
+
+linkFor :: ToValue a => a -> String -> Html
+linkFor x y = a ! href (toValue x) $ string y
 
