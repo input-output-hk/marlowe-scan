@@ -449,3 +449,4 @@ mkNavLink True _ _ tabTitle =
 mkNavLink False cid tabName tabTitle =
   td $ a ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
          $ string tabTitle
+

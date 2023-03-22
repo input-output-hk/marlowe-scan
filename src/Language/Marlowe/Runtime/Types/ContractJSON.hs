@@ -9,7 +9,7 @@ module Language.Marlowe.Runtime.Types.ContractJSON
   , getContractJSON
   ) where
 
-import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode, Value, (.:?) )
+import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), eitherDecode, Value, (.:?), Object )
 import Network.HTTP.Simple (parseRequest, getResponseBody, httpLBS, setRequestHeader, setRequestMethod)
 import Network.HTTP.Types (urlEncode)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
@@ -34,6 +34,7 @@ data Resource = Resource
   , contractId :: String
   , currentContract :: Maybe Contract
   , initialContract :: Contract
+  , metadata :: Object
   , roleTokenMintingPolicyId :: String
   , state :: Maybe State
   , status :: String
@@ -68,6 +69,7 @@ instance FromJSON Resource where
     contractId' <- o .: "contractId"
     currentContract' <- o .: "currentContract"
     initialContract' <- o .: "initialContract"
+    metadata' <- o .: "metadata"
     roleTokenMintingPolicyId' <- o .: "roleTokenMintingPolicyId"
     state' <- o .:? "state"
     status' <- o .: "status"
@@ -77,6 +79,7 @@ instance FromJSON Resource where
                     , contractId = contractId'
                     , currentContract = currentContract'
                     , initialContract = initialContract'
+                    , metadata = metadata'
                     , roleTokenMintingPolicyId = roleTokenMintingPolicyId'
                     , state = state'
                     , status = status'

@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Lib
   ( startApp
@@ -10,15 +11,16 @@ import Control.Monad.IO.Class ( liftIO )
 import Control.Newtype.Generics ( op )
 import Network.Wai ( Application )
 import Network.Wai.Handler.Warp ( run )
-import Servant ( serve, Proxy(..), type (:>), Get, type (:<|>) ((:<|>)), QueryParam )
+import Servant ( Proxy(..), hoistServer, serve, type (:<|>)(..), OctetStream, QueryParam, type (:>), Get, Headers, Header )
 import Servant.HTML.Blaze ( HTML )
-import Servant.Server ( hoistServer )
 
 import Explorer.SharedContractCache ( ContractListCache )
 import Explorer.Web.ContractListView ( ContractListView (..), contractListView )
 import Explorer.Web.ContractView ( ContractView (..), contractView )
 import Language.Marlowe.Runtime.Background ( start )
 import Opts ( Options (optExplorerPort), ExplorerPort (..), mkUrlPrefix )
+import Explorer.Web.ContractInfoDownload (contractDownloadInfo)
+import Data.ByteString.Lazy (ByteString)
 
 startApp :: Options -> IO ()
 startApp opts = do
@@ -32,6 +34,7 @@ type API
      = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/
   :<|> "listContracts" :> QueryParam "page" Int :> Get '[HTML] ContractListView
   :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> QueryParam "transactionId" String :> Get '[HTML] ContractView
+  :<|> "contractDownloadInfo" :> QueryParam "contractId" String :> Get '[OctetStream] (Headers '[Header "Content-Disposition" String] ByteString)
 
 app :: Options -> ContractListCache -> Application
 app opts contractListCache =
@@ -39,4 +42,6 @@ app opts contractListCache =
     hoistServer (Proxy :: Proxy API) liftIO
     (contractListView opts contractListCache Nothing
     :<|> contractListView opts contractListCache
-    :<|> contractView opts)
+    :<|> contractView opts
+    :<|> contractDownloadInfo opts)
+

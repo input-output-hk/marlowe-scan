@@ -5,7 +5,7 @@ let
   f = { mkDerivation, base, blaze-html, gtk, lib, process
       , temporary, zlib, aeson, servant-server, wai, warp, haskell-language-server
       , hspec, hspec-wai, servant-blaze, http-client, wl-pprint
-      , http-conduit, http-types, errors
+      , http-conduit, http-types, errors, zip-archive
       }:
       mkDerivation {
         pname = "marlowe-explorer";
@@ -19,6 +19,7 @@ let
           haskell-language-server errors
           hspec hspec-wai servant-blaze
           http-client wl-pprint http-conduit http-types
+          zip-archive
         ];
         license = "unknown";
         hydraPlatforms = lib.platforms.none;
