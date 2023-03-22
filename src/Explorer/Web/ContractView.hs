@@ -436,6 +436,8 @@ addNavBar cv cid c = do
                      td $ b "Navigation bar"
                      mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
                            allContractViews
+                     td $ a ! href (toValue $ generateLink "contractDownloadInfo" [("contractId", cid)])
+                            $ string "Download contract info"
   c
 
 linkToTransaction :: String -> String -> String -> Html
@@ -449,3 +451,4 @@ mkNavLink True _ _ tabTitle =
 mkNavLink False cid tabName tabTitle =
   td $ a ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
          $ string tabTitle
+

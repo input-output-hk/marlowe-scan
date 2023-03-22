@@ -32,6 +32,7 @@ dependencies:
 - wai
 - warp
 - wl-pprint
+- zip-archive
 
 ghc-options:
 - -Wall

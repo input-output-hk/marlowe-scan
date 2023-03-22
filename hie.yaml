@@ -9,6 +9,9 @@ cradle:
     - path: "./src/Explorer/SharedContractCache.hs"
       component: "marlowe-explorer:lib"
 
+    - path: "./src/Explorer/Web/ContractInfoDownload.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Explorer/Web/ContractListView.hs"
       component: "marlowe-explorer:lib"
 
