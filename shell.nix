@@ -1,7 +1,7 @@
 { nixpkgs ? import <nixpkgs> {}, compiler ? "ghc90", doBenchmark ? false }:
 
 let
-  inherit (nixpkgs) pkgs;
+  pkgs = nixpkgs;
   f = { mkDerivation, base, blaze-html, gtk, lib, process
       , temporary, zlib, aeson, servant-server, wai, warp, haskell-language-server
       , hspec, hspec-wai, servant-blaze, http-client, wl-pprint
