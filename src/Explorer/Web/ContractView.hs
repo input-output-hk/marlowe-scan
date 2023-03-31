@@ -36,7 +36,7 @@ contractView opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHo
   r <- runExceptT (do cjson <- ExceptT $ CJ.getContractJSON urlPrefix cid
                       let link = CJ.transactions $ CJ.links cjson
                       txsjson <- whenMaybe (tab == CTxView)
-                                           $ ExceptT $ TJs.getContractTransactions urlPrefix link
+                                           $ ExceptT $ TJs.getContractTransactionsByLink urlPrefix link
                       let mTxId2 = getIfInContract mTxId txsjson
                       txjson <- forM mTxId2 (ExceptT . TJ.getTransaction urlPrefix link)
                       return $ extractInfo tab blockExplHost cjson txsjson txjson)
