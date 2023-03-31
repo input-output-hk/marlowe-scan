@@ -6,6 +6,12 @@ cradle:
     - path: "./app/Main.hs"
       component: "marlowe-explorer:exe:marlowe-explorer-exe"
 
+    - path: "./src/Explorer/API/GetNumTransactions.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Explorer/API/IsContractOpen.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Explorer/SharedContractCache.hs"
       component: "marlowe-explorer:lib"
 

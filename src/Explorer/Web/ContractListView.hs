@@ -22,6 +22,8 @@ import qualified Data.Sequence as Seq
 import Data.List (intersperse)
 import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import qualified Language.Marlowe.Runtime.Types.ContractsJSON as CSJ
+import Explorer.API.IsContractOpen (isOpenAJAXBox)
+import Explorer.API.GetNumTransactions (numTransactionsAJAXBox)
 
 data PageInfo = PageInfo {
        currentPage :: Int
@@ -176,15 +178,19 @@ renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
       th $ b "Role token minting policy"
       th $ b "Block No"
       th $ b "Slot No"
+      th $ b "Is open"
+      th $ b "Num transactions"
       th $ b ""
     let makeRow clvr = do
           let cid = clvrContractId clvr
           tr $ do
             td $ a ! href (toValue $ generateLink "contractView" [("tab", "info"), ("contractId", cid)])
               $ string cid
-            td $ renderStr . clvrRoleMintingPolicyId $ clvr
-            td $ toHtml . clvrBlock $ clvr
-            td $ toHtml . clvrSlot $ clvr
+            td $ renderStr $ clvrRoleMintingPolicyId clvr
+            td $ toHtml $ clvrBlock clvr
+            td $ toHtml $ clvrSlot clvr
+            td $ isOpenAJAXBox cid
+            td $ numTransactionsAJAXBox cid
             td $ a ! href (toValue $ clvrBlockExplLink clvr) $ string "Explore"
     forM_ clvrs makeRow
   renderNavBar pinf
