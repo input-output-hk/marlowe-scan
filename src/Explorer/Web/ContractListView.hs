@@ -178,7 +178,7 @@ renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
       th $ b "Role token minting policy"
       th $ b "Block No"
       th $ b "Slot No"
-      th $ b "Is open"
+      th $ b "Status"
       th $ b "Num transactions"
       th $ b ""
     let makeRow clvr = do
