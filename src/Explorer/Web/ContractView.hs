@@ -347,7 +347,7 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
       td $ renderTags tags'
     tr $ do
       td $ b "Transaction Id"
-      td $ string transactionId'
+      td $ a ! href (toValue $ "https://" ++ blockExplHost ++ "/transaction/" ++ transactionId') $ string transactionId'
   where previousTransactionLabel = "< Previous Transaction"
         nextTransactionLabel = "Next Transaction >"
         explorerTransactionLinkFromRuntimeLink label rtTxLink =

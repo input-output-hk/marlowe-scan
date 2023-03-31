@@ -31,7 +31,7 @@ isOpenAJAXBox cid = do
         "  xhr.onreadystatechange = function() {\n" ++
         "    if (xhr.readyState == 4) {\n" ++ 
         "      if (xhr.status == 200) {\n" ++
-        "        document.getElementById('" ++ divId ++ "').innerHTML = xhr.responseText;\n" ++
+        "        document.getElementById('" ++ divId ++ "').innerHTML = (xhr.responseText == 'true'?'Open':'Closed');\n" ++
         "      } else {\n" ++
         "        document.getElementById('" ++ divId ++ "').innerHTML = 'Error';\n" ++
         "      }\n" ++
