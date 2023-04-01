@@ -16,7 +16,7 @@ import GHC.Utils.Misc (split)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactinExplorerLink )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink  )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -75,9 +75,10 @@ extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource =
                                                      } _ _ =
   ContractInfoView
       (CIVR { civrContractId = cid
-            , civrContractIdLink = mkTransactinExplorerLink blockExplHost cid
+            , civrContractIdLink = mkTransactionExplorerLink blockExplHost cid
             , civrBlockHeaderHash = blkHash
             , civrBlockNo = blkNo
+            , civrBlockLink = mkBlockExplorerLink blockExplHost blkNo
             , civrSlotNo = sltNo
             , civrRoleTokenMintingPolicyId = mintingPolicyId
             , civrTags = tagsMap
@@ -93,7 +94,7 @@ extractInfo CStateView blockExplHost CJ.ContractJSON { CJ.resource =
                                                      } _ _ =
   ContractStateView
       (CSVR { csvrContractId = cid
-            , csvrContractIdLink = mkTransactinExplorerLink blockExplHost cid
+            , csvrContractIdLink = mkTransactionExplorerLink  blockExplHost cid
             , currentContract = currContract
             , initialContract = initContract
             , currentState = currState
@@ -104,7 +105,7 @@ extractInfo CTxView blockExplHost CJ.ContractJSON { CJ.resource = CJ.Resource { 
             (Just (TJs.Transactions { TJs.transactions = txs })) mTx =
   ContractTxView $ CTVRs { ctvrsContractId = cid
                          , ctvrs = map convertTx $ reverse txs
-                         , ctvrsSelectedTransactionInfo = fmap convertTxDetails mTx
+                         , ctvrsSelectedTransactionInfo = fmap (convertTxDetails blockExplHost) mTx
                          , ctvrsBlockExplHost = blockExplHost
                          }
   where
@@ -116,34 +117,36 @@ extractInfo CTxView blockExplHost CJ.ContractJSON { CJ.resource = CJ.Resource { 
                                                             }
                               } =
                    CTVR { ctvrBlock = blockNo'
+                        , ctvrBlockLink = mkBlockExplorerLink blockExplHost blockNo'
                         , ctvrSlot = slotNo'
                         , ctvrContractId = txContractId
                         , ctvrTransactionId = transactionId'
                         }
 extractInfo _ _blockExplHost _ Nothing _ = ContractViewError "Something went wrong, unable to display"
 
-convertTxDetails :: TJ.Transaction -> CTVRTDetail
-convertTxDetails TJ.Transaction { TJ.links = TJ.Link { TJ.next = mNext
-                                                     , TJ.previous = mPrev
-                                                     }
-                                , TJ.resource = TJ.Resource { TJ.block = TJ.Block { TJ.blockHeaderHash = txDetailBlockHeaderHash
-                                                                                  , TJ.blockNo = txDetailBlockNo
-                                                                                  , TJ.slotNo = txDetailSlotNo
-                                                                                  }
-                                                            , TJ.inputs = txDetailInputs
-                                                            , TJ.invalidBefore = txDetailInvalidBefore
-                                                            , TJ.invalidHereafter = txDetailInvalidHereafter
-                                                            , TJ.outputContract = txDetailOutputContract
-                                                            , TJ.outputState = txDetailOutputState
-                                                            , TJ.status = txDetailStatus
-                                                            , TJ.tags = txDetailTags
-                                                            , TJ.transactionId = txDetailTransactionId
-                                                            }
-                                }
+convertTxDetails :: String -> TJ.Transaction -> CTVRTDetail
+convertTxDetails blockExplHost TJ.Transaction { TJ.links = TJ.Link { TJ.next = mNext
+                                                                   , TJ.previous = mPrev
+                                                                   }
+                                              , TJ.resource = TJ.Resource { TJ.block = TJ.Block { TJ.blockHeaderHash = txDetailBlockHeaderHash
+                                                                                                , TJ.blockNo = txDetailBlockNo
+                                                                                                , TJ.slotNo = txDetailSlotNo
+                                                                                                }
+                                                                          , TJ.inputs = txDetailInputs
+                                                                          , TJ.invalidBefore = txDetailInvalidBefore
+                                                                          , TJ.invalidHereafter = txDetailInvalidHereafter
+                                                                          , TJ.outputContract = txDetailOutputContract
+                                                                          , TJ.outputState = txDetailOutputState
+                                                                          , TJ.status = txDetailStatus
+                                                                          , TJ.tags = txDetailTags
+                                                                          , TJ.transactionId = txDetailTransactionId
+                                                                          }
+                                              }
   = CTVRTDetail { txPrev= mPrev
                 , txNext= mNext
                 , txBlockHeaderHash = txDetailBlockHeaderHash
                 , txBlockNo = txDetailBlockNo
+                , txBlockLink = mkBlockExplorerLink blockExplHost txDetailBlockNo
                 , txSlotNo = txDetailSlotNo
                 , inputs = txDetailInputs
                 , invalidBefore = txDetailInvalidBefore
@@ -194,6 +197,7 @@ data CIVR = CIVR { civrContractId :: String
                  , civrContractIdLink :: String
                  , civrBlockHeaderHash :: String
                  , civrBlockNo :: Integer
+                 , civrBlockLink :: String
                  , civrSlotNo :: Integer
                  , civrRoleTokenMintingPolicyId :: String
                  , civrTags :: Map String String
@@ -206,6 +210,7 @@ renderCIVR (CIVR { civrContractId = cid
                  , civrContractIdLink = cidLink
                  , civrBlockHeaderHash = blockHash
                  , civrBlockNo = blockNum
+                 , civrBlockLink = blockLink
                  , civrSlotNo = slotNum
                  , civrRoleTokenMintingPolicyId = roleMintingPolicyId
                  , civrTags = civrTags'
@@ -217,7 +222,7 @@ renderCIVR (CIVR { civrContractId = cid
              tr $ do td $ b "Block Header Hash"
                      td $ string blockHash
              tr $ do td $ b "Block No"
-                     td $ string (show blockNum)
+                     td $ a ! href (toValue blockLink) $ string $ show blockNum
              tr $ do td $ b "Slot No"
                      td $ string (show slotNum)
              tr $ do td $ b "Role Token Minting Policy ID"
@@ -259,8 +264,9 @@ data CTVRTDetail = CTVRTDetail
     txPrev :: Maybe String,
     txNext :: Maybe String,
     txBlockHeaderHash :: String,
-    txBlockNo :: Int,
-    txSlotNo :: Int,
+    txBlockNo :: Integer,
+    txBlockLink :: String,
+    txSlotNo :: Integer,
     inputs :: [Input],
     invalidBefore :: UTCTime,
     invalidHereafter :: UTCTime,
@@ -274,6 +280,7 @@ data CTVRTDetail = CTVRTDetail
 
 data CTVR = CTVR
   { ctvrBlock :: Integer
+  , ctvrBlockLink :: String
   , ctvrSlot :: Integer
   , ctvrContractId :: String
   , ctvrTransactionId :: String
@@ -320,6 +327,7 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
                                                       , txNext = txNext'
                                                       , txBlockHeaderHash = txBlockHeaderHash'
                                                       , txBlockNo = txBlockNo'
+                                                      , txBlockLink = txBlockLink'
                                                       , txSlotNo = txSlotNo'
                                                       , inputs = inputs'
                                                       , invalidBefore = invalidBefore'
@@ -340,7 +348,7 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
       td $ string txBlockHeaderHash'
     tr $ do
       td $ b "Block number"
-      td $ string $ show txBlockNo'
+      td $ a ! href (toValue txBlockLink') $ string $ show txBlockNo'
     tr $ do
       td $ b "Slot number"
       td $ string $ show txSlotNo'

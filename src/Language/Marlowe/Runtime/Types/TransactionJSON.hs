@@ -19,8 +19,8 @@ data Link = Link
 
 data Block = Block
   { blockHeaderHash :: String,
-    blockNo :: Int,
-    slotNo :: Int
+    blockNo :: Integer,
+    slotNo :: Integer
   }
   deriving (Show)
 
