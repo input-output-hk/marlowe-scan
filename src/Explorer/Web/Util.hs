@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr )
+  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactinExplorerLink )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -13,6 +13,7 @@ import Text.Blaze.Html5 ( body, docTypeHtml, h1, head, html, title,
                           string, Html, (!), br, preEscapedString, a, ToValue (toValue), Markup, script )
 import Text.Blaze.Html5.Attributes ( style, lang, href, type_ )
 import Data.Time (UTCTime, NominalDiffTime)
+import Text.Printf (printf)
 
 baseDoc :: String -> Html -> Html
 baseDoc caption content = docTypeHtml
@@ -98,3 +99,5 @@ makeLocalDateTime timestampToRender =
 linkFor :: ToValue a => a -> String -> Html
 linkFor x y = a ! href (toValue x) $ string y
 
+mkTransactinExplorerLink :: String -> String -> String
+mkTransactinExplorerLink = printf "https://%s/transaction/%s" 
