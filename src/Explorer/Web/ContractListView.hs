@@ -6,7 +6,6 @@ module Explorer.Web.ContractListView
   where
 
 import Control.Monad (forM_)
-import Control.Newtype.Generics (op)
 import Data.Time.Clock ( NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime )
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, preEscapedToHtml, string, toHtml, toValue )
 import Text.Blaze.Html5.Attributes ( href, style )
@@ -15,7 +14,7 @@ import Text.Printf ( printf )
 import Explorer.SharedContractCache ( ContractListCache, readContractList )
 import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr, formatTimeDiff, makeLocalDateTime )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..), ContractInList (..) )
-import Opts (BlockExplorerHost(..), Options(optBlockExplorerHost))
+
 import Data.Foldable (toList)
 import Data.Maybe (fromMaybe)
 import qualified Data.Sequence as Seq
@@ -24,6 +23,7 @@ import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import qualified Language.Marlowe.Runtime.Types.ContractsJSON as CSJ
 import Explorer.API.IsContractOpen (isOpenAJAXBox)
 import Explorer.API.GetNumTransactions (numTransactionsAJAXBox)
+import Opts (Options)
 
 data PageInfo = PageInfo {
        currentPage :: Int
@@ -60,7 +60,6 @@ data CIR = CIR
   , clvrSlot :: Integer
   , clvrRoleMintingPolicyId :: String
   , clvrLink :: String
-  , clvrBlockExplLink :: String
   }
   deriving (Show, Eq)
 
@@ -94,10 +93,10 @@ calcLastPage numContracts = fullPages + partialPages
         sizeOfPartialPage = numContracts `rem` pageLength
         partialPages = if sizeOfPartialPage > 0 then 1 else 0
 
-extractInfo :: UTCTime -> String -> Maybe Int -> ContractList -> ContractListView
-extractInfo _timeNow _blockExplHost _mbPage (ContractList { clRetrievedTime = Nothing }) = ContractListViewStillSyncing
-extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = Just retrievalTime
-                                                       , clContracts = cils })
+extractInfo :: UTCTime -> Maybe Int -> ContractList -> ContractListView
+extractInfo _timeNow _mbPage (ContractList { clRetrievedTime = Nothing }) = ContractListViewStillSyncing
+extractInfo timeNow mbPage (ContractList { clRetrievedTime = Just retrievalTime
+                                                        , clContracts = cils })
     | numContracts == 0 = ContractListViewError "There are no contracts in this network"
     | otherwise =
   ContractListView CLVR { timeOfRendering = timeNow
@@ -133,16 +132,13 @@ extractInfo timeNow blockExplHost mbPage (ContractList { clRetrievedTime = Just 
       , clvrSlot = cilSlotNo
       , clvrRoleMintingPolicyId = cilRoleTokenMintingPolicyId
       , clvrLink = cilLinkUrl
-      , clvrBlockExplLink = printf "https://%s/transaction/%s" blockExplHost cilContractId
       }
 
 contractListView :: Options -> ContractListCache -> Maybe Int -> IO ContractListView
-contractListView opts contractListCache mbPage = do
-  let
-    blockExplHost = op BlockExplorerHost . optBlockExplorerHost $ opts
+contractListView _opts contractListCache mbPage = do
   timeNow <- getCurrentTime
   cl <- readContractList contractListCache
-  return $ extractInfo timeNow blockExplHost mbPage cl
+  return $ extractInfo timeNow mbPage cl
 
 
 renderTime :: UTCTime -> UTCTime -> Html
@@ -180,7 +176,6 @@ renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
       th $ b "Slot No"
       th $ b "Status"
       th $ b "Num transactions"
-      th $ b ""
     let makeRow clvr = do
           let cid = clvrContractId clvr
           tr $ do
@@ -191,7 +186,6 @@ renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
             td $ toHtml $ clvrSlot clvr
             td $ isOpenAJAXBox cid
             td $ numTransactionsAJAXBox cid
-            td $ a ! href (toValue $ clvrBlockExplLink clvr) $ string "Explore"
     forM_ clvrs makeRow
   renderNavBar pinf
 

@@ -16,7 +16,7 @@ import GHC.Utils.Misc (split)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactinExplorerLink )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -60,32 +60,49 @@ parseTab _ = CInfoView
 
 
 extractInfo :: ContractViews -> String -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> ContractView
-extractInfo CInfoView _blockExplHost cv _ _ =
+extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource = 
+                                         (CJ.Resource { CJ.block = CJ.Block { CJ.blockHeaderHash = blkHash
+                                                                            , CJ.blockNo = blkNo
+                                                                            , CJ.slotNo = sltNo
+                                                                            }
+                                                      , CJ.contractId = cid
+                                                      , CJ.metadata =_metadata
+                                                      , CJ.roleTokenMintingPolicyId = mintingPolicyId
+                                                      , CJ.status = currStatus
+                                                      , CJ.tags = tagsMap
+                                                      , CJ.version = ver
+                                                      })
+                                                     } _ _ =
   ContractInfoView
-      (CIVR { civrContractId = CJ.contractId res
-            , civrBlockHeaderHash = CJ.blockHeaderHash block
-            , civrBlockNo = CJ.blockNo block
-            , civrSlotNo = CJ.slotNo block
-            , civrRoleTokenMintingPolicyId = CJ.roleTokenMintingPolicyId res
-            , civrTags = CJ.tags res
-            , civrStatus = CJ.status res
-            , civrVersion = CJ.version res
+      (CIVR { civrContractId = cid
+            , civrContractIdLink = mkTransactinExplorerLink blockExplHost cid
+            , civrBlockHeaderHash = blkHash
+            , civrBlockNo = blkNo
+            , civrSlotNo = sltNo
+            , civrRoleTokenMintingPolicyId = mintingPolicyId
+            , civrTags = tagsMap
+            , civrStatus = currStatus
+            , civrVersion = ver
             })
-  where res = CJ.resource cv
-        block = CJ.block res
-extractInfo CStateView blockExplHost cv _ _ =
+extractInfo CStateView blockExplHost CJ.ContractJSON { CJ.resource = 
+                                         (CJ.Resource { CJ.contractId = cid
+                                                      , CJ.currentContract = currContract
+                                                      , CJ.initialContract = initContract
+                                                      , CJ.state = currState
+                                                      })
+                                                     } _ _ =
   ContractStateView
-      (CSVR { csvrContractId = CJ.contractId res
-            , currentContract = CJ.currentContract res
-            , initialContract = CJ.initialContract res
-            , currentState = CJ.state res
+      (CSVR { csvrContractId = cid
+            , csvrContractIdLink = mkTransactinExplorerLink blockExplHost cid
+            , currentContract = currContract
+            , initialContract = initContract
+            , currentState = currState
             , csvrBlockExplHost = blockExplHost
             })
-  where res = CJ.resource cv
-extractInfo CTxView blockExplHost CJ.ContractJSON { CJ.resource = CJ.Resource { CJ.contractId = contractId' }
+extractInfo CTxView blockExplHost CJ.ContractJSON { CJ.resource = CJ.Resource { CJ.contractId = cid }
                                                   }
             (Just (TJs.Transactions { TJs.transactions = txs })) mTx =
-  ContractTxView $ CTVRs { ctvrsContractId = contractId'
+  ContractTxView $ CTVRs { ctvrsContractId = cid
                          , ctvrs = map convertTx $ reverse txs
                          , ctvrsSelectedTransactionInfo = fmap convertTxDetails mTx
                          , ctvrsBlockExplHost = blockExplHost
@@ -168,12 +185,13 @@ instance ToMarkup ContractView where
     baseDoc ("Contract - " ++ cid) $ addNavBar CInfoView cid $ renderCIVR cvr
   toMarkup (ContractStateView ccsr@(CSVR {csvrContractId = cid})) =
     baseDoc ("Contract - " ++ cid) $ addNavBar CStateView cid $ renderCSVR ccsr
-  toMarkup (ContractTxView ctvrs'@CTVRs { ctvrsContractId = cid }) =
+  toMarkup (ContractTxView ctvrs'@CTVRs {ctvrsContractId = cid}) =
     baseDoc ("Contract - " ++ cid) $ addNavBar CTxView cid $ renderCTVRs ctvrs'
   toMarkup (ContractViewError str) =
     baseDoc "An error occurred" (string ("Error: " ++ str))
 
 data CIVR = CIVR { civrContractId :: String
+                 , civrContractIdLink :: String
                  , civrBlockHeaderHash :: String
                  , civrBlockNo :: Integer
                  , civrSlotNo :: Integer
@@ -185,6 +203,7 @@ data CIVR = CIVR { civrContractId :: String
 
 renderCIVR :: CIVR -> Html
 renderCIVR (CIVR { civrContractId = cid
+                 , civrContractIdLink = cidLink
                  , civrBlockHeaderHash = blockHash
                  , civrBlockNo = blockNum
                  , civrSlotNo = slotNum
@@ -194,7 +213,7 @@ renderCIVR (CIVR { civrContractId = cid
                  , civrVersion = marloweVersion
                  }) =
   table $ do tr $ do td $ b "Contract ID"
-                     td $ string cid
+                     td $ a ! href (toValue cidLink) $ string cid
              tr $ do td $ b "Block Header Hash"
                      td $ string blockHash
              tr $ do td $ b "Block No"
@@ -211,6 +230,7 @@ renderCIVR (CIVR { civrContractId = cid
                      td $ string marloweVersion
 
 data CSVR = CSVR { csvrContractId :: String
+                 , csvrContractIdLink :: String
                  , currentContract :: Maybe Contract
                  , initialContract :: Contract
                  , currentState :: Maybe State
@@ -219,13 +239,14 @@ data CSVR = CSVR { csvrContractId :: String
 
 renderCSVR :: CSVR -> Html
 renderCSVR (CSVR { csvrContractId = cid
+                 , csvrContractIdLink = cidLink
                  , currentContract = cc
                  , initialContract = ic
                  , currentState = cs
                  , csvrBlockExplHost = blockExplHost
                  }) =
   table $ do tr $ do td $ b "Contract ID"
-                     td $ string cid
+                     td $ a ! href (toValue cidLink) $ string cid
              tr $ do td $ b "Current contract"
                      td $ renderMContract cc
              tr $ do td $ b "Current state"
@@ -260,7 +281,7 @@ data CTVR = CTVR
   deriving Show
 
 data CTVRs = CTVRs {
-    ctvrsContractId ::String
+    ctvrsContractId :: String
   , ctvrs :: [CTVR]
   , ctvrsSelectedTransactionInfo :: Maybe CTVRTDetail
   , ctvrsBlockExplHost :: String
