@@ -37,7 +37,7 @@ contractView opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHo
                       let link = CJ.transactions $ CJ.links cjson
                       txsjson <- whenMaybe (tab == CTxView)
                                            $ ExceptT $ TJs.getContractTransactionsByLink urlPrefix link
-                      let mTxId2 = getIfInContract mTxId txsjson
+                      let mTxId2 = getIfInContractDefaultFirst mTxId txsjson
                       txjson <- forM mTxId2 (ExceptT . TJ.getTransaction urlPrefix link)
                       return $ extractInfo tab blockExplHost cjson txsjson txjson)
   return $ either ContractViewError id r
@@ -45,10 +45,12 @@ contractView opts Nothing cid txId = contractView opts (Just "state") cid txId
 contractView _opts _tab Nothing _txId = return $ ContractViewError "Need to specify a contractId"
 
 
-getIfInContract :: Maybe String -> Maybe TJs.Transactions -> Maybe String
-getIfInContract mTxId@(Just txId) (Just (TJs.Transactions { TJs.transactions = txList })) =
+getIfInContractDefaultFirst :: Maybe String -> Maybe TJs.Transactions -> Maybe String
+getIfInContractDefaultFirst mTxId@(Just txId) (Just (TJs.Transactions { TJs.transactions = txList })) =
   if any ((== txId) . TJs.transactionId . TJs.resource) txList then mTxId else Nothing
-getIfInContract _ _ = Nothing
+getIfInContractDefaultFirst Nothing (Just (TJs.Transactions { TJs.transactions = tns@(_:_) } )) =
+  Just (TJs.transactionId $ TJs.resource $ last tns)
+getIfInContractDefaultFirst _ _ = Nothing
 
 
 parseTab :: Maybe String -> ContractViews
