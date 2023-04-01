@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactinExplorerLink )
+  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -99,5 +99,8 @@ makeLocalDateTime timestampToRender =
 linkFor :: ToValue a => a -> String -> Html
 linkFor x y = a ! href (toValue x) $ string y
 
-mkTransactinExplorerLink :: String -> String -> String
-mkTransactinExplorerLink = printf "https://%s/transaction/%s" 
+mkTransactionExplorerLink  :: String -> String -> String
+mkTransactionExplorerLink  = printf "https://%s/transaction/%s" 
+
+mkBlockExplorerLink :: String -> Integer -> String
+mkBlockExplorerLink = printf "https://%s/block/%d" 
