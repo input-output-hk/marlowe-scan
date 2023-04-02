@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Opts
-  ( BlockExplorerHost (..)
+  ( TitleLabel (..)
+  , BlockExplorerHost (..)
   , ExplorerPort (..)
   , RuntimeHost (..)
   , RuntimePort (..)
@@ -12,11 +13,16 @@ module Opts
   where
 
 import Control.Newtype.Generics (Newtype, op)
-import GHC.Generics hiding (Prefix)
+import GHC.Generics (Generic)
 import Options.Applicative ( (<**>), auto, header, help, info, long, metavar,
                              option, showDefault, strOption, value, execParser,
                              helper, Parser )
 import Text.Printf (printf)
+
+newtype TitleLabel = TitleLabel String
+  deriving (Generic, Show)
+
+instance Newtype TitleLabel
 
 newtype ExplorerPort = ExplorerPort Int
   deriving (Generic, Show)
@@ -39,7 +45,8 @@ newtype BlockExplorerHost = BlockExplorerHost String
 instance Newtype BlockExplorerHost
 
 data Options = Options
-  { optExplorerPort :: ExplorerPort
+  { optTitleLabel :: TitleLabel
+  , optExplorerPort :: ExplorerPort
   , optRuntimeHost :: RuntimeHost
   , optRuntimePort :: RuntimePort
   , optBlockExplorerHost :: BlockExplorerHost
@@ -48,7 +55,16 @@ data Options = Options
 
 parser :: Parser Options
 parser = Options
-  <$> ( ExplorerPort <$> option auto
+  <$> ( TitleLabel <$> strOption
+        (  long "title-label"
+        <> metavar "TEXT"
+        <> help ("Label to be shown together with the title in the Marlowe Explorer in parenthesis. " ++
+                 "(It can be used to display the name of the network that the Marlowe explorer is deployed to.)")
+        <> showDefault
+        <> value "Preprod"
+        )
+      )
+  <*> ( ExplorerPort <$> option auto
         (  long "explorer-port"
         <> metavar "PORT"
         <> help "Port number to use for this Marlowe Explorer server"
