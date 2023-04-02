@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink )
+  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -100,7 +100,10 @@ linkFor :: ToValue a => a -> String -> Html
 linkFor x y = a ! href (toValue x) $ string y
 
 mkTransactionExplorerLink  :: String -> String -> String
-mkTransactionExplorerLink  = printf "https://%s/transaction/%s" 
+mkTransactionExplorerLink  = printf "https://%s/transaction/%s"
 
 mkBlockExplorerLink :: String -> Integer -> String
-mkBlockExplorerLink = printf "https://%s/block/%d" 
+mkBlockExplorerLink = printf "https://%s/block/%d"
+
+mkTokenPolicyExplorerLink :: String -> String -> String
+mkTokenPolicyExplorerLink = printf "https://%s/tokenPolicy/%s"
