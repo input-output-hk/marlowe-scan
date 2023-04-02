@@ -23,7 +23,8 @@ import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import qualified Language.Marlowe.Runtime.Types.ContractsJSON as CSJ
 import Explorer.API.IsContractOpen (isOpenAJAXBox)
 import Explorer.API.GetNumTransactions (numTransactionsAJAXBox)
-import Opts (Options)
+import Opts (Options (..), TitleLabel (TitleLabel))
+import Data.List.Extra (trim)
 
 data PageInfo = PageInfo {
        currentPage :: Int
@@ -44,8 +45,12 @@ data CLVR = CLVR {
      , contractList :: [CIR]
   } deriving (Show, Eq)
 
-data ContractListView
-  = ContractListView CLVR
+data ContractListView = ContractListView { titleLabel :: String
+                                         , clvContents :: ContractListViewContents
+                                         }
+
+data ContractListViewContents
+  = ContractListViewContents CLVR
   | ContractListViewStillSyncing
   | ContractListViewError String
   deriving (Show, Eq)
@@ -93,13 +98,13 @@ calcLastPage numContracts = fullPages + partialPages
         sizeOfPartialPage = numContracts `rem` pageLength
         partialPages = if sizeOfPartialPage > 0 then 1 else 0
 
-extractInfo :: UTCTime -> Maybe Int -> ContractList -> ContractListView
+extractInfo :: UTCTime -> Maybe Int -> ContractList -> ContractListViewContents
 extractInfo _timeNow _mbPage (ContractList { clRetrievedTime = Nothing }) = ContractListViewStillSyncing
 extractInfo timeNow mbPage (ContractList { clRetrievedTime = Just retrievalTime
-                                                        , clContracts = cils })
+                                         , clContracts = cils })
     | numContracts == 0 = ContractListViewError "There are no contracts in this network"
     | otherwise =
-  ContractListView CLVR { timeOfRendering = timeNow
+  ContractListViewContents CLVR { timeOfRendering = timeNow
                         , lastRetrieval = retrievalTime
                         , pageInfo = PageInfo { currentPage = cPage
                                               , pageRange = (minPage, maxPage)
@@ -135,14 +140,13 @@ extractInfo timeNow mbPage (ContractList { clRetrievedTime = Just retrievalTime
       }
 
 contractListView :: Options -> ContractListCache -> Maybe Int -> IO ContractListView
-contractListView _opts contractListCache mbPage = do
+contractListView Options { optTitleLabel = TitleLabel labelForTitle } contractListCache mbPage = do
   timeNow <- getCurrentTime
   cl <- readContractList contractListCache
-  return $ extractInfo timeNow mbPage cl
-
+  return $ ContractListView { titleLabel = labelForTitle
+                            , clvContents = extractInfo timeNow mbPage cl }
 
 renderTime :: UTCTime -> UTCTime -> Html
-
 renderTime timeNow retrievalTime =
   if difference > delayBeforeWarning
     then do
@@ -156,15 +160,18 @@ renderTime timeNow retrievalTime =
     difference = diffUTCTime timeNow retrievalTime
 
 renderCIRs :: ContractListView -> Html
-renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
-                                  , lastRetrieval = retrievalTime
-                                  , pageInfo = pinf@(PageInfo { currentPage = page
-                                                              , totalContracts = numContracts
-                                                              , contractRange = (firstContract, lastContract)
-                                                              , numPages = lastPage
-                                                              })
-                                  , contractList = clvrs
-            }) = baseDoc "Marlowe Contract List" $ do
+renderCIRs (ContractListView { titleLabel = labelForTitle
+                             , clvContents = ContractListViewContents
+                                               (CLVR { timeOfRendering = timeNow
+                                                    , lastRetrieval = retrievalTime
+                                                    , pageInfo = pinf@(PageInfo { currentPage = page
+                                                                                , totalContracts = numContracts
+                                                                                , contractRange = (firstContract, lastContract)
+                                                                                , numPages = lastPage
+                                                                                })
+                                                    , contractList = clvrs
+                                                    })
+                             }) = baseDoc ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ do
   renderTime timeNow retrievalTime
   p $ string $ printf "%d-%d contracts shown out of %d, (page %d out of %d)"
                         firstContract lastContract numContracts page lastPage
@@ -189,11 +196,18 @@ renderCIRs (ContractListView CLVR { timeOfRendering = timeNow
     forM_ clvrs makeRow
   renderNavBar pinf
 
-renderCIRs ContractListViewStillSyncing =
-  baseDoc "Marlowe Contract List" $ string "The explorer is still synchronising with the chain. Please, try again later"
+renderCIRs (ContractListView { titleLabel = labelForTitle
+                             , clvContents = ContractListViewStillSyncing}) =
+  baseDoc ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ string "The explorer is still synchronising with the chain. Please, try again later"
 
-renderCIRs (ContractListViewError msg) =
+renderCIRs (ContractListView { clvContents = ContractListViewError msg }) =
   baseDoc "An error occurred" $ string ("Error: " <> msg)
+
+appIfNotBlank :: String -> String -> String
+appIfNotBlank title labelForTitle
+  | not $ null trimmedTitle = title ++ " (" ++ labelForTitle ++ ")"
+  | otherwise = title
+  where trimmedTitle = trim labelForTitle
 
 
 generateLink' :: Int -> String -> Html
