@@ -16,7 +16,7 @@ import GHC.Utils.Misc (split)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink  )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink  )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -81,6 +81,7 @@ extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource =
             , civrBlockLink = mkBlockExplorerLink blockExplHost blkNo
             , civrSlotNo = sltNo
             , civrRoleTokenMintingPolicyId = mintingPolicyId
+            , civrRoleTokenMintingPolicyIdLink = mkTokenPolicyExplorerLink blockExplHost mintingPolicyId
             , civrTags = tagsMap
             , civrStatus = currStatus
             , civrVersion = ver
@@ -200,6 +201,7 @@ data CIVR = CIVR { civrContractId :: String
                  , civrBlockLink :: String
                  , civrSlotNo :: Integer
                  , civrRoleTokenMintingPolicyId :: String
+                 , civrRoleTokenMintingPolicyIdLink :: String
                  , civrTags :: Map String String
                  , civrStatus :: String
                  , civrVersion :: String
@@ -213,6 +215,7 @@ renderCIVR (CIVR { civrContractId = cid
                  , civrBlockLink = blockLink
                  , civrSlotNo = slotNum
                  , civrRoleTokenMintingPolicyId = roleMintingPolicyId
+                 , civrRoleTokenMintingPolicyIdLink = roleMintingPolicyIdLink
                  , civrTags = civrTags'
                  , civrStatus = contractStatus
                  , civrVersion = marloweVersion
@@ -226,7 +229,7 @@ renderCIVR (CIVR { civrContractId = cid
              tr $ do td $ b "Slot No"
                      td $ string (show slotNum)
              tr $ do td $ b "Role Token Minting Policy ID"
-                     td $ string roleMintingPolicyId
+                     td $ a ! href (toValue roleMintingPolicyIdLink) $ string roleMintingPolicyId
              tr $ do td $ b "Tags"
                      td $ renderTags civrTags'
              tr $ do td $ b "Status"
