@@ -428,9 +428,9 @@ renderBoundValues mapBoundValues = table $ do
   tr $ do
     th $ b "Choice Id"
     th $ b "Value"
-  let mkRow (valueId, choiceValue) =
+  let mkRow (ValueId valueId, choiceValue) =
         tr $ do
-          td $ string $ show valueId
+          td $ string $ T.unpack valueId
           td $ string $ show choiceValue
   mapM_ mkRow $ Map.toList mapBoundValues
 
@@ -442,7 +442,7 @@ renderChoices blockExplHost mapChoices = table $ do
     th $ b "Value"
   let mkRow (ChoiceId choiceId party, choiceValue) =
         tr $ do
-          td $ string $ show choiceId
+          td $ string $ T.unpack choiceId
           td $ renderParty blockExplHost party
           td $ string $ show choiceValue
   mapM_ mkRow $ Map.toList mapChoices
