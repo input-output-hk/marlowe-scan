@@ -460,11 +460,11 @@ renderMState blockExplHost (Just (State { accounts    = accs
                           , choices     = chos
                           , boundValues = boundVals
                           , minTime     = mtime })) =
-  table $ do tr $ do td $ b "accounts"
+  table $ do tr $ do td $ b "Accounts"
                      td $ ifEmptyMap accs (string "No accounts") $ renderMAccounts blockExplHost
-             tr $ do td $ b "bound values"
+             tr $ do td $ b "Bound values"
                      td $ ifEmptyMap boundVals (string "No bound values") renderBoundValues
-             tr $ do td $ b "choices"
+             tr $ do td $ b "Choices"
                      td $ ifEmptyMap chos (string "No choices") $ renderChoices blockExplHost
              tr $ do td $ b "minTime"
                      td $ do renderTime mtime
