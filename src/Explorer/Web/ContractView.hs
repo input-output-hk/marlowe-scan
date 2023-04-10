@@ -27,6 +27,7 @@ import Control.Monad.Except (runExceptT, ExceptT (ExceptT))
 import Prelude hiding (div)
 import Data.Time (UTCTime)
 import qualified Data.Text as T
+import qualified Data.Map as M
 
 contractView :: Options -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
 contractView opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHost}) mTab (Just cid) mTxId = do
@@ -460,14 +461,19 @@ renderMState blockExplHost (Just (State { accounts    = accs
                           , boundValues = boundVals
                           , minTime     = mtime })) =
   table $ do tr $ do td $ b "accounts"
-                     td $ renderMAccounts blockExplHost accs
+                     td $ ifEmptyMap accs (string "No accounts") $ renderMAccounts blockExplHost
              tr $ do td $ b "bound values"
-                     td $ renderBoundValues boundVals
+                     td $ ifEmptyMap boundVals (string "No bound values") renderBoundValues
              tr $ do td $ b "choices"
-                     td $ renderChoices blockExplHost chos
+                     td $ ifEmptyMap chos (string "No choices") $ renderChoices blockExplHost
              tr $ do td $ b "minTime"
                      td $ do renderTime mtime
                              string $ " (POSIX: " ++ show mtime ++ ")"
+
+ifEmptyMap :: Map a b -> Html -> (Map a b -> Html) -> Html
+ifEmptyMap mapToCheck defaultHtml renderMapFunc
+  | M.null mapToCheck = defaultHtml
+  | otherwise = renderMapFunc mapToCheck
 
 renderMContract :: Maybe Contract -> Html
 renderMContract Nothing = string "Contract closed"
