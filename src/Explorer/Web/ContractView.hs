@@ -426,12 +426,12 @@ renderToken (Token currSymbol tokenName) money = (printf "%s (%s)" currSymbol to
 renderBoundValues :: Map ValueId Integer -> Html
 renderBoundValues mapBoundValues = table $ do
   tr $ do
-    th $ b "Choice Id"
+    th $ b "Value Id"
     th $ b "Value"
-  let mkRow (ValueId valueId, choiceValue) =
+  let mkRow (ValueId valueId, bindingValue) =
         tr $ do
           td $ string $ T.unpack valueId
-          td $ string $ show choiceValue
+          td $ string $ prettyPrintAmount 0 bindingValue
   mapM_ mkRow $ Map.toList mapBoundValues
 
 renderChoices :: String -> Map ChoiceId Integer -> Html
@@ -444,7 +444,7 @@ renderChoices blockExplHost mapChoices = table $ do
         tr $ do
           td $ string $ T.unpack choiceId
           td $ renderParty blockExplHost party
-          td $ string $ show choiceValue
+          td $ string $ prettyPrintAmount 0 choiceValue
   mapM_ mkRow $ Map.toList mapChoices
 
 renderTime :: POSIXTime -> Html
