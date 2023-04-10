@@ -7,7 +7,6 @@ module Explorer.Web.ContractView
 
 import Control.Monad (forM_, forM)
 import Control.Monad.Extra (whenMaybe)
-import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (unpack)
@@ -408,9 +407,9 @@ renderParty _blockExplHost (Role ro) = string $ "Role: " ++ unpack ro
 renderMAccounts :: String -> Map (Party, Token) Money -> Html
 renderMAccounts blockExplHost mapAccounts = table $ do
   tr $ do
-    th $ b "party"
-    th $ b "currency (token name)"
-    th $ b "amount"
+    th $ b "Party"
+    th $ b "Currency (token name)"
+    th $ b "Amount"
   let mkRow ((party, token), money) =
         let (tokenString, moneyString) = renderToken token money in
         tr $ do
@@ -423,19 +422,29 @@ renderToken :: Token -> Money -> (String, String)
 renderToken (Token "" "") money = ("ADA", prettyPrintAmount 6 money)
 renderToken (Token currSymbol tokenName) money = (printf "%s (%s)" currSymbol tokenName, prettyPrintAmount 0 money)
 
-renderBoundValues :: Map ValueId Integer -> String
-renderBoundValues mapBoundValues = case Map.toList mapBoundValues of
-  [] -> "-"
-  listBoundValues -> intercalate ", "
-    . map (\(ValueId vid, int) -> show vid <> ": " <> show int)
-    $ listBoundValues
+renderBoundValues :: Map ValueId Integer -> Html
+renderBoundValues mapBoundValues = table $ do
+  tr $ do
+    th $ b "Choice Id"
+    th $ b "Value"
+  let mkRow (valueId, choiceValue) =
+        tr $ do
+          td $ string $ show valueId
+          td $ string $ show choiceValue
+  mapM_ mkRow $ Map.toList mapBoundValues
 
-renderChoices :: Map ChoiceId a -> String
-renderChoices mapChoices = case Map.keys mapChoices of
-  [] -> "-"
-  listChoiceIds -> intercalate ", "
-    . map (\(ChoiceId choiceName party) -> show party <> ": " <> unpack choiceName)
-    $ listChoiceIds
+renderChoices :: String -> Map ChoiceId Integer -> Html
+renderChoices blockExplHost mapChoices = table $ do
+  tr $ do
+    th $ b "Choice Id"
+    th $ b "Party"
+    th $ b "Value"
+  let mkRow (ChoiceId choiceId party, choiceValue) =
+        tr $ do
+          td $ string $ show choiceId
+          td $ renderParty blockExplHost party
+          td $ string $ show choiceValue
+  mapM_ mkRow $ Map.toList mapChoices
 
 renderTime :: POSIXTime -> Html
 renderTime =
@@ -453,9 +462,9 @@ renderMState blockExplHost (Just (State { accounts    = accs
   table $ do tr $ do td $ b "accounts"
                      td $ renderMAccounts blockExplHost accs
              tr $ do td $ b "bound values"
-                     td $ string $ renderBoundValues boundVals
+                     td $ renderBoundValues boundVals
              tr $ do td $ b "choices"
-                     td $ string $ renderChoices chos
+                     td $ renderChoices blockExplHost chos
              tr $ do td $ b "minTime"
                      td $ do renderTime mtime
                              string $ " (POSIX: " ++ show mtime ++ ")"
