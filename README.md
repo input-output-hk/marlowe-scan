@@ -82,22 +82,26 @@ Please note that `hie.yaml` files located outside of the project folder (in ance
 
 Marlowe Explorer provides the following flags that can be used to configure its behavior:
 
-- `--explorer-port PORT` or `-p PORT`: The port number to use for the Marlowe Explorer server. The default value is `8081`.
+- `--title-label TEXT`: The label to be shown together with the title in the Marlowe Explorer in parenthesis. (It can be used to display the name of the network that the Marlowe explorer is deployed to.) The default value is `Preprod`.
+
+- `--explorer-port PORT`: The port number to use for the Marlowe Explorer server. The default value is `8081`.
     
 - `--runtime-host HOSTNAME-OR-IP`: The hostname or IP address of the running Marlowe Runtime server. The default value is `builder`.
     
 - `--runtime-port PORT`: The port number of the running Marlowe Runtime server. The default value is `8080`.
     
-These flags can be set by using the command line when starting the Marlowe Explorer server. For example, to start the server on port `9000` and connect to a runtime server running on the IP address `192.168.0.1` and port `8888`, you could use the following command:
+- `--block-explorer HOST`: The hostname or IP address for exploring Cardano blockchain addresses, transactions, etc. The default value is "preprod.cardanoscan.io".
+
+These flags can be set by using the command line when starting the Marlowe Explorer server. For example, to start the server on port `9000` and connect to a runtime server running `Preview` on the IP address `192.168.0.1` and port `8888`, you could use the following command:
 
 ```bash
-result/bin/marlowe-explorer-exe --explorer-port 9000 --runtime-host 192.168.0.1 --runtime-port 8888
+result/bin/marlowe-explorer-exe --title-label "Preview" --explorer-port 9000 --runtime-host 192.168.0.1 --runtime-port 8888 --block-explorer "preview.cardanoscan.io"
 ```
 
 If you have built the project using Stack you can pass the parameters by adding `--` between the command and the parameters, like this:
 
 ```bash
-stack exec marlowe-explorer-exe -- --explorer-port 9000 --runtime-host 192.168.0.1 --runtime-port 8888
+stack exec marlowe-explorer-exe -- --title-label "Preview" --explorer-port 9000 --runtime-host 192.168.0.1 --runtime-port 8888 --block-explorer "preview.cardanoscan.io"
 ```
 
 
