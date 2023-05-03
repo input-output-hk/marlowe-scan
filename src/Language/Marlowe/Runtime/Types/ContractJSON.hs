@@ -38,7 +38,7 @@ data Resource = Resource
   , roleTokenMintingPolicyId :: String
   , state :: Maybe State
   , status :: String
-  , tags :: Map String String
+  , tags :: Map String Value
   , version :: String
   } deriving (Show, Eq)
 

@@ -15,7 +15,7 @@ import GHC.Utils.Misc (split)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink  )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString  )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -82,7 +82,7 @@ extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource =
             , civrSlotNo = sltNo
             , civrRoleTokenMintingPolicyId = mintingPolicyId
             , civrRoleTokenMintingPolicyIdLink = mkTokenPolicyExplorerLink blockExplHost mintingPolicyId
-            , civrTags = tagsMap
+            , civrTags = fmap valueToString tagsMap
             , civrStatus = currStatus
             , civrVersion = ver
             })
@@ -125,6 +125,7 @@ extractInfo CTxView blockExplHost CJ.ContractJSON { CJ.resource = CJ.Resource { 
                         }
 extractInfo _ _blockExplHost _ Nothing _ = ContractViewError "Something went wrong, unable to display"
 
+
 convertTxDetails :: String -> TJ.Transaction -> CTVRTDetail
 convertTxDetails blockExplHost TJ.Transaction { TJ.links = TJ.Link { TJ.next = mNext
                                                                    , TJ.previous = mPrev
@@ -155,7 +156,7 @@ convertTxDetails blockExplHost TJ.Transaction { TJ.links = TJ.Link { TJ.next = m
                 , outputContract = txDetailOutputContract
                 , outputState = txDetailOutputState
                 , txStatus = txDetailStatus
-                , txTags = txDetailTags
+                , txTags = fmap valueToString txDetailTags
                 , transactionId = txDetailTransactionId
                 }
 
@@ -396,7 +397,7 @@ renderTags tagMap | Map.null tagMap = string "No tags"
                                              th $ b "Value"
                                            mapM_ (\(t, v) -> tr $ do
                                                                td $ string t
-                                                               td $ string (show v)
+                                                               td $ code $ stringToHtml v
                                                  ) (Map.toList tagMap)
 
 renderParty :: String -> Party -> Html

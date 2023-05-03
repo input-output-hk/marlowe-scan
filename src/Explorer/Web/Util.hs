@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink )
+  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -14,6 +14,9 @@ import Text.Blaze.Html5 ( body, docTypeHtml, h1, head, html, title,
 import Text.Blaze.Html5.Attributes ( style, lang, href, type_ )
 import Data.Time (UTCTime, NominalDiffTime)
 import Text.Printf (printf)
+import Data.Aeson (Value)
+import Data.Aeson.Encode.Pretty (encodePretty)
+import Data.ByteString.Lazy (toStrict)
 
 baseDoc :: String -> Html -> Html
 baseDoc caption content = docTypeHtml
@@ -107,3 +110,6 @@ mkBlockExplorerLink = printf "https://%s/block/%d"
 
 mkTokenPolicyExplorerLink :: String -> String -> String
 mkTokenPolicyExplorerLink = printf "https://%s/tokenPolicy/%s"
+
+valueToString :: Value -> String
+valueToString = unpack . toStrict . encodePretty
