@@ -14,6 +14,7 @@ description:         Please see the README on GitHub at <https://github.com/inpu
 dependencies:
 - base >= 4.7 && < 5
 - aeson
+- aeson-pretty
 - base16-bytestring
 - blaze-html
 - blaze-markup

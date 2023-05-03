@@ -23,7 +23,7 @@ data Resource = Resource
   { block :: Block
   , contractId :: String
   , status :: String
-  , tags :: Map String String
+  , tags :: Map String Value
   , transactionId :: String
   , utxo :: Maybe String
   } deriving (Show, Eq)

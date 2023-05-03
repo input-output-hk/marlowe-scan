@@ -48,7 +48,7 @@ data Resource = Resource
     outputState :: Maybe State,
     outputUtxo :: Maybe String,
     status :: String,
-    tags :: Map String String,
+    tags :: Map String Value,
     transactionId :: String
   }
   deriving (Show)
