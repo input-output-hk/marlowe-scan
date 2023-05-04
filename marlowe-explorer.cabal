@@ -37,6 +37,7 @@ library
       Language.Marlowe.Runtime.ContractCaching
       Language.Marlowe.Runtime.Types.ContractJSON
       Language.Marlowe.Runtime.Types.ContractsJSON
+      Language.Marlowe.Runtime.Types.General
       Language.Marlowe.Runtime.Types.IndexedSeq
       Language.Marlowe.Runtime.Types.LazyFeed
       Language.Marlowe.Runtime.Types.TransactionJSON
