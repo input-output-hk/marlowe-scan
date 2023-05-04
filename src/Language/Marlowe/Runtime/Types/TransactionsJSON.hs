@@ -4,11 +4,17 @@ module Language.Marlowe.Runtime.Types.TransactionsJSON (Transaction(..), Links(.
 
 import Data.Map (Map)
 import Data.Aeson.Types (FromJSON (parseJSON), Parser, Value, withObject, (.:), (.:?))
-import Network.HTTP.Simple (parseRequest, setRequestMethod, setRequestHeader, httpLBS, getResponseBody)
+import Network.HTTP.Simple (parseRequest, setRequestMethod, setRequestHeader, httpLBS, getResponseBody, getResponseHeader)
 import Data.Aeson (eitherDecode)
 import Network.HTTP.Types (urlEncode)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 import Data.Text (pack, unpack)
+import Language.Marlowe.Runtime.Types.General (Range(..), setRangeHeader, parseRangeHeader)
+import Network.HTTP.Client (HttpException)
+import Control.Error ( hoistEither, runExceptT, ExceptT(..) )
+import Data.List (foldl')
+import Control.Exception (try, Exception (displayException))
+import Data.Either.Extra (mapLeft)
 
 data Transaction = Transaction
   { links :: Links
@@ -84,17 +90,30 @@ instance FromJSON Transactions where
     results <- o .: "results"
     return Transactions { transactions = results }
 
-getContractTransactionsByContractId :: String -> String -> IO (Either String Transactions)
-getContractTransactionsByContractId endpoint reqContractId = do
-    let reqContractIdUrlEncoded = urlEncode False $ encodeUtf8 $ pack reqContractId
-    initialRequest <- parseRequest $ endpoint ++ "contracts/" ++ unpack (decodeUtf8 reqContractIdUrlEncoded) ++ "/transactions"
-    let request = setRequestMethod "GET" $ setRequestHeader "Accept" ["application/json"] initialRequest
-    response <- httpLBS request
-    return $ eitherDecode (getResponseBody response)
-
 getContractTransactionsByLink :: String -> String -> IO (Either String Transactions)
 getContractTransactionsByLink endpoint link = do
-    initialRequest <- parseRequest $ endpoint ++ link
-    let request = setRequestMethod "GET" $ setRequestHeader "Accept" ["application/json"] initialRequest
-    response <- httpLBS request
-    return $ eitherDecode (getResponseBody response)
+  ts <- runExceptT $ getContractTransactions endpoint link Start
+  return $ (\x -> Transactions { transactions = x }) <$> ts
+
+getContractTransactions :: String -> String -> Range -> ExceptT String IO [Transaction]
+getContractTransactions _endpoint _link Done = return []
+getContractTransactions endpoint link range = do
+  initialRequest <- parseRequest $ endpoint <> link
+  let request = foldl' (flip id) initialRequest
+        [ setRequestMethod "GET"
+        , setRequestHeader "Accept" ["application/json"]
+        , setRangeHeader range
+        ]
+  response <- ExceptT $ httpExceptionToString <$> try (httpLBS request)
+  (Transactions { transactions = ts }) <- hoistEither $ eitherDecode (getResponseBody response)
+  let nextRange = parseRangeHeader $ getResponseHeader "Next-Range" response
+  (ts ++) <$> getContractTransactions endpoint link nextRange
+  where
+    httpExceptionToString :: Either HttpException a -> Either String a
+    httpExceptionToString = mapLeft displayException
+
+getContractTransactionsByContractId :: String -> String -> IO (Either String Transactions)
+getContractTransactionsByContractId endpoint reqContractId =
+    getContractTransactionsByLink endpoint $ "contracts/" ++ unpack (decodeUtf8 reqContractIdUrlEncoded) ++ "/transactions"
+    where
+      reqContractIdUrlEncoded = urlEncode False $ encodeUtf8 $ pack reqContractId

@@ -9,7 +9,6 @@ module Language.Marlowe.Runtime.Types.ContractsJSON
   , ContractListISeq
   , ContractList(..)
   , ContractLinks(..)
-  , Range(..)
   , Resource(..)
   , ResultList(..)
   )
@@ -17,7 +16,6 @@ module Language.Marlowe.Runtime.Types.ContractsJSON
 
 import Control.Exception ( Exception(displayException) )
 import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), Value )
-import Data.ByteString ( ByteString )
 import Data.Time.Clock ( UTCTime )
 import Network.HTTP.Simple ( HttpException )
 import Language.Marlowe.Runtime.Types.IndexedSeq (IndexedSeq, Indexed (getIdentifier))
@@ -111,8 +109,3 @@ instance Exception ContractListFetchingException where
   displayException (DecodingException msg) = "Decoding exception: " ++ msg
   displayException (RequestException subException) = "Exception querying runtime for contracts: " ++ displayException subException
 
-data Range
-  = Start
-  | Next ByteString
-  | Done
-  deriving (Eq, Show)

@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Language.Marlowe.Runtime.ContractCaching (refreshContracts) where
 
-import Language.Marlowe.Runtime.Types.ContractsJSON ( Range(..), ContractList(..), ContractListISeq, ResultList(ResultList, results), ContractInList )
+import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), ContractListISeq, ResultList(ResultList, results), ContractInList )
 import qualified Language.Marlowe.Runtime.Types.LazyFeed as LazyFeed
 import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import Language.Marlowe.Runtime.Types.LazyFeed (LazyFeed)
-import Data.ByteString (ByteString)
-import Network.HTTP.Simple (HttpException, Request, parseRequest, setRequestHeader, setRequestMethod, httpLBS, getResponseBody, getResponseHeader)
+import Network.HTTP.Simple (HttpException, parseRequest, setRequestHeader, setRequestMethod, httpLBS, getResponseBody, getResponseHeader)
 import Data.Time.Clock (getCurrentTime)
 import Data.Foldable (foldl')
 import Control.Exception (try, Exception (displayException))
@@ -14,6 +13,7 @@ import Data.Aeson (eitherDecode)
 import Control.Monad.Except (ExceptT(ExceptT))
 import Control.Error.Util (hoistEither)
 import Data.Either.Extra (mapLeft)
+import Language.Marlowe.Runtime.Types.General (Range (..), setRangeHeader, parseRangeHeader)
 
 refreshContracts :: String -> ContractListISeq -> IO (Either String ContractList)
 refreshContracts endpoint lOldChain = do
@@ -37,14 +37,6 @@ completeOldContractList _ Nothing = Left ISeq.empty
 
 getAllContracts :: String -> LazyFeed ContractInList
 getAllContracts endpoint = getAllContracts' endpoint Start
-
-setRangeHeader :: Range -> Request -> Request
-setRangeHeader (Next bs) = setRequestHeader "Range" [bs]
-setRangeHeader _ = id
-
-parseRangeHeader :: [ByteString] -> Range
-parseRangeHeader [bs] = Next bs
-parseRangeHeader _ = Done
 
 getAllContracts' :: String -> Range -> LazyFeed ContractInList
 getAllContracts' _endpoint Done = LazyFeed.emptyLazyFeed

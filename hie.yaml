@@ -42,6 +42,9 @@ cradle:
     - path: "./src/Language/Marlowe/Runtime/Types/ContractsJSON.hs"
       component: "marlowe-explorer:lib"
 
+    - path: "./src/Language/Marlowe/Runtime/Types/General.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Language/Marlowe/Runtime/Types/IndexedSeq.hs"
       component: "marlowe-explorer:lib"
 
