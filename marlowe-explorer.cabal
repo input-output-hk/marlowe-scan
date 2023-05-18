@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Explorer.API.GetNumTransactions
+      Explorer.API.HealthCheck
       Explorer.API.IsContractOpen
       Explorer.SharedContractCache
       Explorer.Web.ContractInfoDownload

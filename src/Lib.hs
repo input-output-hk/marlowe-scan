@@ -23,6 +23,7 @@ import Explorer.Web.ContractInfoDownload (contractDownloadInfo)
 import Data.ByteString.Lazy (ByteString)
 import Explorer.API.GetNumTransactions (getContractNumTransactions)
 import Explorer.API.IsContractOpen (isContractOpen)
+import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
 
 startApp :: Options -> IO ()
 startApp opts = do
@@ -39,6 +40,7 @@ type API
   :<|> "contractDownloadInfo" :> QueryParam "contractId" String :> Get '[OctetStream] (Headers '[Header "Content-Disposition" String] ByteString)
   :<|> "isContractOpen" :> QueryParam "contractId" String :> Get '[JSON] Bool
   :<|> "getNumTransactions" :> QueryParam "contractId" String :> Get '[JSON] Integer
+  :<|> "health" :> Get '[JSON] HealthCheckResult
 
 app :: Options -> ContractListCache -> Application
 app opts contractListCache =
@@ -49,6 +51,8 @@ app opts contractListCache =
     :<|> contractView opts
     :<|> contractDownloadInfo opts
     :<|> isContractOpen opts
-    :<|> getContractNumTransactions opts)
+    :<|> getContractNumTransactions opts
+    :<|> healthCheck contractListCache)
+
 
 
