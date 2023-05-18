@@ -9,6 +9,9 @@ cradle:
     - path: "./src/Explorer/API/GetNumTransactions.hs"
       component: "marlowe-explorer:lib"
 
+    - path: "./src/Explorer/API/HealthCheck.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Explorer/API/IsContractOpen.hs"
       component: "marlowe-explorer:lib"
 
