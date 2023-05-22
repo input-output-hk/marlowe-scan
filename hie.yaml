@@ -15,6 +15,12 @@ cradle:
     - path: "./src/Explorer/API/IsContractOpen.hs"
       component: "marlowe-explorer:lib"
 
+    - path: "./src/Explorer/ResourceHelpers.hs"
+      component: "marlowe-explorer:lib"
+
+    - path: "./src/Explorer/Resources.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Explorer/SharedContractCache.hs"
       component: "marlowe-explorer:lib"
 
