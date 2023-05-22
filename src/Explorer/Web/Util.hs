@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString )
+  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr, tlr, tld )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -10,20 +10,72 @@ import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ( body, docTypeHtml, h1, head, html, title,
-                          string, Html, (!), br, preEscapedString, a, ToValue (toValue), Markup, script )
-import Text.Blaze.Html5.Attributes ( style, lang, href, type_ )
+                          string, Html, (!), br, preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue )
+import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt )
 import Data.Time (UTCTime, NominalDiffTime)
 import Text.Printf (printf)
 import Data.Aeson (Value)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy (toStrict)
 
+crossorigin :: H.Attribute
+crossorigin = customAttribute "crossorigin" ""
+
+logo :: Html
+logo = img ! src "/svg/logo.svg" ! alt "Marlowe logo" ! class_ "logo-pic"
+
+magnifyingGlassIcon :: Html
+magnifyingGlassIcon = img ! src "/svg/magnifying-glass.svg" ! alt "Magnifying glass" ! class_ "side-icon"
+
+fullLogo :: Html
+fullLogo = H.div ! class_ "logo"
+--               $ a ! href "/"
+                 $ do logo
+                      H.div ! class_ "logo-text"
+                            $ do H.span ! class_ "logo-text-marlowe" $ string "Marlowe"
+                                 nbsp
+                                 H.span ! class_ "logo-text-explorer" $ string "Explorer"
+
+explorerOption :: Bool -> Html
+explorerOption isSelected = H.div ! class_ (stringValue ("side-option " ++ if isSelected then "selected-option" else ""))
+                                  $ do H.div ! class_ "side-icon"
+                                             $ magnifyingGlassIcon
+                                       H.div ! class_ "side-text"
+                                             $ string "Explorer"
+
 baseDoc :: String -> Html -> Html
 baseDoc caption content = docTypeHtml
                           $ html ! lang "en"
-                                 $ do head $ title $ string caption
-                                      body $ do h1 $ string caption
-                                                content
+                                 $ do head $ do title $ string caption
+                                                link ! rel "preconnect" ! href "https://fonts.gstatic.com" ! crossorigin
+                                                link ! href "https://fonts.googleapis.com/css2?family=Outfit&display=swap" ! rel "stylesheet"
+                                                link ! href "/css/stylesheet.css" ! rel "stylesheet"
+                                      body $ H.div ! class_ "wrapper"
+                                                   $ do H.div ! class_ "side-menu"
+                                                              $ do fullLogo
+                                                                   explorerOption True
+                                                        H.div ! class_ "main-content"
+                                                              $ do h1 $ string caption
+                                                                   content
+
+-- Table for listing contracts (with style)
+
+tableList :: Html -> Html
+tableList = H.table ! class_ "table"
+
+tlhr :: Html -> Html
+tlhr = H.tr ! class_ "table-header"
+
+tlh :: Html -> Html
+tlh = H.th
+
+tlr :: Html -> Html
+tlr = H.tr ! class_ "table-row"
+
+tld :: Html -> Html
+tld = H.td ! class_ "table-cell"
+
+-- Normal basic tables with border
 
 table :: Html -> Html
 table = H.table ! style "border: 1px solid black"

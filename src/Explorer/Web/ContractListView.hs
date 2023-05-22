@@ -12,7 +12,7 @@ import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf ( printf )
 
 import Explorer.SharedContractCache ( ContractListCache, readContractList )
-import Explorer.Web.Util ( baseDoc, generateLink, table, td, th, tr, formatTimeDiff, makeLocalDateTime )
+import Explorer.Web.Util ( baseDoc, generateLink, formatTimeDiff, makeLocalDateTime, tableList, tlhr, tlh, tlr, tld )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..), ContractInList (..) )
 
 import Data.Foldable (toList)
@@ -175,24 +175,24 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
   renderTime timeNow retrievalTime
   p $ string $ printf "%d-%d contracts shown out of %d, (page %d out of %d)"
                         firstContract lastContract numContracts page lastPage
-  table $ do
-    tr $ do
-      th $ b "Contract ID"
-      th $ b "Role token minting policy"
-      th $ b "Block No"
-      th $ b "Slot No"
-      th $ b "Status"
-      th $ b "Num transactions"
+  tableList $ do
+    tlhr $ do
+      tlh $ b "Contract ID"
+      tlh $ b "Role token minting policy"
+      tlh $ b "Block No"
+      tlh $ b "Slot No"
+      tlh $ b "Status"
+      tlh $ b "Num transactions"
     let makeRow clvr = do
           let cid = clvrContractId clvr
-          tr $ do
-            td $ a ! href (toValue $ generateLink "contractView" [("tab", "info"), ("contractId", cid)])
-              $ string cid
-            td $ renderStr $ clvrRoleMintingPolicyId clvr
-            td $ toHtml $ clvrBlock clvr
-            td $ toHtml $ clvrSlot clvr
-            td $ isOpenAJAXBox cid
-            td $ numTransactionsAJAXBox cid
+          tlr $ do
+            tld $ a ! href (toValue $ generateLink "contractView" [("tab", "info"), ("contractId", cid)])
+                    $ string cid
+            tld $ renderStr $ clvrRoleMintingPolicyId clvr
+            tld $ toHtml $ clvrBlock clvr
+            tld $ toHtml $ clvrSlot clvr
+            tld $ isOpenAJAXBox cid
+            tld $ numTransactionsAJAXBox cid
     forM_ clvrs makeRow
   renderNavBar pinf
 
