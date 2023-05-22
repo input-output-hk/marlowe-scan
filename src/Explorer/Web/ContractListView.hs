@@ -70,7 +70,7 @@ data CIR = CIR
 
 -- Number of contracts per page
 pageLength :: Int
-pageLength = 20
+pageLength = 12
 
 -- Number of pages to each side to show (unless close to border)
 contextPages :: Int
