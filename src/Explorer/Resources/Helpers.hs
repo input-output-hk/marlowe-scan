@@ -1,4 +1,4 @@
-module Explorer.ResourceHelpers(cssPath, embedResource, svgPath) where
+module Explorer.Resources.Helpers(cssPath, embedResource, svgPath) where
 
 import Data.FileEmbed (embedFile, makeRelativeToProject, embedFile)
 import Language.Haskell.TH (Q)

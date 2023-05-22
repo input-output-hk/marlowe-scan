@@ -28,8 +28,9 @@ library
       Explorer.API.GetNumTransactions
       Explorer.API.HealthCheck
       Explorer.API.IsContractOpen
-      Explorer.ResourceHelpers
-      Explorer.Resources
+      Explorer.Resources.Data
+      Explorer.Resources.Helpers
+      Explorer.Resources.MimeTypes
       Explorer.SharedContractCache
       Explorer.Web.ContractInfoDownload
       Explorer.Web.ContractListView
@@ -68,6 +69,7 @@ library
     , ghc
     , http-client
     , http-conduit
+    , http-media
     , http-types
     , mtl
     , newtype-generics
@@ -106,6 +108,7 @@ executable marlowe-explorer-exe
     , ghc
     , http-client
     , http-conduit
+    , http-media
     , http-types
     , marlowe-explorer
     , newtype-generics
@@ -145,6 +148,7 @@ test-suite marlowe-explorer-test
     , hspec-wai
     , http-client
     , http-conduit
+    , http-media
     , http-types
     , marlowe-explorer
     , scientific

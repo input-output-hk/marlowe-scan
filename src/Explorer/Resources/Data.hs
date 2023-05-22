@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Explorer.Resources(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass) where
+module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass) where
 
-import Explorer.ResourceHelpers (cssPath, embedResource, svgPath)
+import Explorer.Resources.Helpers (cssPath, embedResource, svgPath)
 import Data.ByteString (ByteString)
 
 ----------------

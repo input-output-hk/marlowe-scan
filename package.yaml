@@ -26,6 +26,7 @@ dependencies:
 - ghc
 - http-client
 - http-conduit
+- http-media
 - http-types
 - scientific
 - servant-blaze
