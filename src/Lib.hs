@@ -14,7 +14,7 @@ import Network.Wai.Handler.Warp ( run )
 import Servant ( Proxy(..), hoistServer, serve, type (:<|>)(..), OctetStream, QueryParam, type (:>), Get, Headers, Header, JSON, HasServer (ServerT) )
 import Servant.HTML.Blaze ( HTML )
 
-import Explorer.SharedContractCache ( ContractListCache )
+import Explorer.SharedContractCache ( ContractListCacheReader )
 import Explorer.Web.ContractListView ( ContractListView (..), contractListView )
 import Explorer.Web.ContractView ( ContractView (..), contractView )
 import Language.Marlowe.Runtime.Background ( start )
@@ -25,7 +25,7 @@ import qualified Data.ByteString as BS
 import Explorer.API.GetNumTransactions (getContractNumTransactions)
 import Explorer.API.IsContractOpen (isContractOpen)
 import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
-import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass)
+import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus)
 import Explorer.Resources.MimeTypes (CSS, SVG)
 
 startApp :: Options -> IO ()
@@ -38,18 +38,22 @@ startApp opts = do
 
 type ResourcesAPI = "css" :> "stylesheet.css" :> Get '[CSS] BS.ByteString
               :<|> ("svg" :> (("active-light.svg" :> Get '[SVG] BS.ByteString)
+                         :<|> ("amber-status-light.svg" :> Get '[SVG] BS.ByteString)
                          :<|> ("green-status-light.svg" :> Get '[SVG] BS.ByteString)
                          :<|> ("inactive-light.svg" :> Get '[SVG] BS.ByteString)
                          :<|> ("logo.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("magnifying-glass.svg" :> Get '[SVG] BS.ByteString)))
+                         :<|> ("magnifying-glass.svg" :> Get '[SVG] BS.ByteString)
+                         :<|> ("red-status-light.svg" :> Get '[SVG] BS.ByteString)))
 
 appResources :: ServerT ResourcesAPI IO
 appResources = return cssStylesheet
           :<|> return activeLight
+          :<|> return amberStatus
           :<|> return greenStatus
           :<|> return inactiveLight
           :<|> return logo
           :<|> return magnifyingGlass
+          :<|> return redStatus
 
 type API
      = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/
@@ -61,13 +65,13 @@ type API
   :<|> "health" :> Get '[JSON] HealthCheckResult
   :<|> ResourcesAPI
 
-app :: Options -> ContractListCache -> Application
+app :: ContractListCacheReader contractListCache => Options -> contractListCache -> Application
 app opts contractListCache =
   serve (Proxy :: Proxy API) $
     hoistServer (Proxy :: Proxy API) liftIO
     (contractListView opts contractListCache Nothing
     :<|> contractListView opts contractListCache
-    :<|> contractView opts
+    :<|> contractView opts contractListCache
     :<|> contractDownloadInfo opts
     :<|> isContractOpen opts
     :<|> getContractNumTransactions opts

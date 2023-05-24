@@ -1,5 +1,6 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE MonoLocalBinds #-}
 
 module Explorer.Web.ContractView
   (ContractView(..), contractView)
@@ -15,7 +16,7 @@ import GHC.Utils.Misc (split)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString  )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, SyncStatus  )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -28,11 +29,28 @@ import Prelude hiding (div)
 import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Data.Map as M
+import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
 
-contractView :: Options -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
-contractView opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHost}) mTab (Just cid) mTxId = do
+contractView :: ContractListCacheStatusReader contractCache => Options -> contractCache -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
+contractView opts contractCache mTab mCid mTxId = do
+  curSyncStatus <- getSyncStatus contractCache
+  cData <- contractViewInner opts mTab mCid mTxId
+  return $ ContractView { cvRetrievalSyncStatus = curSyncStatus
+                        , cvMContractId = getMaybeContractId cData
+                        , cvData = cData
+                        }
+
+getMaybeContractId :: CV -> Maybe String
+getMaybeContractId (ContractInfoView CIVR { civrContractId = cid }) = Just cid
+getMaybeContractId (ContractStateView CSVR { csvrContractId = cid }) = Just cid
+getMaybeContractId (ContractTxView CTVRs { ctvrsContractId = cid } ) = Just cid
+getMaybeContractId (ContractViewError _) = Nothing
+
+contractViewInner :: Options -> Maybe String -> Maybe String -> Maybe String -> IO CV
+contractViewInner opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHost}) mTab (Just cid) mTxId = do
   let urlPrefix = mkUrlPrefix opts
       tab = parseTab mTab
+  
   r <- runExceptT (do cjson <- ExceptT $ CJ.getContractJSON urlPrefix cid
                       let link = CJ.transactions $ CJ.links cjson
                       txsjson <- whenMaybe (tab == CTxView)
@@ -41,8 +59,8 @@ contractView opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHo
                       txjson <- forM mTxId2 (ExceptT . TJ.getTransaction urlPrefix link)
                       return $ extractInfo tab blockExplHost cjson txsjson txjson)
   return $ either ContractViewError id r
-contractView opts Nothing cid txId = contractView opts (Just "state") cid txId
-contractView _opts _tab Nothing _txId = return $ ContractViewError "Need to specify a contractId"
+contractViewInner opts Nothing cid txId = contractViewInner opts (Just "state") cid txId
+contractViewInner _opts _tab Nothing _txId = return $ ContractViewError "Need to specify a contractId"
 
 
 getIfInContractDefaultFirst :: Maybe String -> Maybe TJs.Transactions -> Maybe String
@@ -59,7 +77,7 @@ parseTab (Just "txs") = CTxView
 parseTab _ = CInfoView
 
 
-extractInfo :: ContractViews -> String -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> ContractView
+extractInfo :: ContractViews -> String -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> CV
 extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource = 
                                          (CJ.Resource { CJ.block = CJ.Block { CJ.blockHeaderHash = blkHash
                                                                             , CJ.blockNo = blkNo
@@ -179,21 +197,40 @@ data ContractViews = CInfoView
                    | CTxView
   deriving (Show, Eq)
 
-data ContractView = ContractInfoView CIVR
-                  | ContractStateView CSVR
-                  | ContractTxView CTVRs
-                  | ContractViewError String
+data ContractView = ContractView {
+    cvRetrievalSyncStatus :: SyncStatus
+  , cvMContractId :: Maybe String
+  , cvData :: CV
+}
 
 instance ToMarkup ContractView where
   toMarkup :: ContractView -> Markup
+  toMarkup (ContractView { cvRetrievalSyncStatus = curSyncStatus
+                         , cvMContractId = Just cid
+                         , cvData = cv
+                         }) =
+    baseDoc curSyncStatus ("Contract - " ++ cid) $ toMarkup cv
+  toMarkup (ContractView { cvRetrievalSyncStatus = curSyncStatus
+                         , cvMContractId = Nothing
+                         , cvData = cv
+                         }) =
+    baseDoc curSyncStatus "An error occurred" $ toMarkup cv
+
+data CV = ContractInfoView CIVR
+        | ContractStateView CSVR
+        | ContractTxView CTVRs
+        | ContractViewError String
+
+instance ToMarkup CV where
+  toMarkup :: CV -> Markup
   toMarkup (ContractInfoView cvr@(CIVR {civrContractId = cid})) =
-    baseDoc ("Contract - " ++ cid) $ addNavBar CInfoView cid $ renderCIVR cvr
+    addNavBar CInfoView cid $ renderCIVR cvr
   toMarkup (ContractStateView ccsr@(CSVR {csvrContractId = cid})) =
-    baseDoc ("Contract - " ++ cid) $ addNavBar CStateView cid $ renderCSVR ccsr
+    addNavBar CStateView cid $ renderCSVR ccsr
   toMarkup (ContractTxView ctvrs'@CTVRs {ctvrsContractId = cid}) =
-    baseDoc ("Contract - " ++ cid) $ addNavBar CTxView cid $ renderCTVRs ctvrs'
+    addNavBar CTxView cid $ renderCTVRs ctvrs'
   toMarkup (ContractViewError str) =
-    baseDoc "An error occurred" (string ("Error: " ++ str))
+    string $ "Error: " ++ str
 
 data CIVR = CIVR { civrContractId :: String
                  , civrContractIdLink :: String

@@ -7,7 +7,6 @@ module Language.Marlowe.Runtime.Types.ContractsJSON
   ( Block(..)
   , ContractInList(..)
   , ContractListISeq
-  , ContractList(..)
   , ContractLinks(..)
   , Resource(..)
   , ResultList(..)
@@ -16,7 +15,6 @@ module Language.Marlowe.Runtime.Types.ContractsJSON
 
 import Control.Exception ( Exception(displayException) )
 import Data.Aeson ( withObject, (.:), FromJSON(parseJSON), Value )
-import Data.Time.Clock ( UTCTime )
 import Network.HTTP.Simple ( HttpException )
 import Language.Marlowe.Runtime.Types.IndexedSeq (IndexedSeq, Indexed (getIdentifier))
 import Data.Aeson.Types (Parser)
@@ -93,12 +91,6 @@ instance FromJSON ResultList where
     ResultList <$> o .: "results"
 
 type ContractListISeq = IndexedSeq ContractInList String
-
-data ContractList = ContractList
-  { clRetrievedTime :: Maybe UTCTime
-  , clContracts :: ContractListISeq
-  }
-  deriving (Show, Eq)
 
 data ContractListFetchingException = DecodingException String
                                    | RequestException HttpException

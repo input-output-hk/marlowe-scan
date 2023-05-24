@@ -6,14 +6,13 @@ module Explorer.Web.ContractListView
   where
 
 import Control.Monad (forM_)
-import Data.Time.Clock ( NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime )
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, preEscapedToHtml, string, toHtml, toValue )
 import Text.Blaze.Html5.Attributes ( href, style )
 import Text.Printf ( printf )
 
-import Explorer.SharedContractCache ( ContractListCache, readContractList )
-import Explorer.Web.Util ( baseDoc, generateLink, formatTimeDiff, makeLocalDateTime, tableList, tlhr, tlh, tlr, tld )
-import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractList (..), ContractInList (..) )
+import Explorer.SharedContractCache ( ContractListCacheReader, readContractList, ContractList(..) )
+import Explorer.Web.Util ( baseDoc, generateLink, formatTimeDiff, makeLocalDateTime, tableList, tlhr, tlh, tlr, tld, SyncStatus (..) )
+import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractInList (..), ContractListISeq )
 
 import Data.Foldable (toList)
 import Data.Maybe (fromMaybe)
@@ -35,24 +34,21 @@ data PageInfo = PageInfo {
 } deriving (Show, Eq)
 
 data CLVR = CLVR {
-      -- | Time of rendering (set to now when contractListView is called)
-       timeOfRendering :: UTCTime
-      -- | Time of last contracts list retrieval from Marlowe Runtime
-     , lastRetrieval :: UTCTime
       -- | Info about current page
-     , pageInfo :: PageInfo
+       pageInfo :: PageInfo
       -- | Contract list view records
      , contractList :: [CIR]
   } deriving (Show, Eq)
 
 data ContractListView = ContractListView { titleLabel :: String
+                                         , retrievalSyncStatus :: SyncStatus
                                          , clvContents :: ContractListViewContents
                                          }
 
 data ContractListViewContents
   = ContractListViewContents CLVR
   | ContractListViewStillSyncing
-  | ContractListViewError String
+  | ContractListViewError SyncStatus String
   deriving (Show, Eq)
 
 instance ToMarkup ContractListView where
@@ -98,21 +94,18 @@ calcLastPage numContracts = fullPages + partialPages
         sizeOfPartialPage = numContracts `rem` pageLength
         partialPages = if sizeOfPartialPage > 0 then 1 else 0
 
-extractInfo :: UTCTime -> Maybe Int -> ContractList -> ContractListViewContents
-extractInfo _timeNow _mbPage (ContractList { clRetrievedTime = Nothing }) = ContractListViewStillSyncing
-extractInfo timeNow mbPage (ContractList { clRetrievedTime = Just retrievalTime
-                                         , clContracts = cils })
-    | numContracts == 0 = ContractListViewError "There are no contracts in this network"
+extractInfo :: SyncStatus -> Maybe Int -> ContractListISeq -> ContractListViewContents
+extractInfo Syncing _mbPage _ = ContractListViewStillSyncing
+extractInfo syncStatus mbPage cils
+    | numContracts == 0 = ContractListViewError syncStatus "There are no contracts in this network"
     | otherwise =
-  ContractListViewContents CLVR { timeOfRendering = timeNow
-                        , lastRetrieval = retrievalTime
-                        , pageInfo = PageInfo { currentPage = cPage
-                                              , pageRange = (minPage, maxPage)
-                                              , totalContracts = numContracts
-                                              , contractRange = (firstContract, lastContract)
-                                              , numPages = lastPage
-                                              }
-                        , contractList = map convertContract $ toList contracts }
+  ContractListViewContents CLVR { pageInfo = PageInfo { currentPage = cPage
+                                                      , pageRange = (minPage, maxPage)
+                                                      , totalContracts = numContracts
+                                                      , contractRange = (firstContract, lastContract)
+                                                      , numPages = lastPage
+                                                      }
+                                , contractList = map convertContract $ toList contracts }
   where
     firstContract = contractsBefore + 1
     lastContract = contractsBefore + Seq.length contracts
@@ -139,40 +132,36 @@ extractInfo timeNow mbPage (ContractList { clRetrievedTime = Just retrievalTime
       , clvrLink = cilLinkUrl
       }
 
-contractListView :: Options -> ContractListCache -> Maybe Int -> IO ContractListView
+contractListView :: ContractListCacheReader contractListCache => Options -> contractListCache -> Maybe Int -> IO ContractListView
 contractListView Options { optTitleLabel = TitleLabel labelForTitle } contractListCache mbPage = do
-  timeNow <- getCurrentTime
-  cl <- readContractList contractListCache
+  ( ContractList { clContracts = cl
+                 , clSyncStatus = curSyncStatus }) <- readContractList contractListCache
   return $ ContractListView { titleLabel = labelForTitle
-                            , clvContents = extractInfo timeNow mbPage cl }
+                            , clvContents = extractInfo curSyncStatus mbPage cl
+                            , retrievalSyncStatus = curSyncStatus
+                            }
 
-renderTime :: UTCTime -> UTCTime -> Html
-renderTime timeNow retrievalTime =
-  if difference > delayBeforeWarning
-    then do
-      p ! style "color: red" $ string (printf "The list of contracts could not be updated since " ++ formatTimeDiff difference ++ ", check the Marlowe Runtime is accessible")
-    else p $ do string "Contracts list acquired: "
-                makeLocalDateTime retrievalTime
-  where
-    delayBeforeWarning :: NominalDiffTime
-    delayBeforeWarning = 60  -- This is one minute
-    
-    difference = diffUTCTime timeNow retrievalTime
+renderTime :: SyncStatus -> Html
+renderTime Syncing = p $ string "Retrieving list of contracts from Marlowe Runtime..."
+renderTime (Synced _ lrt) = p $ do string "Contracts list acquired: "
+                                   makeLocalDateTime lrt
+renderTime (OutOfSync ndt _) = p ! style "color: red"
+                                  $ string (printf "The list of contracts could not be updated since " ++ formatTimeDiff ndt ++ ", check the Marlowe Runtime is accessible")
+
 
 renderCIRs :: ContractListView -> Html
 renderCIRs (ContractListView { titleLabel = labelForTitle
+                             , retrievalSyncStatus = currSyncStatus
                              , clvContents = ContractListViewContents
-                                               (CLVR { timeOfRendering = timeNow
-                                                    , lastRetrieval = retrievalTime
-                                                    , pageInfo = pinf@(PageInfo { currentPage = page
-                                                                                , totalContracts = numContracts
-                                                                                , contractRange = (firstContract, lastContract)
-                                                                                , numPages = lastPage
-                                                                                })
-                                                    , contractList = clvrs
-                                                    })
-                             }) = baseDoc ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ do
-  renderTime timeNow retrievalTime
+                                               (CLVR { pageInfo = pinf@(PageInfo { currentPage = page
+                                                                                 , totalContracts = numContracts
+                                                                                 , contractRange = (firstContract, lastContract)
+                                                                                 , numPages = lastPage
+                                                                                 })
+                                                     , contractList = clvrs
+                                                     })
+                             }) = baseDoc currSyncStatus ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ do
+  renderTime currSyncStatus
   p $ string $ printf "%d-%d contracts shown out of %d, (page %d out of %d)"
                         firstContract lastContract numContracts page lastPage
   tableList $ do
@@ -198,10 +187,10 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
 
 renderCIRs (ContractListView { titleLabel = labelForTitle
                              , clvContents = ContractListViewStillSyncing}) =
-  baseDoc ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ string "The explorer is still synchronising with the chain. Please, try again later"
+  baseDoc Syncing ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ string "The explorer is still synchronising with the chain. Please, try again later"
 
-renderCIRs (ContractListView { clvContents = ContractListViewError msg }) =
-  baseDoc "An error occurred" $ string ("Error: " <> msg)
+renderCIRs (ContractListView { clvContents = ContractListViewError curSyncStatus msg }) =
+  baseDoc curSyncStatus "An error occurred" $ string ("Error: " <> msg)
 
 appIfNotBlank :: String -> String -> String
 appIfNotBlank title labelForTitle

@@ -112,12 +112,25 @@ html, body {
 .status-badge {
     margin-top: 0.5rem;
     padding: 0.25rem;
-    background-color: #EFFFF8;
     border-radius: 4px;
-    border: 1px solid #0FE088;
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+.synced-badge {
+    background-color: #EFFFF8;
+    border: 1px solid #0FE088;
+}
+
+.syncing-badge {
+    background-color: #FFFAEF;
+    border: 1px solid #E09B10;
+}
+
+.out-of-sync-badge {
+    background-color: #FFEBEA;
+    border: 1px solid #E0140F;
 }
 
 .status-light {

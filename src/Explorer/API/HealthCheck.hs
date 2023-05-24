@@ -1,13 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE MonoLocalBinds #-}
 
 module Explorer.API.HealthCheck(HealthCheckResult(..), healthCheck) where
 
 import Data.Aeson (ToJSON)
 import GHC.Generics (Generic)
-import Explorer.SharedContractCache (ContractListCache, readContractList)
-import Language.Marlowe.Runtime.Types.ContractsJSON (ContractList(..))
-import Data.Time (getCurrentTime, diffUTCTime)
+import Explorer.Web.Util (SyncStatus(..))
+import Explorer.SharedContractCache (ContractListCacheStatusReader (..))
 
 data HealthCheckResult = HealthCheckResult
   { alive :: Bool
@@ -16,22 +16,25 @@ data HealthCheckResult = HealthCheckResult
   , millisecondsSinceLastUpdate :: Maybe Integer
   } deriving (Show, Eq, Generic, ToJSON)
 
-healthCheck :: ContractListCache -> IO HealthCheckResult
+healthCheck :: ContractListCacheStatusReader cache => cache -> IO HealthCheckResult
 healthCheck cache = do
-    ContractList { clRetrievedTime = mRetrievedTime } <- readContractList cache
-    now <- getCurrentTime
-    pure $ case mRetrievedTime of
-            Nothing -> HealthCheckResult
-                         { alive = True
-                         , ready = False
-                         , healthy = True
-                         , millisecondsSinceLastUpdate = Nothing
-                         }
-            Just lastUpdated ->
-               let millisSinceLastUpdated = round (1000 * (now `diffUTCTime` lastUpdated)) in
-               HealthCheckResult
-                 { alive = True
-                 , ready = True
-                 , healthy = millisSinceLastUpdated < 60000 -- Healthy if it was updated in the last minute
-                 , millisecondsSinceLastUpdate = Just millisSinceLastUpdated
-                 }
+    curSyncStatus <- getSyncStatus cache
+    pure $ case curSyncStatus of
+              Syncing -> HealthCheckResult
+                                { alive = True
+                                , ready = False
+                                , healthy = True
+                                , millisecondsSinceLastUpdate = Nothing
+                                }
+              Synced ndt _ -> HealthCheckResult
+                                      { alive = True
+                                      , ready = True
+                                      , healthy = True
+                                      , millisecondsSinceLastUpdate = Just $ round $ 1000 * ndt
+                                      }
+              OutOfSync ndt _ -> HealthCheckResult
+                                      { alive = True
+                                      , ready = True
+                                      , healthy = False
+                                      , millisecondsSinceLastUpdate = Just $ round $ 1000 * ndt
+                                      }

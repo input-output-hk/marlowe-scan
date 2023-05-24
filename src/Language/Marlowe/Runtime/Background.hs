@@ -7,10 +7,8 @@ module Language.Marlowe.Runtime.Background
 
 import Control.Concurrent ( forkIO, threadDelay, myThreadId )
 
-import Explorer.SharedContractCache ( ContractListCache, newContractList, readContractList, writeContractList )
+import Explorer.SharedContractCache ( ContractListCache, newContractList, readContractList, writeContractList, ContractList (..) )
 import Language.Marlowe.Runtime.ContractCaching (refreshContracts)
-import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..) )
-import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import GHC.GHCi.Helpers (flushAll)
 import GHC.Conc (ThreadId)
 import Control.Exception (Exception(displayException), throwTo)
@@ -24,14 +22,14 @@ instance Exception BackgroundProcessException where
 
 start :: String -> IO ContractListCache
 start endpoint = do
-  contractListCache <- newContractList $ ContractList Nothing ISeq.empty
+  contractListCache <- newContractList
   parentThreadId <- myThreadId
   _ <- forkIO $ run (Just parentThreadId) endpoint contractListCache
   pure contractListCache
 
 run :: Maybe ThreadId -> String -> ContractListCache -> IO ()
 run mParentThreadId endpoint contractListCache = do
-  ContractList _ oldChain <- readContractList contractListCache
+  ContractList { clContracts = oldChain } <- readContractList contractListCache
   eresult <- refreshContracts endpoint oldChain
   case eresult of
     Left err -> do putStrLn $ "ERROR retrieving contracts: " <> err

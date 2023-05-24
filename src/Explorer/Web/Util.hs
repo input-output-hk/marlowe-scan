@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr, tlr, tld )
+  ( SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -17,6 +17,7 @@ import Text.Printf (printf)
 import Data.Aeson (Value)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy (toStrict)
+import Data.Time.Clock (diffUTCTime)
 
 crossorigin :: H.Attribute
 crossorigin = customAttribute "crossorigin" ""
@@ -26,6 +27,15 @@ logo = img ! src "/svg/logo.svg" ! alt "Marlowe logo" ! class_ "logo-pic"
 
 magnifyingGlassIcon :: Html
 magnifyingGlassIcon = img ! src "/svg/magnifying-glass.svg" ! alt "Magnifying glass" ! class_ "side-icon"
+
+greenStatusLight :: Html
+greenStatusLight = img ! src "/svg/green-status-light.svg" ! alt "Green status light" ! class_ "side-icon"
+
+amberStatusLight :: Html
+amberStatusLight = img ! src "/svg/amber-status-light.svg" ! alt "Amber status light" ! class_ "side-icon"
+
+redStatusLight :: Html
+redStatusLight = img ! src "/svg/red-status-light.svg" ! alt "Red status light" ! class_ "side-icon"
 
 fullLogo :: Html
 fullLogo = H.div ! class_ "logo"
@@ -43,8 +53,46 @@ explorerOption isSelected = H.div ! class_ (stringValue ("side-option " ++ if is
                                        H.div ! class_ "side-text"
                                              $ string "Explorer"
 
-baseDoc :: String -> Html -> Html
-baseDoc caption content = docTypeHtml
+data SyncStatus = Syncing | Synced NominalDiffTime UTCTime | OutOfSync NominalDiffTime UTCTime
+  deriving (Eq, Show)
+
+calculateSyncStatus :: UTCTime -> Maybe UTCTime -> SyncStatus
+calculateSyncStatus _ Nothing = Syncing
+calculateSyncStatus currTime (Just lastRetrievalTime)
+  | timeSinceLastSync < 60 = Synced timeSinceLastSync lastRetrievalTime
+  | otherwise = OutOfSync timeSinceLastSync lastRetrievalTime
+  where
+  timeSinceLastSync :: NominalDiffTime
+  timeSinceLastSync = currTime `diffUTCTime` lastRetrievalTime
+
+statusLightForTime :: SyncStatus -> Html
+statusLightForTime Syncing = amberStatusLight
+statusLightForTime (Synced _ _) = greenStatusLight
+statusLightForTime (OutOfSync _ _) = redStatusLight
+
+statusExplanationForTime :: SyncStatus -> Html
+statusExplanationForTime Syncing = string "Synchronizing"
+statusExplanationForTime (Synced _ _) = string "Synchronized"
+statusExplanationForTime (OutOfSync _ _) = string "Out of sync"
+
+badgeClass :: SyncStatus -> String
+badgeClass Syncing = "syncing-badge"
+badgeClass (Synced _ _) = "synced-badge"
+badgeClass (OutOfSync _ _) = "out-of-sync-badge"
+
+syncStatus :: SyncStatus -> Html
+syncStatus curSyncStatus = H.div ! class_ "side-indicator-wrapper"
+                                 $ H.div ! class_ "side-indicator"
+                                         $ do H.div ! class_ "status-label"
+                                                    $ string "Blockchain status:"
+                                              H.div ! class_ (stringValue ("status-badge " ++ badgeClass curSyncStatus))
+                                                    $ do H.div ! class_ "status-light"
+                                                               $ statusLightForTime curSyncStatus
+                                                         H.div ! class_ "status-explantion"
+                                                               $ statusExplanationForTime curSyncStatus
+
+baseDoc :: SyncStatus  -> String -> Html -> Html
+baseDoc curSyncStatus caption content = docTypeHtml
                           $ html ! lang "en"
                                  $ do head $ do title $ string caption
                                                 link ! rel "preconnect" ! href "https://fonts.gstatic.com" ! crossorigin
@@ -54,9 +102,11 @@ baseDoc caption content = docTypeHtml
                                                    $ do H.div ! class_ "side-menu"
                                                               $ do fullLogo
                                                                    explorerOption True
+                                                                   syncStatus curSyncStatus
                                                         H.div ! class_ "main-content"
                                                               $ do h1 $ string caption
                                                                    content
+
 
 -- Table for listing contracts (with style)
 
