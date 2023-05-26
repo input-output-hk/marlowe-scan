@@ -166,21 +166,21 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
                         firstContract lastContract numContracts page lastPage
   tableList $ do
     tlhr $ do
+      tlh $ b "Active"
       tlh $ b "Contract ID"
       tlh $ b "Role token minting policy"
       tlh $ b "Block No"
       tlh $ b "Slot No"
-      tlh $ b "Status"
       tlh $ b "Num transactions"
     let makeRow clvr = do
           let cid = clvrContractId clvr
           tlr $ do
+            tld $ isOpenAJAXBox cid
             tld $ a ! href (toValue $ generateLink "contractView" [("tab", "info"), ("contractId", cid)])
                     $ string cid
             tld $ renderStr $ clvrRoleMintingPolicyId clvr
             tld $ toHtml $ clvrBlock clvr
             tld $ toHtml $ clvrSlot clvr
-            tld $ isOpenAJAXBox cid
             tld $ numTransactionsAJAXBox cid
     forM_ clvrs makeRow
   renderNavBar pinf

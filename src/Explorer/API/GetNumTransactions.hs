@@ -23,7 +23,7 @@ numTransactionsAJAXBox cid = do
     let url = generateLink "getNumTransactions" [("contractId", cid)]
         divId = "numTransFor_" ++ cid
 
-    H.div ! A.id (H.toValue divId) $ H.string "Loading..."
+    H.div ! A.id (H.toValue divId) $ H.string "..."
 
     H.script ! A.type_ (H.toValue "text/javascript") $ H.string $
         "function getNumTransactions() {\n" ++
@@ -33,7 +33,7 @@ numTransactionsAJAXBox cid = do
         "      if (xhr.status == 200) {\n" ++
         "        document.getElementById('" ++ divId ++ "').innerHTML = xhr.responseText;\n" ++
         "      } else {\n" ++
-        "        document.getElementById('" ++ divId ++ "').innerHTML = 'Error';\n" ++
+        "        document.getElementById('" ++ divId ++ "').innerHTML = 'Err';\n" ++
         "      }\n" ++
         "    }\n" ++
         "  };\n" ++
