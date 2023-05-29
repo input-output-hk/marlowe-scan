@@ -116,6 +116,7 @@ html, body {
     display: flex;
     flex-direction: row;
     align-items: center;
+    color: #5A5A5A;
 }
 
 .synced-badge {
@@ -124,13 +125,13 @@ html, body {
 }
 
 .syncing-badge {
-    background-color: #FFFAEF;
-    border: 1px solid #E09B10;
+    background-color: #FFF8F1;
+    border: 1px solid #E0730F;
 }
 
 .out-of-sync-badge {
-    background-color: #FFEBEA;
-    border: 1px solid #E0140F;
+    background-color: #FFF6F9;
+    border: 1px solid #E00F41;
 }
 
 .status-light {

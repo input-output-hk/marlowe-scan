@@ -29,13 +29,13 @@ magnifyingGlassIcon :: Html
 magnifyingGlassIcon = img ! src "/svg/magnifying-glass.svg" ! alt "Magnifying glass" ! class_ "side-icon"
 
 greenStatusLight :: Html
-greenStatusLight = img ! src "/svg/green-status-light.svg" ! alt "Green status light" ! class_ "side-icon"
+greenStatusLight = img ! src "/svg/green-status-light.svg" ! alt "Green status light"
 
 amberStatusLight :: Html
-amberStatusLight = img ! src "/svg/amber-status-light.svg" ! alt "Amber status light" ! class_ "side-icon"
+amberStatusLight = img ! src "/svg/amber-status-light.svg" ! alt "Amber status light"
 
 redStatusLight :: Html
-redStatusLight = img ! src "/svg/red-status-light.svg" ! alt "Red status light" ! class_ "side-icon"
+redStatusLight = img ! src "/svg/red-status-light.svg" ! alt "Red status light"
 
 fullLogo :: Html
 fullLogo = H.div ! class_ "logo"
