@@ -27,7 +27,7 @@
         }
         
         .side-menu {
-            max-width: 16.8rem;
+            min-width: 16.8rem;
             flex-grow: 1;
             background-color: #F7F9FF;
             padding-top: 1.2rem;
@@ -36,10 +36,6 @@
             align-items: stretch;
         }
 
-        .main-content {
-            flex-grow: 999;
-            background-color: #ffffff;
-        }
 
         .logo {
             display: block;
@@ -136,15 +132,21 @@
         }
 
         .main-content {
+            flex-grow: 999;
+            background-color: #ffffff;
             padding-left: 6.6rem;
             padding-top: 3.25rem;
             padding-bottom: 3.25rem;
             padding-right: 3.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .table {
             border-collapse: separate;
             border-spacing: 0;
+            width: max-content;
         }
 
         .table-header > th {
@@ -189,6 +191,78 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        
+        .table-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+
+        .pagination-box {
+            float: right;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            width: fit-content;
+            font-style: normal;
+            font-size: 14px;
+            font-weight: 400;
+            color: #000000;
+        }
+
+        .pagination-box a {
+            text-decoration: none;
+            line-height: 17px;
+            color: #000000;
+        }
+
+
+        .page-arrow {
+            display: float;
+            float: right;
+            color: #5B7296;
+            padding: 0.625rem 0.938rem;
+            border-style: transparent;
+            border-width: 1px;
+        }
+
+        .pagination-box a:first-child .page-arrow {
+            padding-left: 0.1rem;
+        }
+
+        .pagination-box a:last-child .page-arrow {
+            padding-right: 0.1rem;
+        }
+
+        .page-button {
+            border-style: solid;
+            border-color: #E7E7E7;
+            border-width: 1px;
+            display: float;
+            float: right;
+            padding: 0.625rem 0.938rem;
+            
+        }
+
+        .pagination-box a:nth-child(2) div {
+            border-top-left-radius: 0.25rem;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .pagination-box a:nth-last-child(2) div {
+            border-top-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .current-page {
+            background-color: #F6F7FF;
+            border-color: #4B1FED;
+            color: #4B1FED;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -251,265 +325,272 @@
             <h1>Marlowe Contract List (Mainnet)</h1>
             <p>Contracts list acquired: Thu May 18 2023 21:14:42 GMT+0200</p>
             <p>1-12 contracts shown out of 316, (page 1 out of 27)</p>
-            <table class="table">
-                <tr class="table-header">
-                    <th>
-                        <b>Contract ID</b>
-                    </th>
-                    <th>
-                        <b>Role token minting policy</b>
-                    </th>
-                    <th>
-                        <b>Block No</b>
-                    </th>
-                    <th>
-                        <b>Slot No</b>
-                    </th>
-                    <th>
-                        <b>Status</b>
-                    </th>
-                    <th>
-                        <b>Num transactions</b>
-                    </th>
-                </tr>
-                <tr class="table-row active">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#0038FF"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=ec3bbda726d550b9dbd6c82d29e33bf30ba94a88e0569a2f8bac456f1bdcfd2a%231">ec3bbda726d550b9dbd6c82d29e33bf30ba94a88e0569a2f8bac456f1bdcfd2a#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=ec13cf2bd6c1b60ff2b139b76dcb89c17f11fb86ea3211f95e837a458bec5116%231">ec13cf2bd6c1b60ff2b139b76dcb89c17f11fb86ea3211f95e837a458bec5116#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row active">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=e1345fc197860ca687369a14830e834a6f27461b5e5f5e14d3a5f49198369821%231">e1345fc197860ca687369a14830e834a6f27461b5e5f5e14d3a5f49198369821#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#0038FF"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=df6c365b4855cab20aa9339d74857ed19b36e94d3079f53bcf57344d2035bb62%231">df6c365b4855cab20aa9339d74857ed19b36e94d3079f53bcf57344d2035bb62#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=d58527a4abdd919944c91aeef1e16928029e85480e198816e9727c3785a9e115%231">d58527a4abdd919944c91aeef1e16928029e85480e198816e9727c3785a9e115#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row active">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=d5205b80182337116c8c3c8accd255bb13ebf9919b3331d24dd434330848c32d%231">d5205b80182337116c8c3c8accd255bb13ebf9919b3331d24dd434330848c32d#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#0038FF"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=d44a4e1cd9fe1def2fb7cd87b02d1b00d687e3d98c0798fe4feaec3d49d4bacb%231">d44a4e1cd9fe1def2fb7cd87b02d1b00d687e3d98c0798fe4feaec3d49d4bacb#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=d3cf42a3ac7950d5467cd7cd688155778545134c22d1fccb41d90e986bd1f142%231">d3cf42a3ac7950d5467cd7cd688155778545134c22d1fccb41d90e986bd1f142#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=c28ebb234c28894983daa478a657e88278da6a43a3fbee661ffb184aacd63c46%231">c28ebb234c28894983daa478a657e88278da6a43a3fbee661ffb184aacd63c46#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=bdb19db7346e65d9d020f39b8aea35c01e1d5eef0e6265c9cd5636beddf03641%231">bdb19db7346e65d9d020f39b8aea35c01e1d5eef0e6265c9cd5636beddf03641#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                <tr class="table-row">
-                    <td class="table-cell">
-                        <a
-                            href="contractView?tab=info&amp;contractId=bcaeb74fa88b148c78e981f58222828e449ea3654c0d7fbff4f33404aa94defb%231">bcaeb74fa88b148c78e981f58222828e449ea3654c0d7fbff4f33404aa94defb#1</a>
-                    </td>
-                    <td class="table-cell">-</td>
-                    <td class="table-cell">8589188</td>
-                    <td class="table-cell">88732776</td>
-                    <td class="table-cell">
-                        <div class="active-light">
-                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td class="table-cell">
-                        <div>3</div>
-                    </td>
-                </tr>
-                
-            </table>
-            <p>&lt;&lt;&nbsp;&nbsp;&lt;&nbsp;&nbsp;1&nbsp;&nbsp;<a href="listContracts?page=2">2</a>&nbsp;&nbsp;<a
-                    href="listContracts?page=3">3</a>&nbsp;&nbsp;<a href="listContracts?page=4">4</a>&nbsp;&nbsp;<a
-                    href="listContracts?page=5">5</a>&nbsp;&nbsp;<a href="listContracts?page=6">6</a>&nbsp;&nbsp;<a
-                    href="listContracts?page=7">7</a>&nbsp;&nbsp;<a href="listContracts?page=8">8</a>&nbsp;&nbsp;<a
-                    href="listContracts?page=9">9</a>&nbsp;&nbsp;<a href="listContracts?page=10">10</a>&nbsp;&nbsp;<a
-                    href="listContracts?page=11">11</a>&nbsp;&nbsp;<a href="listContracts?page=2">&gt;</a>&nbsp;&nbsp;<a
-                    href="listContracts?page=27">&gt;&gt;</a>
-            </p>
+            <div class="table-wrapper">
+                <table class="table">
+                    <tr class="table-header">
+                        <th>
+                            <b>Contract ID</b>
+                        </th>
+                        <th>
+                            <b>Role token minting policy</b>
+                        </th>
+                        <th>
+                            <b>Block No</b>
+                        </th>
+                        <th>
+                            <b>Slot No</b>
+                        </th>
+                        <th>
+                            <b>Status</b>
+                        </th>
+                        <th>
+                            <b>Num transactions</b>
+                        </th>
+                    </tr>
+                    <tr class="table-row active">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#0038FF"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=ec3bbda726d550b9dbd6c82d29e33bf30ba94a88e0569a2f8bac456f1bdcfd2a%231">ec3bbda726d550b9dbd6c82d29e33bf30ba94a88e0569a2f8bac456f1bdcfd2a#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=ec13cf2bd6c1b60ff2b139b76dcb89c17f11fb86ea3211f95e837a458bec5116%231">ec13cf2bd6c1b60ff2b139b76dcb89c17f11fb86ea3211f95e837a458bec5116#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row active">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=e1345fc197860ca687369a14830e834a6f27461b5e5f5e14d3a5f49198369821%231">e1345fc197860ca687369a14830e834a6f27461b5e5f5e14d3a5f49198369821#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#0038FF"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=df6c365b4855cab20aa9339d74857ed19b36e94d3079f53bcf57344d2035bb62%231">df6c365b4855cab20aa9339d74857ed19b36e94d3079f53bcf57344d2035bb62#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=d58527a4abdd919944c91aeef1e16928029e85480e198816e9727c3785a9e115%231">d58527a4abdd919944c91aeef1e16928029e85480e198816e9727c3785a9e115#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row active">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=d5205b80182337116c8c3c8accd255bb13ebf9919b3331d24dd434330848c32d%231">d5205b80182337116c8c3c8accd255bb13ebf9919b3331d24dd434330848c32d#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#0038FF"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=d44a4e1cd9fe1def2fb7cd87b02d1b00d687e3d98c0798fe4feaec3d49d4bacb%231">d44a4e1cd9fe1def2fb7cd87b02d1b00d687e3d98c0798fe4feaec3d49d4bacb#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=d3cf42a3ac7950d5467cd7cd688155778545134c22d1fccb41d90e986bd1f142%231">d3cf42a3ac7950d5467cd7cd688155778545134c22d1fccb41d90e986bd1f142#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=c28ebb234c28894983daa478a657e88278da6a43a3fbee661ffb184aacd63c46%231">c28ebb234c28894983daa478a657e88278da6a43a3fbee661ffb184aacd63c46#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=bdb19db7346e65d9d020f39b8aea35c01e1d5eef0e6265c9cd5636beddf03641%231">bdb19db7346e65d9d020f39b8aea35c01e1d5eef0e6265c9cd5636beddf03641#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    <tr class="table-row">
+                        <td class="table-cell">
+                            <a
+                                href="contractView?tab=info&amp;contractId=bcaeb74fa88b148c78e981f58222828e449ea3654c0d7fbff4f33404aa94defb%231">bcaeb74fa88b148c78e981f58222828e449ea3654c0d7fbff4f33404aa94defb#1</a>
+                        </td>
+                        <td class="table-cell">-</td>
+                        <td class="table-cell">8589188</td>
+                        <td class="table-cell">88732776</td>
+                        <td class="table-cell">
+                            <div class="active-light">
+                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
+                                </svg>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <div>3</div>
+                        </td>
+                    </tr>
+                    
+                </table>
+                <div class="pagination-box">
+                    <a href="listContracts?page=2"><div class="page-arrow">&lt;</div></a>
+                    <a href="listContracts?page=2"><div class="page-button">Previous</div></a>
+                    <a href="listContracts?page=2"><div class="page-button current-page">1</div></a>
+                    <a href="listContracts?page=2"><div class="page-button">2</div></a>
+                    <a href="listContracts?page=3"><div class="page-button">3</div></a>
+                    <a href="listContracts?page=4"><div class="page-button">4</div></a>
+                    <a href="listContracts?page=5"><div class="page-button">5</div></a>
+                    <a href="listContracts?page=6"><div class="page-button">6</div></a>
+                    <a href="listContracts?page=7"><div class="page-button">7</div></a>
+                    <a href="listContracts?page=2"><div class="page-button">Next</div></a>
+                    <a href="listContracts?page=27"><div class="page-arrow">&gt</div></a>
+                </div>
+            </div>
         </div>
     </div>
 </body>
