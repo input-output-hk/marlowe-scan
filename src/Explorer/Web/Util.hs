@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus )
+  ( SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus, tldhc )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -124,6 +124,9 @@ tlr = H.tr ! class_ "table-row"
 
 tld :: Html -> Html
 tld = H.td ! class_ "table-cell"
+
+tldhc :: Html -> Html
+tldhc = H.td ! class_ "table-cell hash-cell"
 
 -- Normal basic tables with border
 

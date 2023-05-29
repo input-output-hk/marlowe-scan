@@ -6,18 +6,18 @@ module Explorer.Web.ContractListView
   where
 
 import Control.Monad (forM_)
-import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, preEscapedToHtml, string, toHtml, toValue )
-import Text.Blaze.Html5.Attributes ( href, style )
+import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, p, string, toHtml, toValue )
+import qualified Text.Blaze.Html5 as H
+import Text.Blaze.Html5.Attributes ( href, style, class_ )
 import Text.Printf ( printf )
 
 import Explorer.SharedContractCache ( ContractListCacheReader, readContractList, ContractList(..) )
-import Explorer.Web.Util ( baseDoc, generateLink, formatTimeDiff, makeLocalDateTime, tableList, tlhr, tlh, tlr, tld, SyncStatus (..) )
+import Explorer.Web.Util ( baseDoc, generateLink, formatTimeDiff, makeLocalDateTime, tableList, tlhr, tlh, tlr, tld, SyncStatus (..), tldhc )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractInList (..), ContractListISeq )
 
 import Data.Foldable (toList)
 import Data.Maybe (fromMaybe)
 import qualified Data.Sequence as Seq
-import Data.List (intersperse)
 import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import qualified Language.Marlowe.Runtime.Types.ContractsJSON as CSJ
 import Explorer.API.IsContractOpen (isOpenAJAXBox)
@@ -70,7 +70,7 @@ pageLength = 12
 
 -- Number of pages to each side to show (unless close to border)
 contextPages :: Int
-contextPages = 5
+contextPages = 3
 
 -- Make sure a value is inside an interval
 bindVal :: Int -> Int -> Int -> Int
@@ -164,26 +164,27 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
   renderTime currSyncStatus
   p $ string $ printf "%d-%d contracts shown out of %d, (page %d out of %d)"
                         firstContract lastContract numContracts page lastPage
-  tableList $ do
-    tlhr $ do
-      tlh $ b "Active"
-      tlh $ b "Contract ID"
-      tlh $ b "Role token minting policy"
-      tlh $ b "Block No"
-      tlh $ b "Slot No"
-      tlh $ b "Num transactions"
-    let makeRow clvr = do
-          let cid = clvrContractId clvr
-          tlr $ do
-            tld $ isOpenAJAXBox cid
-            tld $ a ! href (toValue $ generateLink "contractView" [("tab", "info"), ("contractId", cid)])
-                    $ string cid
-            tld $ renderStr $ clvrRoleMintingPolicyId clvr
-            tld $ toHtml $ clvrBlock clvr
-            tld $ toHtml $ clvrSlot clvr
-            tld $ numTransactionsAJAXBox cid
-    forM_ clvrs makeRow
-  renderNavBar pinf
+  H.div ! class_ "table-wrapper" $ do
+    tableList $ do
+      tlhr $ do
+        tlh $ b "Active"
+        tlh $ b "Contract ID"
+        tlh $ b "Role token minting policy"
+        tlh $ b "Block No"
+        tlh $ b "Slot No"
+        tlh $ b "Num transactions"
+      let makeRow clvr = do
+            let cid = clvrContractId clvr
+            tlr $ do
+              tld $ isOpenAJAXBox cid
+              tldhc $ a ! href (toValue $ generateLink "contractView" [("tab", "info"), ("contractId", cid)])
+                        $ string cid
+              tldhc $ renderStr $ clvrRoleMintingPolicyId clvr
+              tld $ toHtml $ clvrBlock clvr
+              tld $ toHtml $ clvrSlot clvr
+              tld $ numTransactionsAJAXBox cid
+      forM_ clvrs makeRow
+    renderNavBar pinf
 
 renderCIRs (ContractListView { titleLabel = labelForTitle
                              , clvContents = ContractListViewStillSyncing}) =
@@ -199,31 +200,37 @@ appIfNotBlank title labelForTitle
   where trimmedTitle = trim labelForTitle
 
 
-generateLink' :: Int -> String -> Html
-generateLink' targetPage label =
-  a ! href (toValue $ generateLink "listContracts" [("page", show targetPage)]) $ string label
-
-space :: Html
-space = preEscapedToHtml ("&nbsp;&nbsp;" :: String)
+generateLink' :: Int -> Html -> Html
+generateLink' targetPage = a ! href (toValue $ generateLink "listContracts" [("page", show targetPage)])
 
 renderNavBar :: PageInfo -> Html
 renderNavBar pinf@(PageInfo { currentPage = page
                             , pageRange = (minPage, maxPage)
                             , numPages = lastPage
                             }) =
-  p $ sequence_ $ intersperse space $ [ generateNavLink pinf 1 "<<"
-                                      , generateNavLink pinf (page - 1) "<"
-                                      ] ++ [ generateNavLink pinf np (show np) | np <- [minPage..maxPage] ] ++
-                                      [ generateNavLink pinf (page + 1) ">"
-                                      , generateNavLink pinf lastPage ">>"
-                                      ]
+  H.div ! class_ "pagination-box"
+        $ sequence_ $ [ generateNavLink False pinf 1 $ genArrow "<"
+                      , generateNavLink True pinf (page - 1) $ genLink "Previous"
+                      ] ++ [ generateNavLink False pinf np $ genLink $ show np | np <- [minPage..maxPage] ] ++
+                      [ generateNavLink True pinf (page + 1) $ genLink "Next"
+                      , generateNavLink False pinf lastPage $ genArrow ">"
+                      ]
 
-generateNavLink :: PageInfo -> Int -> String -> Html
-generateNavLink (PageInfo { currentPage = page
-                          , numPages = lastPage
-                          }) targetPage linkText
-  | page == boundPage = string linkText
-  | otherwise = generateLink' boundPage linkText
+
+genArrow :: String -> Bool -> Html
+genArrow label _ = H.div ! class_ "page-arrow" $ string label
+
+genLink :: String -> Bool -> Html
+genLink label isThis = H.div ! class_ (if isThis then "page-button current-page" else "page-button") $ string label
+
+generateNavLink :: Bool -> PageInfo -> Int -> (Bool -> Html) -> Html
+generateNavLink ommit (PageInfo { currentPage = page
+                                , numPages = lastPage
+                                }) targetPage genContent
+  
+  | page == boundPage && ommit = pure ()
+  | otherwise = generateLink' boundPage
+                  $ genContent (boundPage == page)
   where boundPage = bindVal 1 lastPage targetPage
 
 renderStr :: String -> Html

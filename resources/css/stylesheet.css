@@ -28,11 +28,6 @@ html, body {
     align-items: stretch;
 }
 
-.main-content {
-    flex-grow: 999;
-    background-color: #ffffff;
-}
-
 .logo {
     display: block;
     margin: 2rem;
@@ -144,15 +139,21 @@ html, body {
 }
 
 .main-content {
+    flex-grow: 999;
+    background-color: #ffffff;
     padding-left: 6.6rem;
     padding-top: 3.25rem;
     padding-bottom: 3.25rem;
     padding-right: 3.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .table {
     border-collapse: separate;
     border-spacing: 0;
+    width: max-content;
 }
 
 .table-header > th {
@@ -171,6 +172,10 @@ html, body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.hash-cell {
+    width: 300px;
 }
 
 .table-row {
@@ -199,3 +204,75 @@ html, body {
     align-items: center;
 }
 
+
+.table-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+
+.pagination-box {
+    float: right;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    width: fit-content;
+    font-style: normal;
+    font-size: 14px;
+    font-weight: 400;
+    color: #000000;
+}
+
+.pagination-box a {
+    text-decoration: none;
+    line-height: 17px;
+    color: #000000;
+}
+
+
+.page-arrow {
+    display: float;
+    float: right;
+    color: #5B7296;
+    padding: 0.625rem 0.938rem;
+    border-style: transparent;
+    border-width: 1px;
+}
+
+.pagination-box a:first-child .page-arrow {
+    padding-left: 0.1rem;
+}
+
+.pagination-box a:last-child .page-arrow {
+    padding-right: 0.1rem;
+}
+
+.page-button {
+    border-style: solid;
+    border-color: #E7E7E7;
+    border-width: 1px;
+    display: float;
+    float: right;
+    padding: 0.625rem 0.938rem;
+
+}
+
+.pagination-box a:nth-child(2) div {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.pagination-box a:nth-last-child(2) div {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.current-page {
+    background-color: #F6F7FF;
+    border-color: #4B1FED;
+    color: #4B1FED;
+    font-weight: 700;
+}
