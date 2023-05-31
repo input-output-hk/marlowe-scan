@@ -4,6 +4,11 @@
 
 <head>
     <title>Contract - 3e5d0ac37fc61e2c635cac9eccd98d5caef8b09eed3e6c6256453eaead093b21#1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/prism-coy.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/plugins/line-numbers/prism-line-numbers.min.css">
     <style>
         html, body {
             height: 100%;
@@ -188,87 +193,179 @@
             justify-content: center;
             align-items: center;
         }
+        .button-row {
+            padding: 20px 0px;
+        }
+        .button-cell {
+            font-weight: bold;
+            border: 1px solid #5B7296;
+            border-radius: 18px;
+            background-color: transparent;
+            padding: 9px 17px;
+            margin: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .button-cell.active {
+            border: 1px solid #000000;
+            color: #000000;
+        }
+
+        .inactive-text {
+            font-size: 15px;
+            color: #5B7296;
+        }
+
+        .details-list {
+            text-align: left;
+        }
+        .details-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        dt, dd {
+            text-align: left;
+        }
+        .icon {
+            height: 15px;
+            width: 15px;
+        }
+
+        .h2-sub-text {
+            font-weight: normal;
+            font-size: 20px;
+        }
+
+
     </style>
 </head>
 
 <body>
-    <h1>Contract - 3e5d0ac37fc61e2c635cac9eccd98d5caef8b09eed3e6c6256453eaead093b21#1</h1>
-    <table style="border: 1px solid black">
-        <tr>
-            <td style="border: 1px solid black; padding: 5px;"><b><a href="listContracts">Contracts List</a></b></td>
-            <td style="border: 1px solid black; padding: 5px;"><b>Navigation bar</b></td>
-            <td style="border: 1px solid black; padding: 5px;"><a
-                    href="contractView?tab=info&amp;contractId=3e5d0ac37fc61e2c635cac9eccd98d5caef8b09eed3e6c6256453eaead093b21%231">Details</a>
-            </td>
-            <td style="border: 1px solid black; padding: 5px;">Code</td>
-            <td style="border: 1px solid black; padding: 5px;"><a
-                    href="contractView?tab=txs&amp;contractId=3e5d0ac37fc61e2c635cac9eccd98d5caef8b09eed3e6c6256453eaead093b21%231">Transactions</a>
-            </td>
-            <td style="border: 1px solid black; padding: 5px;"><a
-                    href="contractDownloadInfo?contractId=3e5d0ac37fc61e2c635cac9eccd98d5caef8b09eed3e6c6256453eaead093b21%231">Download
-                    contract info</a></td>
-        </tr>
-    </table>
-    <table style="border: 1px solid black">
-        <tr>
-            <td style="border: 1px solid black; padding: 5px;"><b>Contract ID</b></td>
-            <td style="border: 1px solid black; padding: 5px;"><a
-                    href="https://cardanoscan.io/transaction/3e5d0ac37fc61e2c635cac9eccd98d5caef8b09eed3e6c6256453eaead093b21#1">3e5d0ac37fc61e2c635cac9eccd98d5caef8b09eed3e6c6256453eaead093b21#1</a>
-            </td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; padding: 5px;"><b>Current contract</b></td>
-            <td style="border: 1px solid black; padding: 5px;">
-                <code>When [<br>&nbsp;&nbsp;(Case<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Deposit<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 4560))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Pay<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Party<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1qy9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupcvluken35ncjnu0puetf5jvttedkze02d5kf890kquh60sut9jg7&quot;))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 4560) Close))] 1683961140000 Close<br></code>
-            </td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; padding: 5px;"><b>Current state</b></td>
-            <td style="border: 1px solid black; padding: 5px;">
-                <table style="border: 1px solid black">
-                    <tr>
-                        <td style="border: 1px solid black; padding: 5px;"><b>Accounts</b></td>
-                        <td style="border: 1px solid black; padding: 5px;">
-                            <table style="border: 1px solid black">
-                                <tr>
-                                    <th style="border: 1px solid black; padding: 5px;"><b>Party</b></th>
-                                    <th style="border: 1px solid black; padding: 5px;"><b>Currency (token name)</b></th>
-                                    <th style="border: 1px solid black; padding: 5px;"><b>Amount</b></th>
-                                </tr>
-                                <tr>
-                                    <td style="border: 1px solid black; padding: 5px;">Address: <a
-                                            href="https://cardanoscan.io/address/addr_test1vq9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupczgtm9j">addr_test1vq9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupczgtm9j</a>
-                                    </td>
-                                    <td style="border: 1px solid black; padding: 5px;">ADA</td>
-                                    <td style="border: 1px solid black; padding: 5px;">2.000000</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 5px;"><b>Bound values</b></td>
-                        <td style="border: 1px solid black; padding: 5px;">No bound values</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 5px;"><b>Choices</b></td>
-                        <td style="border: 1px solid black; padding: 5px;">No choices</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 5px;"><b>minTime</b></td>
-                        <td style="border: 1px solid black; padding: 5px;">
-                            Sat Feb 04 2023 16:21:12 GMT+0100 (POSIX: 1675524072000)
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; padding: 5px;"><b>Initial contract</b></td>
-            <td style="border: 1px solid black; padding: 5px;">
-                <code>When [<br>&nbsp;&nbsp;(Case<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Deposit<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1qy9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupcvluken35ncjnu0puetf5jvttedkze02d5kf890kquh60sut9jg7&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1qy9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupcvluken35ncjnu0puetf5jvttedkze02d5kf890kquh60sut9jg7&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 9000))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Pay<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1qy9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupcvluken35ncjnu0puetf5jvttedkze02d5kf890kquh60sut9jg7&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Party<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 9000)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(When [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Case<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Deposit<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 4560))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Pay<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Party<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1qy9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupcvluken35ncjnu0puetf5jvttedkze02d5kf890kquh60sut9jg7&quot;))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 4560)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(When [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Case<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Deposit<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 4560))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Pay<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1q95e9feu4hkp4qwvgqasq02na05z3eg33zzjquf2d86e6qzznwng4gtlladnxm7d486psa003jy6dv230t82rvv3pflqeuzzt2&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Party<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Address &quot;addr1qy9prvx8ufwutkwxx9cmmuuajaqmjqwujqlp9d8pvg6gupcvluken35ncjnu0puetf5jvttedkze02d5kf890kquh60sut9jg7&quot;))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Token &quot;8bb3b343d8e404472337966a722150048c768d0a92a9813596c5338d&quot; &quot;USDB&quot;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Constant 4560) Close))] 1683961140000 Close)))] 1676185140000 Close)))] 1668495540000 Close<br></code>
-            </td>
-        </tr>
-    </table>
+    <div class="wrapper">
+        <div class="side-menu">
+            <div class="logo">
+                <svg class="logo-pic" width="37" height="35" viewBox="0 0 37 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31849 2.90887L0.661621 0V4.67271V17.591H5.16925V9.34542L17.097 18.8334L32.6816 31.2302L36.3385 34.1391V29.4664V4.67271V0L32.6816 2.90887L18.5 14.1896L4.31849 2.90887ZM31.8308 24.7937L22.1205 17.0695L31.8308 9.34542V24.7937ZM0.662063 17.5916L5.16655 21.627V17.5916H0.662063Z" fill="#7D7F94"/>
+                </svg>
+                <div class="logo-text">
+                    <span class="logo-text-marlowe">
+                        Marlowe
+                    </span>
+                    <span class="logo-text-explorer">
+                        Explorer
+                    </span>
+                </div>
+            </div>
+            <div class="side-option selected-option">
+                <div class="side-icon">
+                    <svg style="padding-top: 0.1rem;" width="16" height="15" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.4361 14.9995L9.18606 9.74945C8.76939 10.0828 8.29022 10.3467 7.74855 10.5411C7.20689 10.7356 6.6305 10.8328 6.01939 10.8328C4.5055 10.8328 3.22439 10.3086 2.17606 9.26028C1.12717 8.2114 0.602722 6.93001 0.602722 5.41612C0.602722 3.90223 1.12717 2.62084 2.17606 1.57195C3.22439 0.523617 4.5055 -0.000549316 6.01939 -0.000549316C7.53328 -0.000549316 8.81467 0.523617 9.86355 1.57195C10.9119 2.62084 11.4361 3.90223 11.4361 5.41612C11.4361 6.02723 11.3388 6.60362 11.1444 7.14528C10.9499 7.68695 10.6861 8.16612 10.3527 8.58278L15.6027 13.8328L14.4361 14.9995ZM6.01939 9.16612C7.06105 9.16612 7.94661 8.80167 8.67605 8.07278C9.40494 7.34334 9.76939 6.45778 9.76939 5.41612C9.76939 4.37445 9.40494 3.48889 8.67605 2.75945C7.94661 2.03056 7.06105 1.66612 6.01939 1.66612C4.97772 1.66612 4.09217 2.03056 3.36272 2.75945C2.63383 3.48889 2.26939 4.37445 2.26939 5.41612C2.26939 6.45778 2.63383 7.34334 3.36272 8.07278C4.09217 8.80167 4.97772 9.16612 6.01939 9.16612Z" fill="#4B1FED"/>
+                    </svg>
+                </div>
+                <div class="side-text">
+                    Explorer
+                </div>
+            </div>
+            <div class="side-option">
+                <div class="side-icon">
+                    <svg style="padding-top: 0.1rem;" width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 12.5L7.16667 11.2917L5.375 9.50001L7.16667 7.70834L6 6.50001L3 9.50001L6 12.5ZM10 12.5L13 9.50001L10 6.50001L8.83333 7.70834L10.625 9.50001L8.83333 11.2917L10 12.5ZM2.16667 17C1.70833 17 1.31583 16.837 0.989167 16.5108C0.663055 16.1842 0.5 15.7917 0.5 15.3333V3.66668C0.5 3.20834 0.663055 2.81584 0.989167 2.48918C1.31583 2.16307 1.70833 2.00001 2.16667 2.00001H5.66667C5.84722 1.50001 6.14944 1.09723 6.57333 0.791677C6.99667 0.486121 7.47222 0.333344 8 0.333344C8.52778 0.333344 9.00361 0.486121 9.4275 0.791677C9.85083 1.09723 10.1528 1.50001 10.3333 2.00001H13.8333C14.2917 2.00001 14.6842 2.16307 15.0108 2.48918C15.3369 2.81584 15.5 3.20834 15.5 3.66668V15.3333C15.5 15.7917 15.3369 16.1842 15.0108 16.5108C14.6842 16.837 14.2917 17 13.8333 17H2.16667ZM8 3.04168C8.18056 3.04168 8.33 2.98251 8.44833 2.86418C8.56611 2.7464 8.625 2.59723 8.625 2.41668C8.625 2.23612 8.56611 2.08668 8.44833 1.96834C8.33 1.85057 8.18056 1.79168 8 1.79168C7.81944 1.79168 7.67028 1.85057 7.5525 1.96834C7.43417 2.08668 7.375 2.23612 7.375 2.41668C7.375 2.59723 7.43417 2.7464 7.5525 2.86418C7.67028 2.98251 7.81944 3.04168 8 3.04168ZM2.16667 15.3333H13.8333V3.66668H2.16667V15.3333Z" fill="#5B7296"/>
+                    </svg>                        
+                </div>
+                <div class="side-text">
+                    Documentation
+                </div>
+            </div>
+            <div class="side-indicator-wrapper">
+                <div class="side-indicator">
+                    <div class="status-label">
+                        Blockchain status:
+                    </div>
+                    <div class="status-badge">
+                        <div class="status-light">
+                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#0FE088"/>
+                            </svg>
+                        </div>
+                        <div class="status-explantion">
+                            Synchronized
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-container">
+            <div class="main-content">
+                <div>
+                    <h2>Contract - <span class="h2-sub-text">625b020d234e815c7ff1d7b0eea2fe29a429f6c31ce48197b690f6013d784500</span></h2>
+                </div>
+                <div class="button-row">
+                    <button class="button-cell active inactive-text">Details</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Transactions</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=state&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Code</button>
+                </div>
+
+                <dl class="details-list">
+                    <div class="details-item">
+                        <dt class="inactive-text">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book" viewBox="0 0 16 16"> <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/> </svg>
+                            Name
+                        </dt>
+                        <dd>
+                            Bob’s Contract 123457789834483473
+                        </dd>
+                    </div>
+                    <div class="details-item">
+                        <dt class="inactive-text">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fingerprint" viewBox="0 0 16 16"> <path d="M8.06 6.5a.5.5 0 0 1 .5.5v.776a11.5 11.5 0 0 1-.552 3.519l-1.331 4.14a.5.5 0 0 1-.952-.305l1.33-4.141a10.5 10.5 0 0 0 .504-3.213V7a.5.5 0 0 1 .5-.5Z"/> <path d="M6.06 7a2 2 0 1 1 4 0 .5.5 0 1 1-1 0 1 1 0 1 0-2 0v.332c0 .409-.022.816-.066 1.221A.5.5 0 0 1 6 8.447c.04-.37.06-.742.06-1.115V7Zm3.509 1a.5.5 0 0 1 .487.513 11.5 11.5 0 0 1-.587 3.339l-1.266 3.8a.5.5 0 0 1-.949-.317l1.267-3.8a10.5 10.5 0 0 0 .535-3.048A.5.5 0 0 1 9.569 8Zm-3.356 2.115a.5.5 0 0 1 .33.626L5.24 14.939a.5.5 0 1 1-.955-.296l1.303-4.199a.5.5 0 0 1 .625-.329Z"/> <path d="M4.759 5.833A3.501 3.501 0 0 1 11.559 7a.5.5 0 0 1-1 0 2.5 2.5 0 0 0-4.857-.833.5.5 0 1 1-.943-.334Zm.3 1.67a.5.5 0 0 1 .449.546 10.72 10.72 0 0 1-.4 2.031l-1.222 4.072a.5.5 0 1 1-.958-.287L4.15 9.793a9.72 9.72 0 0 0 .363-1.842.5.5 0 0 1 .546-.449Zm6 .647a.5.5 0 0 1 .5.5c0 1.28-.213 2.552-.632 3.762l-1.09 3.145a.5.5 0 0 1-.944-.327l1.089-3.145c.382-1.105.578-2.266.578-3.435a.5.5 0 0 1 .5-.5Z"/> <path d="M3.902 4.222a4.996 4.996 0 0 1 5.202-2.113.5.5 0 0 1-.208.979 3.996 3.996 0 0 0-4.163 1.69.5.5 0 0 1-.831-.556Zm6.72-.955a.5.5 0 0 1 .705-.052A4.99 4.99 0 0 1 13.059 7v1.5a.5.5 0 1 1-1 0V7a3.99 3.99 0 0 0-1.386-3.028.5.5 0 0 1-.051-.705ZM3.68 5.842a.5.5 0 0 1 .422.568c-.029.192-.044.39-.044.59 0 .71-.1 1.417-.298 2.1l-1.14 3.923a.5.5 0 1 1-.96-.279L2.8 8.821A6.531 6.531 0 0 0 3.058 7c0-.25.019-.496.054-.736a.5.5 0 0 1 .568-.422Zm8.882 3.66a.5.5 0 0 1 .456.54c-.084 1-.298 1.986-.64 2.934l-.744 2.068a.5.5 0 0 1-.941-.338l.745-2.07a10.51 10.51 0 0 0 .584-2.678.5.5 0 0 1 .54-.456Z"/> <path d="M4.81 1.37A6.5 6.5 0 0 1 14.56 7a.5.5 0 1 1-1 0 5.5 5.5 0 0 0-8.25-4.765.5.5 0 0 1-.5-.865Zm-.89 1.257a.5.5 0 0 1 .04.706A5.478 5.478 0 0 0 2.56 7a.5.5 0 0 1-1 0c0-1.664.626-3.184 1.655-4.333a.5.5 0 0 1 .706-.04ZM1.915 8.02a.5.5 0 0 1 .346.616l-.779 2.767a.5.5 0 1 1-.962-.27l.778-2.767a.5.5 0 0 1 .617-.346Zm12.15.481a.5.5 0 0 1 .49.51c-.03 1.499-.161 3.025-.727 4.533l-.07.187a.5.5 0 0 1-.936-.351l.07-.187c.506-1.35.634-2.74.663-4.202a.5.5 0 0 1 .51-.49Z"/> </svg>
+                            Version
+                        </dt>
+                        <dd>
+                            1.1.1
+                        </dd>
+                    </div>
+                </dl>
+                <div class="code-container"><pre class="line-numbers" data-start="0"><code class="language-javascript" id="code">
+/* We can set explicitRefunds true to run Close refund analysis
+but we get a shorter contract if we set it to false */
+const explicitRefunds: Boolean = false;
+
+const buyer: Party = Role("Buyer");
+const seller: Party = Role("Seller");
+const arbiter: Party = Role("Mediator");
+
+const price: Value = ConstantParam("Price");
+
+const depositTimeout: Timeout = TimeParam("Payment deadline");
+const disputeTimeout: Timeout = TimeParam("Complaint deadline");
+const answerTimeout: Timeout = TimeParam("Complaint response deadline");
+const arbitrageTimeout: Timeout = TimeParam("Mediation deadline");
+
+function choice(choiceName: string, chooser: Party, choiceValue: SomeNumber, 
+continuation: Contract): Case {
+    return Case(Choice(ChoiceId(choiceName, chooser),
+        [Bound(choiceValue, choiceValue)]),
+        continuation);
+}
+
+
+function deposit(timeout: Timeout, timeoutContinuation: Contract, continuation: 
+Contract): Contract {
+    return When([Case(Deposit(seller, buyer, ada, price), continuation)],
+                </code></pre></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/plugins/line-numbers/prism-line-numbers.min.js"> </script>
+    <script type="text/javascript">
+        // manual highlighting in case content is dynamic
+        Prism.highlightAll();
+    </script> 
+
 </body>
 
 </html>
