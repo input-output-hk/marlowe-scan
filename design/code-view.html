@@ -241,6 +241,36 @@
 
 
     </style>
+<!-- syntax highlighting styles -->
+<style>
+        .token.value {
+          color: #0d6659;
+        }
+        
+        .token.observation {
+          color: #1d704f;
+        }
+        
+        .token.bound {
+          color: #1c598a;
+        }
+        
+        .token.action {
+          color: #6c3a7a;
+        }
+        
+        .token.payee {
+          color: #232f3e;
+        }
+        
+        .token.case {
+          color: #b58c0a;
+        }
+        
+        .token.contract {
+          color: #af5f16;
+        }
+</style>
 </head>
 
 <body>
@@ -328,39 +358,44 @@
                         </dd>
                     </div>
                 </dl>
-                <div class="code-container"><pre class="line-numbers" data-start="0"><code class="language-javascript" id="code">
-/* We can set explicitRefunds true to run Close refund analysis
-but we get a shorter contract if we set it to false */
-const explicitRefunds: Boolean = false;
-
-const buyer: Party = Role("Buyer");
-const seller: Party = Role("Seller");
-const arbiter: Party = Role("Mediator");
-
-const price: Value = ConstantParam("Price");
-
-const depositTimeout: Timeout = TimeParam("Payment deadline");
-const disputeTimeout: Timeout = TimeParam("Complaint deadline");
-const answerTimeout: Timeout = TimeParam("Complaint response deadline");
-const arbitrageTimeout: Timeout = TimeParam("Mediation deadline");
-
-function choice(choiceName: string, chooser: Party, choiceValue: SomeNumber, 
-continuation: Contract): Case {
-    return Case(Choice(ChoiceId(choiceName, chooser),
-        [Bound(choiceValue, choiceValue)]),
-        continuation);
-}
-
-
-function deposit(timeout: Timeout, timeoutContinuation: Contract, continuation: 
-Contract): Contract {
-    return When([Case(Deposit(seller, buyer, ada, price), continuation)],
+                <div class="code-container"><pre class="line-numbers" data-start="1"><code class="language-marlowe" id="code">
+When [
+  (Case
+     (Deposit
+        (Role "Ada provider")
+        (Role "Ada provider")
+        (Token "" "")
+        (MulValue
+           (Constant 1000000)
+           (Constant 294)))
+     (When [
+        (Case
+           (Deposit
+              (Role "Dollar provider")
+              (Role "Dollar provider")
+              (Token "9772ff715b691c0444f333ba1db93b055c0864bec48fff92d1f2a7fe" "Djed_testMicroUSD")
+              (Constant 100000000))
+           (Pay
+              (Role "Ada provider")
+              (Party
+                 (Role "Dollar provider"))
+              (Token "" "")
+              (MulValue
+                 (Constant 1000000)
+                 (Constant 294))
+              (Pay
+                 (Role "Dollar provider")
+                 (Party
+                    (Role "Ada provider"))
+                 (Token "9772ff715b691c0444f333ba1db93b055c0864bec48fff92d1f2a7fe" "Djed_testMicroUSD")
+                 (Constant 100000000) Close)))] 1685200080000 Close))] 1685199780000 Close
                 </code></pre></div>
             </div>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js"> </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/plugins/line-numbers/prism-line-numbers.min.js"> </script>
+    <script src="marlowe.js"> </script>
     <script type="text/javascript">
         // manual highlighting in case content is dynamic
         Prism.highlightAll();
