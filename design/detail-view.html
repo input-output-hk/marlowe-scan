@@ -205,6 +205,7 @@
             margin-right: 5px;
             cursor: pointer;
             text-align: center;
+            box-shadow: 0px 5px 5px 0px rgba(205, 205, 205, 0.25);
         }
 
         .button-cell.active {
@@ -222,13 +223,16 @@
         }
         .details-item {
             display: flex;
-            justify-content: space-between;
+            justify-content: left;
             padding: 10px 0;
         }
 
         dt, dd {
-            text-align: left;
             word-wrap: break-word;
+        }
+
+        dt {
+            width: 150px;
         }
 
         dd span {
@@ -260,11 +264,11 @@
         }
         .contract-label {
             font-weight: bold;
-            font-size: 22px;
+            font-size: 26px;
         }
 
         .contract-id {
-            font-size: 19px;
+            font-size: 26px;
         }
     </style>
 
@@ -333,7 +337,12 @@
                     <button class="button-cell active inactive-text">Details</button>
                     <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=state&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Code</button>
                     <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Transactions</button>
-                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Download</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">
+                        <svg class="icon" width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1.5 12.5001C1.0875 12.5001 0.734375 12.3532 0.440625 12.0595C0.146875 11.7657 0 11.4126 0 11.0001V8.75012H1.5V11.0001H10.5V8.75012H12V11.0001C12 11.4126 11.8531 11.7657 11.5594 12.0595C11.2656 12.3532 10.9125 12.5001 10.5 12.5001H1.5ZM6 9.50012L2.25 5.75012L3.3 4.66262L5.25 6.61262V0.500122H6.75V6.61262L8.7 4.66262L9.75 5.75012L6 9.50012Z" fill="#878FAA"/>
+                        </svg>
+                        Download
+                    </button>
                 </div>
                 <dl class="details-list">
                     <div class="details-item">
