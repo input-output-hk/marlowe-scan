@@ -521,8 +521,7 @@ renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c = do
   H.div ! class_ "button-row"
-        $ do a ! class_ "invisible-link" ! href "listContracts" $ H.div ! class_ "button-cell inactive-text" $ string "Back to contract list"
-             mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
+        $ do mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
                    allContractViews
              a ! class_ "invisible-link" ! href (toValue $ generateLink "contractDownloadInfo" [("contractId", cid)])
                $ H.div ! class_ "button-cell inactive-text"

@@ -38,13 +38,13 @@ redStatusLight :: Html
 redStatusLight = img ! src "/svg/red-status-light.svg" ! alt "Red status light"
 
 fullLogo :: Html
-fullLogo = H.div ! class_ "logo"
---               $ a ! href "/"
-                 $ do logo
-                      H.div ! class_ "logo-text"
-                            $ do H.span ! class_ "logo-text-marlowe" $ string "Marlowe"
-                                 nbsp
-                                 H.span ! class_ "logo-text-explorer" $ string "Explorer"
+fullLogo = a ! class_ "invisible-link" ! href "/"
+             $ H.div ! class_ "logo"
+                     $ do logo
+                          H.div ! class_ "logo-text"
+                                $ do H.span ! class_ "logo-text-marlowe" $ string "Marlowe"
+                                     nbsp
+                                     H.span ! class_ "logo-text-explorer" $ string "Explorer"
 
 downloadIcon :: Html
 downloadIcon = img ! class_ "icon" ! src "/svg/download.svg" ! alt "Download icon"

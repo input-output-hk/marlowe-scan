@@ -9,6 +9,22 @@ html, body {
     font-family: 'Outfit', sans-serif;
 }
 
+a.invisible-link {
+    text-decoration: none;
+}
+
+a.invisible-link:hover {
+    text-decoration: none;
+}
+
+a.invisible-link > * {
+    text-decoration: none;
+}
+
+a.invisible-link:hover > * {
+    text-decoration: none;
+}
+
 .wrapper {
     height: 100%;
     display: flex;
@@ -28,7 +44,7 @@ html, body {
     align-items: stretch;
 }
 
-.logo {
+div.logo {
     display: block;
     margin: 2rem;
     margin-bottom: 3rem;
@@ -202,14 +218,6 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-a.invisible-link {
-    text-decoration: none;
-}
-
-a.invisible-link:hover {
-    text-decoration: none; 
 }
 
 .button-row {
