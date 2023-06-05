@@ -169,6 +169,7 @@
 
         .table-row {
             box-shadow: 0px 3px 11px 3px rgba(232, 237, 255, 0.3);
+            height: 76px;
         }
 
         .table-row > :first-child {
@@ -264,6 +265,70 @@
             color: #4B1FED;
             font-weight: 700;
         }
+
+        .button-row {
+            padding: 20px 0px;
+        }
+        .button-cell {
+            font-weight: bold;
+            border: 1px solid #5B7296;
+            border-radius: 18px;
+            background-color: transparent;
+            padding: 9px 17px;
+            margin-right: 5px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0px 5px 5px 0px rgba(205, 205, 205, 0.25);
+        }
+
+        .button-cell.active {
+            border: 1px solid #000000;
+            color: #000000;
+        }
+
+        .inactive-text {
+            font-size: 15px;
+            color: #5B7296;
+        }
+
+
+        .fontweight-bold {
+            font-weight: bold;
+        }
+
+        .flex-container {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .icon {
+            margin-right: 10px;
+            margin-bottom: 1px;
+        }
+
+        .shaded-description-value {
+            background-color: #EFF2FE;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .contract-header {
+            margin-bottom: 20px;
+        }
+        .contract-label {
+            font-weight: bold;
+            font-size: 26px;
+        }
+
+        .contract-id {
+            font-size: 26px;
+        }
+
+        .brand-color-text {
+            color: #4B1FED;
+        }
+
     </style>
 </head>
 
@@ -321,274 +386,309 @@
                 </div>
             </div>
         </div>
-        <div class="main-content">
-            <h1>Marlowe Contract List (Mainnet)</h1>
-            <p>Contracts list acquired: Thu May 18 2023 21:14:42 GMT+0200</p>
-            <p>1-12 contracts shown out of 316, (page 1 out of 27)</p>
-            <div class="table-wrapper">
-                <table class="table">
-                    <tr class="table-header">
-                        <th>
-                            <b>Contract ID</b>
-                        </th>
-                        <th>
-                            <b>Role token minting policy</b>
-                        </th>
-                        <th>
-                            <b>Block No</b>
-                        </th>
-                        <th>
-                            <b>Slot No</b>
-                        </th>
-                        <th>
-                            <b>Status</b>
-                        </th>
-                        <th>
-                            <b>Num transactions</b>
-                        </th>
-                    </tr>
-                    <tr class="table-row active">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#4B1FED"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=ec3bbda726d550b9dbd6c82d29e33bf30ba94a88e0569a2f8bac456f1bdcfd2a%231">ec3bbda726d550b9dbd6c82d29e33bf30ba94a88e0569a2f8bac456f1bdcfd2a#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=ec13cf2bd6c1b60ff2b139b76dcb89c17f11fb86ea3211f95e837a458bec5116%231">ec13cf2bd6c1b60ff2b139b76dcb89c17f11fb86ea3211f95e837a458bec5116#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row active">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=e1345fc197860ca687369a14830e834a6f27461b5e5f5e14d3a5f49198369821%231">e1345fc197860ca687369a14830e834a6f27461b5e5f5e14d3a5f49198369821#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#4B1FED"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=df6c365b4855cab20aa9339d74857ed19b36e94d3079f53bcf57344d2035bb62%231">df6c365b4855cab20aa9339d74857ed19b36e94d3079f53bcf57344d2035bb62#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=d58527a4abdd919944c91aeef1e16928029e85480e198816e9727c3785a9e115%231">d58527a4abdd919944c91aeef1e16928029e85480e198816e9727c3785a9e115#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row active">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=d5205b80182337116c8c3c8accd255bb13ebf9919b3331d24dd434330848c32d%231">d5205b80182337116c8c3c8accd255bb13ebf9919b3331d24dd434330848c32d#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#4B1FED"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=d44a4e1cd9fe1def2fb7cd87b02d1b00d687e3d98c0798fe4feaec3d49d4bacb%231">d44a4e1cd9fe1def2fb7cd87b02d1b00d687e3d98c0798fe4feaec3d49d4bacb#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=d3cf42a3ac7950d5467cd7cd688155778545134c22d1fccb41d90e986bd1f142%231">d3cf42a3ac7950d5467cd7cd688155778545134c22d1fccb41d90e986bd1f142#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=c28ebb234c28894983daa478a657e88278da6a43a3fbee661ffb184aacd63c46%231">c28ebb234c28894983daa478a657e88278da6a43a3fbee661ffb184aacd63c46#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=bdb19db7346e65d9d020f39b8aea35c01e1d5eef0e6265c9cd5636beddf03641%231">bdb19db7346e65d9d020f39b8aea35c01e1d5eef0e6265c9cd5636beddf03641#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    <tr class="table-row">
-                        <td class="table-cell">
-                            <a
-                                href="contractView?tab=info&amp;contractId=bcaeb74fa88b148c78e981f58222828e449ea3654c0d7fbff4f33404aa94defb%231">bcaeb74fa88b148c78e981f58222828e449ea3654c0d7fbff4f33404aa94defb#1</a>
-                        </td>
-                        <td class="table-cell">-</td>
-                        <td class="table-cell">8589188</td>
-                        <td class="table-cell">88732776</td>
-                        <td class="table-cell">
-                            <div class="active-light">
-                                <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="5.5" cy="5.49994" r="5.5" fill="#5B7296"/>
-                                </svg>
-                            </div>
-                        </td>
-                        <td class="table-cell">
-                            <div>3</div>
-                        </td>
-                    </tr>
-                    
-                </table>
-                <div class="pagination-box">
-                    <a href="listContracts?page=2"><div class="page-arrow">&lt;</div></a>
-                    <a href="listContracts?page=2"><div class="page-button">Previous</div></a>
-                    <a href="listContracts?page=2"><div class="page-button current-page">1</div></a>
-                    <a href="listContracts?page=2"><div class="page-button">2</div></a>
-                    <a href="listContracts?page=3"><div class="page-button">3</div></a>
-                    <a href="listContracts?page=4"><div class="page-button">4</div></a>
-                    <a href="listContracts?page=5"><div class="page-button">5</div></a>
-                    <a href="listContracts?page=6"><div class="page-button">6</div></a>
-                    <a href="listContracts?page=7"><div class="page-button">7</div></a>
-                    <a href="listContracts?page=2"><div class="page-button">Next</div></a>
-                    <a href="listContracts?page=27"><div class="page-arrow">&gt</div></a>
+            <div class="main-content">
+                <div class="contract-header">
+                    <span class="contract-label">Contract - </span><span class="contract-id">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17</span>
+                </div>
+                <div class="button-row">
+                    <button class="button-cell active inactive-text">Details</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=state&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Code</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Transactions</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">
+                        <svg class="icon" width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1.5 12.5001C1.0875 12.5001 0.734375 12.3532 0.440625 12.0595C0.146875 11.7657 0 11.4126 0 11.0001V8.75012H1.5V11.0001H10.5V8.75012H12V11.0001C12 11.4126 11.8531 11.7657 11.5594 12.0595C11.2656 12.3532 10.9125 12.5001 10.5 12.5001H1.5ZM6 9.50012L2.25 5.75012L3.3 4.66262L5.25 6.61262V0.500122H6.75V6.61262L8.7 4.66262L9.75 5.75012L6 9.50012Z" fill="#878FAA"/>
+                        </svg>
+                        Download
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <tr class="table-header">
+                            <th>
+                                <b>Transaction Hash</b>
+                            </th>
+                            <th>
+                                <b>Timestamp</b>
+                            </th>
+                            <th>
+                                <b>Slot</b>
+                            </th>
+                            <th>
+                                <b>Inputs</b>
+                            </th>
+                            <th>
+                                <b>Outputs</b>
+                            </th>
+                            <th>
+                                <b>Total</b>
+                            </th>
+                        </tr>
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                         <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+                       
+                    </table>
+                    <div class="pagination-box">
+                        <a href="listContracts?page=2"><div class="page-arrow">&lt;</div></a>
+                        <a href="listContracts?page=2"><div class="page-button">Previous</div></a>
+                        <a href="listContracts?page=2"><div class="page-button current-page">1</div></a>
+                        <a href="listContracts?page=2"><div class="page-button">2</div></a>
+                        <a href="listContracts?page=3"><div class="page-button">3</div></a>
+                        <a href="listContracts?page=4"><div class="page-button">4</div></a>
+                        <a href="listContracts?page=5"><div class="page-button">5</div></a>
+                        <a href="listContracts?page=6"><div class="page-button">6</div></a>
+                        <a href="listContracts?page=7"><div class="page-button">7</div></a>
+                        <a href="listContracts?page=2"><div class="page-button">Next</div></a>
+                        <a href="listContracts?page=27"><div class="page-arrow">&gt</div></a>
+                    </div>
                 </div>
             </div>
         </div>
