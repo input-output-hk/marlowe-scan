@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Explorer.Web.Util
-  ( SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus, tldhc )
+  ( SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink , mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus, tldhc, downloadIcon )
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -45,6 +45,9 @@ fullLogo = H.div ! class_ "logo"
                             $ do H.span ! class_ "logo-text-marlowe" $ string "Marlowe"
                                  nbsp
                                  H.span ! class_ "logo-text-explorer" $ string "Explorer"
+
+downloadIcon :: Html
+downloadIcon = img ! class_ "icon" ! src "/svg/download.svg" ! alt "Download icon"
 
 explorerOption :: Bool -> Html
 explorerOption isSelected = H.div ! class_ (stringValue ("side-option " ++ if isSelected then "selected-option" else ""))

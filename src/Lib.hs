@@ -25,7 +25,7 @@ import qualified Data.ByteString as BS
 import Explorer.API.GetNumTransactions (getContractNumTransactions)
 import Explorer.API.IsContractOpen (isContractOpen)
 import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
-import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus)
+import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon)
 import Explorer.Resources.MimeTypes (CSS, SVG)
 
 startApp :: Options -> IO ()
@@ -43,7 +43,8 @@ type ResourcesAPI = "css" :> "stylesheet.css" :> Get '[CSS] BS.ByteString
                          :<|> ("inactive-light.svg" :> Get '[SVG] BS.ByteString)
                          :<|> ("logo.svg" :> Get '[SVG] BS.ByteString)
                          :<|> ("magnifying-glass.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("red-status-light.svg" :> Get '[SVG] BS.ByteString)))
+                         :<|> ("red-status-light.svg" :> Get '[SVG] BS.ByteString)
+                         :<|> ("download.svg" :> Get '[SVG] BS.ByteString)))
 
 appResources :: ServerT ResourcesAPI IO
 appResources = return cssStylesheet
@@ -54,6 +55,7 @@ appResources = return cssStylesheet
           :<|> return logo
           :<|> return magnifyingGlass
           :<|> return redStatus
+          :<|> return downloadIcon
 
 type API
      = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/

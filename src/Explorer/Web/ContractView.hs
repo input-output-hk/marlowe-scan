@@ -14,9 +14,10 @@ import Data.Text (unpack)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import GHC.Utils.Misc (split)
 import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
-import Text.Blaze.Html5.Attributes ( href, style )
+import qualified Text.Blaze.Html5 as H
+import Text.Blaze.Html5.Attributes ( href, style, class_ )
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, SyncStatus  )
+import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, SyncStatus, downloadIcon  )
 import Language.Marlowe.Pretty ( pretty )
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -519,12 +520,14 @@ renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c = do
-  table $ do tr $ do td $ b $ a ! href "listContracts" $ "Contracts List"
-                     td $ b "Navigation bar"
-                     mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
-                           allContractViews
-                     td $ a ! href (toValue $ generateLink "contractDownloadInfo" [("contractId", cid)])
-                            $ string "Download contract info"
+  H.div ! class_ "button-row"
+        $ do a ! class_ "invisible-link" ! href "listContracts" $ H.div ! class_ "button-cell inactive-text" $ string "Back to contract list"
+             mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
+                   allContractViews
+             a ! class_ "invisible-link" ! href (toValue $ generateLink "contractDownloadInfo" [("contractId", cid)])
+               $ H.div ! class_ "button-cell inactive-text"
+                       $ do downloadIcon
+                            string "Download"
   c
 
 linkToTransaction :: String -> String -> String -> Html
@@ -533,9 +536,8 @@ linkToTransaction contractId transactionId' linkText =
     $ string linkText
 
 mkNavLink :: Bool -> String -> String -> String -> Html
-mkNavLink True _ _ tabTitle =
-  td $ string tabTitle
-mkNavLink False cid tabName tabTitle =
-  td $ a ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
-         $ string tabTitle
+mkNavLink isActive cid tabName tabTitle =
+  a ! class_ "invisible-link" ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
+    $ H.div ! class_ (if isActive then "button-cell inactive-text active" else "button-cell inactive-text")
+            $ string tabTitle
 

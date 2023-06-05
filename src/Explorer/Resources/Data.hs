@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus) where
+module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon) where
 
 import Explorer.Resources.Helpers (cssPath, embedResource, svgPath)
 import Data.ByteString (ByteString)
@@ -36,3 +36,5 @@ logo = $(embedResource svgPath "logo.svg")
 magnifyingGlass :: ByteString
 magnifyingGlass = $(embedResource svgPath "magnifying-glass.svg")
 
+downloadIcon :: ByteString
+downloadIcon = $(embedResource svgPath "download.svg")

@@ -168,14 +168,14 @@ html, body {
     border-left-style: none;
     border-right-style: none;
     padding: 1rem;
-    max-width: 300px;
+    max-width: 18.75rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .hash-cell {
-    width: 300px;
+    width: 18.75rem;
 }
 
 .table-row {
@@ -184,14 +184,14 @@ html, body {
 
 .table-row > :first-child {
     border-left-style: solid;
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
 }
 
 .table-row > :last-child {
     border-right-style: solid;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
 }
 
 .table-row.active {
@@ -204,6 +204,46 @@ html, body {
     align-items: center;
 }
 
+a.invisible-link {
+    text-decoration: none;
+}
+
+a.invisible-link:hover {
+    text-decoration: none; 
+}
+
+.button-row {
+    padding: 1.25rem 0;
+    margin-bottom: 2rem;
+}
+
+.button-cell {
+    display: inline;
+    font-weight: bold;
+    border: 1px solid #5B7296;
+    border-radius: 18px;
+    background-color: transparent;
+    padding: 0.56rem 1.063rem;
+    margin: 0.31rem;
+    box-shadow: 0px 5px 5px 0px rgba(205, 205, 205, 0.25);
+    cursor: pointer;
+    text-align: center;
+}
+
+.button-cell.active {
+    border: 1px solid #000000;
+    color: #000000;
+}
+
+.inactive-text {
+    font-size: 0.94rem;
+    color: #5B7296;
+}
+
+.icon {
+    margin-right: 0.625rem;
+    margin-bottom: 0.063rem;
+}
 
 .table-wrapper {
     display: flex;
@@ -221,17 +261,16 @@ html, body {
     margin-top: 1.5rem;
     width: fit-content;
     font-style: normal;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
     color: #000000;
 }
 
 .pagination-box a {
     text-decoration: none;
-    line-height: 17px;
+    line-height: 1.063rem;
     color: #000000;
 }
-
 
 .page-arrow {
     display: float;
