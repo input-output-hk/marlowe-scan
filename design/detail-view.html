@@ -202,7 +202,7 @@
             border-radius: 18px;
             background-color: transparent;
             padding: 9px 17px;
-            margin: 5px;
+            margin-right: 5px;
             cursor: pointer;
             text-align: center;
         }
@@ -253,6 +253,18 @@
             padding: 4px 10px;
             border-radius: 4px;
             margin-right: 10px;
+        }
+
+        .contract-header {
+            margin-bottom: 20px;
+        }
+        .contract-label {
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .contract-id {
+            font-size: 19px;
         }
     </style>
 
@@ -314,6 +326,9 @@
         </div>
         <div class="main-container">
             <div class="main-content">
+                <div class="contract-header">
+                    <span class="contract-label">Contract - </span><span class="contract-id">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17</span>
+                </div>
                 <div class="button-row">
                     <button class="button-cell active inactive-text">Details</button>
                     <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=state&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Code</button>
