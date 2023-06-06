@@ -323,3 +323,17 @@ div.logo {
     color: #4B1FED;
     font-weight: 700;
 }
+
+.contract-header {
+    margin-bottom: 20px;
+}
+
+.contract-label {
+    font-weight: bold;
+    font-size: 26px;
+}
+
+.contract-id {
+    font-size: 26px;
+}
+

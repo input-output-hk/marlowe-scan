@@ -9,7 +9,7 @@ import Data.ByteString.Char8 ( pack, unpack )
 import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
-import Text.Blaze.Html5 ( body, docTypeHtml, h1, head, html, title,
+import Text.Blaze.Html5 ( body, docTypeHtml, head, html, title,
                           string, Html, (!), br, preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue )
 import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt )
 import Data.Time (UTCTime, NominalDiffTime)
@@ -94,10 +94,10 @@ syncStatus curSyncStatus = H.div ! class_ "side-indicator-wrapper"
                                                          H.div ! class_ "status-explantion"
                                                                $ statusExplanationForTime curSyncStatus
 
-baseDoc :: SyncStatus  -> String -> Html -> Html
-baseDoc curSyncStatus caption content = docTypeHtml
+baseDoc :: SyncStatus  -> String -> Html -> Html -> Html
+baseDoc curSyncStatus titleText caption content = docTypeHtml
                           $ html ! lang "en"
-                                 $ do head $ do title $ string caption
+                                 $ do head $ do title $ string titleText
                                                 link ! rel "preconnect" ! href "https://fonts.gstatic.com" ! crossorigin
                                                 link ! href "https://fonts.googleapis.com/css2?family=Outfit&display=swap" ! rel "stylesheet"
                                                 link ! href "/css/stylesheet.css" ! rel "stylesheet"
@@ -107,7 +107,7 @@ baseDoc curSyncStatus caption content = docTypeHtml
                                                                    explorerOption True
                                                                    syncStatus curSyncStatus
                                                         H.div ! class_ "main-content"
-                                                              $ do h1 $ string caption
+                                                              $ do caption
                                                                    content
 
 

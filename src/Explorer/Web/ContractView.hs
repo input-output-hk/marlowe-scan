@@ -210,12 +210,20 @@ instance ToMarkup ContractView where
                          , cvMContractId = Just cid
                          , cvData = cv
                          }) =
-    baseDoc curSyncStatus ("Contract - " ++ cid) $ toMarkup cv
+    baseDoc curSyncStatus ("Contract - " ++ cid) headerHtml $ toMarkup cv
+    where
+      headerHtml :: Html
+      headerHtml = H.div ! class_ "contract-header"
+                         $ do H.span ! class_ "contract-label"
+                                     $ string "Contract - "
+                              H.span ! class_ "contract-id"
+                                     $ string cid
+    
   toMarkup (ContractView { cvRetrievalSyncStatus = curSyncStatus
                          , cvMContractId = Nothing
                          , cvData = cv
                          }) =
-    baseDoc curSyncStatus "An error occurred" $ toMarkup cv
+    baseDoc curSyncStatus "Error" (string "An error occurred") $ toMarkup cv
 
 data CV = ContractInfoView CIVR
         | ContractStateView CSVR

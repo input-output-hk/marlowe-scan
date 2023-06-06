@@ -160,7 +160,7 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
                                                                                  })
                                                      , contractList = clvrs
                                                      })
-                             }) = baseDoc currSyncStatus ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ do
+                             }) = baseDoc currSyncStatus headerText (string headerText) $ do
   renderTime currSyncStatus
   p $ string $ printf "%d-%d contracts shown out of %d, (page %d out of %d)"
                         firstContract lastContract numContracts page lastPage
@@ -185,13 +185,13 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
               tld $ numTransactionsAJAXBox cid
       forM_ clvrs makeRow
     renderNavBar pinf
-
+    where headerText = "Marlowe Contract List" `appIfNotBlank` labelForTitle
 renderCIRs (ContractListView { titleLabel = labelForTitle
                              , clvContents = ContractListViewStillSyncing}) =
-  baseDoc Syncing ("Marlowe Contract List" `appIfNotBlank` labelForTitle) $ string "The explorer is still synchronising with the chain. Please, try again later"
-
+  baseDoc Syncing headerText (string headerText) $ string "The explorer is still synchronising with the chain. Please, try again later"
+    where headerText = "Marlowe Contract List" `appIfNotBlank` labelForTitle
 renderCIRs (ContractListView { clvContents = ContractListViewError curSyncStatus msg }) =
-  baseDoc curSyncStatus "An error occurred" $ string ("Error: " <> msg)
+  baseDoc curSyncStatus "Error" (string "An error occurred") $ string ("Error: " <> msg)
 
 appIfNotBlank :: String -> String -> String
 appIfNotBlank title labelForTitle
