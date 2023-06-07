@@ -1,5 +1,6 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE MonoLocalBinds #-}
 
 module Explorer.Web.ContractView
   (ContractView(..), contractView)
@@ -12,11 +13,16 @@ import qualified Data.Map as Map
 import Data.Text (unpack)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import GHC.Utils.Misc (split)
-import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
-import Text.Blaze.Html5.Attributes ( href, style )
+import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue))
+import qualified Text.Blaze.Html5 as H
+import Text.Blaze.Html5.Attributes (href, style, class_)
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString  )
-import Language.Marlowe.Pretty ( pretty )
+import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime,
+                          generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
+                          valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
+                          roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv)
+import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
 import qualified Language.Marlowe.Runtime.Types.TransactionJSON as TJ
@@ -28,11 +34,29 @@ import Prelude hiding (div)
 import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Data.Map as M
+import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
+import Data.Maybe (isJust)
 
-contractView :: Options -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
-contractView opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHost}) mTab (Just cid) mTxId = do
+contractView :: ContractListCacheStatusReader contractCache => Options -> contractCache -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
+contractView opts contractCache mTab mCid mTxId = do
+  curSyncStatus <- getSyncStatus contractCache
+  cData <- contractViewInner opts mTab mCid mTxId
+  return $ ContractView { cvRetrievalSyncStatus = curSyncStatus
+                        , cvMContractId = getMaybeContractId cData
+                        , cvData = cData
+                        }
+
+getMaybeContractId :: CV -> Maybe String
+getMaybeContractId (ContractInfoView CIVR { civrContractId = cid }) = Just cid
+getMaybeContractId (ContractStateView CSVR { csvrContractId = cid }) = Just cid
+getMaybeContractId (ContractTxView CTVRs { ctvrsContractId = cid } ) = Just cid
+getMaybeContractId (ContractViewError _) = Nothing
+
+contractViewInner :: Options -> Maybe String -> Maybe String -> Maybe String -> IO CV
+contractViewInner opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHost}) mTab (Just cid) mTxId = do
   let urlPrefix = mkUrlPrefix opts
       tab = parseTab mTab
+
   r <- runExceptT (do cjson <- ExceptT $ CJ.getContractJSON urlPrefix cid
                       let link = CJ.transactions $ CJ.links cjson
                       txsjson <- whenMaybe (tab == CTxView)
@@ -41,8 +65,8 @@ contractView opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHo
                       txjson <- forM mTxId2 (ExceptT . TJ.getTransaction urlPrefix link)
                       return $ extractInfo tab blockExplHost cjson txsjson txjson)
   return $ either ContractViewError id r
-contractView opts Nothing cid txId = contractView opts (Just "state") cid txId
-contractView _opts _tab Nothing _txId = return $ ContractViewError "Need to specify a contractId"
+contractViewInner opts Nothing cid txId = contractViewInner opts (Just "state") cid txId
+contractViewInner _opts _tab Nothing _txId = return $ ContractViewError "Need to specify a contractId"
 
 
 getIfInContractDefaultFirst :: Maybe String -> Maybe TJs.Transactions -> Maybe String
@@ -59,22 +83,23 @@ parseTab (Just "txs") = CTxView
 parseTab _ = CInfoView
 
 
-extractInfo :: ContractViews -> String -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> ContractView
-extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource = 
+extractInfo :: ContractViews -> String -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> CV
+extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource =
                                          (CJ.Resource { CJ.block = CJ.Block { CJ.blockHeaderHash = blkHash
                                                                             , CJ.blockNo = blkNo
                                                                             , CJ.slotNo = sltNo
                                                                             }
                                                       , CJ.contractId = cid
+                                                      , CJ.currentContract = currContract
                                                       , CJ.metadata =_metadata
                                                       , CJ.roleTokenMintingPolicyId = mintingPolicyId
-                                                      , CJ.status = currStatus
                                                       , CJ.tags = tagsMap
                                                       , CJ.version = ver
                                                       })
                                                      } _ _ =
   ContractInfoView
-      (CIVR { civrContractId = cid
+      (CIVR { civrIsActive = isJust currContract
+            , civrContractId = cid
             , civrContractIdLink = mkTransactionExplorerLink blockExplHost cid
             , civrBlockHeaderHash = blkHash
             , civrBlockNo = blkNo
@@ -83,10 +108,9 @@ extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource =
             , civrRoleTokenMintingPolicyId = mintingPolicyId
             , civrRoleTokenMintingPolicyIdLink = mkTokenPolicyExplorerLink blockExplHost mintingPolicyId
             , civrTags = fmap valueToString tagsMap
-            , civrStatus = currStatus
             , civrVersion = ver
             })
-extractInfo CStateView blockExplHost CJ.ContractJSON { CJ.resource = 
+extractInfo CStateView blockExplHost CJ.ContractJSON { CJ.resource =
                                          (CJ.Resource { CJ.contractId = cid
                                                       , CJ.currentContract = currContract
                                                       , CJ.initialContract = initContract
@@ -179,23 +203,51 @@ data ContractViews = CInfoView
                    | CTxView
   deriving (Show, Eq)
 
-data ContractView = ContractInfoView CIVR
-                  | ContractStateView CSVR
-                  | ContractTxView CTVRs
-                  | ContractViewError String
+data ContractView = ContractView {
+    cvRetrievalSyncStatus :: SyncStatus
+  , cvMContractId :: Maybe String
+  , cvData :: CV
+}
 
 instance ToMarkup ContractView where
   toMarkup :: ContractView -> Markup
-  toMarkup (ContractInfoView cvr@(CIVR {civrContractId = cid})) =
-    baseDoc ("Contract - " ++ cid) $ addNavBar CInfoView cid $ renderCIVR cvr
-  toMarkup (ContractStateView ccsr@(CSVR {csvrContractId = cid})) =
-    baseDoc ("Contract - " ++ cid) $ addNavBar CStateView cid $ renderCSVR ccsr
-  toMarkup (ContractTxView ctvrs'@CTVRs {ctvrsContractId = cid}) =
-    baseDoc ("Contract - " ++ cid) $ addNavBar CTxView cid $ renderCTVRs ctvrs'
-  toMarkup (ContractViewError str) =
-    baseDoc "An error occurred" (string ("Error: " ++ str))
+  toMarkup (ContractView { cvRetrievalSyncStatus = curSyncStatus
+                         , cvMContractId = Just cid
+                         , cvData = cv
+                         }) =
+    baseDoc curSyncStatus ("Contract - " ++ cid) headerHtml $ toMarkup cv
+    where
+      headerHtml :: Html
+      headerHtml = H.div ! class_ "contract-header"
+                         $ do H.span ! class_ "contract-label"
+                                     $ string "Contract - "
+                              H.span ! class_ "contract-id"
+                                     $ string cid
 
-data CIVR = CIVR { civrContractId :: String
+  toMarkup (ContractView { cvRetrievalSyncStatus = curSyncStatus
+                         , cvMContractId = Nothing
+                         , cvData = cv
+                         }) =
+    baseDoc curSyncStatus "Error" (makeTitleDiv "An error occurred") $ toMarkup cv
+
+data CV = ContractInfoView CIVR
+        | ContractStateView CSVR
+        | ContractTxView CTVRs
+        | ContractViewError String
+
+instance ToMarkup CV where
+  toMarkup :: CV -> Markup
+  toMarkup (ContractInfoView cvr@(CIVR {civrContractId = cid})) =
+    addNavBar CInfoView cid $ renderCIVR cvr
+  toMarkup (ContractStateView ccsr@(CSVR {csvrContractId = cid})) =
+    addNavBar CStateView cid $ renderCSVR ccsr
+  toMarkup (ContractTxView ctvrs'@CTVRs {ctvrsContractId = cid}) =
+    addNavBar CTxView cid $ renderCTVRs ctvrs'
+  toMarkup (ContractViewError str) =
+    string $ "Error: " ++ str
+
+data CIVR = CIVR { civrIsActive :: Bool
+                 , civrContractId :: String
                  , civrContractIdLink :: String
                  , civrBlockHeaderHash :: String
                  , civrBlockNo :: Integer
@@ -204,7 +256,6 @@ data CIVR = CIVR { civrContractId :: String
                  , civrRoleTokenMintingPolicyId :: String
                  , civrRoleTokenMintingPolicyIdLink :: String
                  , civrTags :: Map String String
-                 , civrStatus :: String
                  , civrVersion :: String
                  }
 
@@ -218,25 +269,35 @@ renderCIVR (CIVR { civrContractId = cid
                  , civrRoleTokenMintingPolicyId = roleMintingPolicyId
                  , civrRoleTokenMintingPolicyIdLink = roleMintingPolicyIdLink
                  , civrTags = civrTags'
-                 , civrStatus = contractStatus
+                 , civrIsActive = contractStatus
                  , civrVersion = marloweVersion
                  }) =
-  table $ do tr $ do td $ b "Contract ID"
-                     td $ a ! href (toValue cidLink) $ string cid
-             tr $ do td $ b "Block Header Hash"
-                     td $ string blockHash
-             tr $ do td $ b "Block No"
-                     td $ a ! href (toValue blockLink) $ string $ show blockNum
-             tr $ do td $ b "Slot No"
-                     td $ string (show slotNum)
-             tr $ do td $ b "Role Token Minting Policy ID"
-                     td $ a ! href (toValue roleMintingPolicyIdLink) $ string roleMintingPolicyId
-             tr $ do td $ b "Tags"
-                     td $ renderTags civrTags'
-             tr $ do td $ b "Status"
-                     td $ string contractStatus
-             tr $ do td $ b "Version"
-                     td $ string marloweVersion
+  dtable $ do tr $ do dtd $ do statusIcon
+                               string "Status"
+                      mtd $ do H.span ! class_ "icon-margin-right"
+                                      $ if contractStatus then activeLight else inactiveLight
+                               H.span $ string $ if contractStatus then "Active" else "Closed"
+              tr $ do dtd $ do contractIdIcon
+                               string "Contract ID"
+                      mtd $ a ! href (toValue cidLink) $ string cid
+              tr $ do dtd $ do blockHeaderHashIcon
+                               string "Block Header Hash"
+                      mtd $ string blockHash
+              tr $ do dtd $ do roleTokenMintingPolicyIdIcon
+                               string "Role Token Minting Policy ID"
+                      mtd $ a ! href (toValue roleMintingPolicyIdLink) $ string roleMintingPolicyId
+              tr $ do dtd $ do slotNoIcon
+                               string "Slot No"
+                      mtd $ string (show slotNum)
+              tr $ do dtd $ do blockNoIcon
+                               string "Block No"
+                      mtd $ a ! href (toValue blockLink) $ string $ show blockNum
+              tr $ do dtd $ do metadataIcon
+                               string "Tags"
+                      mtd $ renderTags civrTags'
+              tr $ do dtd $ do versionIcon
+                               string "Version"
+                      mtd $ string marloweVersion
 
 data CSVR = CSVR { csvrContractId :: String
                  , csvrContractIdLink :: String
@@ -358,7 +419,7 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
       td $ string $ show txSlotNo'
     tr $ do
       td $ b "Inputs"
-      td $ do if null inputs' 
+      td $ do if null inputs'
               then string "No inputs"
               else table $ do
                      mapM_ (\inp -> do tr $ td $ code $ stringToHtml $ show $ pretty inp) inputs'
@@ -482,12 +543,13 @@ renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c = do
-  table $ do tr $ do td $ b $ a ! href "listContracts" $ "Contracts List"
-                     td $ b "Navigation bar"
-                     mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
-                           allContractViews
-                     td $ a ! href (toValue $ generateLink "contractDownloadInfo" [("contractId", cid)])
-                            $ string "Download contract info"
+  H.div ! class_ "button-row"
+        $ do mapM_ (\ccv -> mkNavLink (cv == ccv) cid (getNavTab ccv) (getNavTitle ccv))
+                   allContractViews
+             a ! class_ "invisible-link" ! href (toValue $ generateLink "contractDownloadInfo" [("contractId", cid)])
+               $ H.div ! class_ "button-cell inactive-text"
+                       $ do downloadIcon
+                            string "Download"
   c
 
 linkToTransaction :: String -> String -> String -> Html
@@ -496,9 +558,8 @@ linkToTransaction contractId transactionId' linkText =
     $ string linkText
 
 mkNavLink :: Bool -> String -> String -> String -> Html
-mkNavLink True _ _ tabTitle =
-  td $ string tabTitle
-mkNavLink False cid tabName tabTitle =
-  td $ a ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
-         $ string tabTitle
+mkNavLink isActive cid tabName tabTitle =
+  a ! class_ "invisible-link" ! href (toValue $ generateLink "contractView" [("tab", tabName), ("contractId", cid)])
+    $ H.div ! class_ (if isActive then "button-cell inactive-text active" else "button-cell inactive-text")
+            $ string tabTitle
 

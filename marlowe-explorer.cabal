@@ -28,6 +28,9 @@ library
       Explorer.API.GetNumTransactions
       Explorer.API.HealthCheck
       Explorer.API.IsContractOpen
+      Explorer.Resources.Data
+      Explorer.Resources.Helpers
+      Explorer.Resources.MimeTypes
       Explorer.SharedContractCache
       Explorer.Web.ContractInfoDownload
       Explorer.Web.ContractListView
@@ -62,9 +65,11 @@ library
     , containers
     , errors
     , extra
+    , file-embed
     , ghc
     , http-client
     , http-conduit
+    , http-media
     , http-types
     , mtl
     , newtype-generics
@@ -72,6 +77,7 @@ library
     , scientific
     , servant-blaze
     , servant-server
+    , template-haskell
     , text
     , time
     , wai
@@ -98,15 +104,18 @@ executable marlowe-explorer-exe
     , containers
     , errors
     , extra
+    , file-embed
     , ghc
     , http-client
     , http-conduit
+    , http-media
     , http-types
     , marlowe-explorer
     , newtype-generics
     , scientific
     , servant-blaze
     , servant-server
+    , template-haskell
     , text
     , wai
     , warp
@@ -133,16 +142,19 @@ test-suite marlowe-explorer-test
     , containers
     , errors
     , extra
+    , file-embed
     , ghc
     , hspec
     , hspec-wai
     , http-client
     , http-conduit
+    , http-media
     , http-types
     , marlowe-explorer
     , scientific
     , servant-blaze
     , servant-server
+    , template-haskell
     , text
     , wai
     , warp

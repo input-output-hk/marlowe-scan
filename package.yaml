@@ -22,13 +22,16 @@ dependencies:
 - containers
 - errors
 - extra
+- file-embed
 - ghc
 - http-client
 - http-conduit
+- http-media
 - http-types
 - scientific
 - servant-blaze
 - servant-server
+- template-haskell
 - text
 - wai
 - warp

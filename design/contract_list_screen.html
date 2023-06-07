@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Marlowe Contract List (Mainnet)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-width: 100%;
+            width: min-content;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .wrapper {
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            flex-grow: 1;
+        }
+        
+        .side-menu {
+            min-width: 16.8rem;
+            flex-grow: 1;
+            background-color: #F7F9FF;
+            padding-top: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+
+        .logo {
+            display: block;
+            margin: 2rem;
+            margin-bottom: 3rem;
+            width: auto;
+            font-size: 1.3rem;
+            flex-grow: 0;
+            color: #7D7F94;
+            text-align: center;
+            letter-spacing: 0.15rem;
+        }
+
+        .logo-pic {
+            width: 1.95rem;
+        }
+
+        .logo-text {
+            margin-top: 0.2rem;
+        }
+
+        .logo-text-marlowe {
+            font-weight: 600;
+        }
+
+        .side-option {
+            color: #000000;
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+            padding-right: 2.5rem;
+            padding-left: 2.9rem;
+            display: flex;
+            flex-grow: 0;
+            flex-direction: row;
+            align-items: center;
+            box-sizing: border-box;
+            border-left: 5px solid transparent;
+            color: #5B7296;
+        }
+
+        .selected-option {
+            background-color: #EFF4FF;
+            border-left: 5px solid #4B1FED;
+            color: #000000;
+        }
+
+        .side-icon {
+            margin-right: 0.8rem;
+        }
+
+        .side-text {
+            font-weight: 600;
+        }
+
+        .side-indicator-wrapper {
+            flex-grow: 1;
+            padding: 2.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .side-indicator {
+            flex-grow: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-weight: 700;
+        }
+
+        .status-label {
+            margin-bottom: 0.5rem;
+        }
+
+        .status-badge {
+            margin-top: 0.5rem;
+            padding: 0.25rem;
+            background-color: #EFFFF8;
+            border-radius: 4px;
+            border: 1px solid #0FE088;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        
+        .status-light {
+            margin: 0.1rem;
+        }
+
+        .status-explantion {
+            margin: 0.1rem;
+            margin-left: 0.3rem;
+        }
+
+        .main-content {
+            flex-grow: 999;
+            background-color: #ffffff;
+            padding-left: 6.6rem;
+            padding-top: 3.25rem;
+            padding-bottom: 3.25rem;
+            padding-right: 3.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: max-content;
+        }
+
+        .table-header > th {
+            padding: 1rem;
+            color: #5B7296;
+        }
+
+        .table-cell {
+            border-color: #E7E7E7;
+            border-width: 2px;
+            border-style: solid;
+            border-left-style: none;
+            border-right-style: none;
+            padding: 1rem;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .table-row {
+            box-shadow: 0px 3px 11px 3px rgba(232, 237, 255, 0.3);
+            height: 76px;
+        }
+
+        .table-row > :first-child {
+            border-left-style: solid;
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        .table-row > :last-child {
+            border-right-style: solid;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .table-row.active {
+            background-color: #F7F9FF;
+        }
+
+        .active-light {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .table-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+
+        .pagination-box {
+            float: right;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            width: fit-content;
+            font-style: normal;
+            font-size: 14px;
+            font-weight: 400;
+            color: #000000;
+        }
+
+        .pagination-box a {
+            text-decoration: none;
+            line-height: 17px;
+            color: #000000;
+        }
+
+
+        .page-arrow {
+            display: float;
+            float: right;
+            color: #5B7296;
+            padding: 0.625rem 0.938rem;
+            border-style: transparent;
+            border-width: 1px;
+        }
+
+        .pagination-box a:first-child .page-arrow {
+            padding-left: 0.1rem;
+        }
+
+        .pagination-box a:last-child .page-arrow {
+            padding-right: 0.1rem;
+        }
+
+        .page-button {
+            border-style: solid;
+            border-color: #E7E7E7;
+            border-width: 1px;
+            display: float;
+            float: right;
+            padding: 0.625rem 0.938rem;
+            
+        }
+
+        .pagination-box a:nth-child(2) div {
+            border-top-left-radius: 0.25rem;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .pagination-box a:nth-last-child(2) div {
+            border-top-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .current-page {
+            background-color: #F6F7FF;
+            border-color: #4B1FED;
+            color: #4B1FED;
+            font-weight: 700;
+        }
+
+        .button-row {
+            padding: 20px 0px;
+        }
+        .button-cell {
+            font-weight: bold;
+            border: 1px solid #5B7296;
+            border-radius: 18px;
+            background-color: transparent;
+            padding: 9px 17px;
+            margin-right: 5px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0px 5px 5px 0px rgba(205, 205, 205, 0.25);
+        }
+
+        .button-cell.active {
+            border: 1px solid #000000;
+            color: #000000;
+        }
+
+        .inactive-text {
+            font-size: 15px;
+            color: #5B7296;
+        }
+
+
+        .fontweight-bold {
+            font-weight: bold;
+        }
+
+        .flex-container {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .icon {
+            margin-right: 10px;
+            margin-bottom: 1px;
+        }
+
+        .shaded-description-value {
+            background-color: #EFF2FE;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .contract-header {
+            margin-bottom: 20px;
+        }
+        .contract-label {
+            font-weight: bold;
+            font-size: 26px;
+        }
+
+        .contract-id {
+            font-size: 26px;
+        }
+
+        .brand-color-text {
+            color: #4B1FED;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="side-menu">
+            <div class="logo">
+                <svg class="logo-pic" width="37" height="35" viewBox="0 0 37 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31849 2.90887L0.661621 0V4.67271V17.591H5.16925V9.34542L17.097 18.8334L32.6816 31.2302L36.3385 34.1391V29.4664V4.67271V0L32.6816 2.90887L18.5 14.1896L4.31849 2.90887ZM31.8308 24.7937L22.1205 17.0695L31.8308 9.34542V24.7937ZM0.662063 17.5916L5.16655 21.627V17.5916H0.662063Z" fill="#7D7F94"/>
+                </svg>
+                <div class="logo-text">
+                    <span class="logo-text-marlowe">
+                        Marlowe
+                    </span>
+                    <span class="logo-text-explorer">
+                        Explorer
+                    </span>
+                </div>
+            </div>
+            <div class="side-option selected-option">
+                <div class="side-icon">
+                    <svg style="padding-top: 0.1rem;" width="16" height="15" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.4361 14.9995L9.18606 9.74945C8.76939 10.0828 8.29022 10.3467 7.74855 10.5411C7.20689 10.7356 6.6305 10.8328 6.01939 10.8328C4.5055 10.8328 3.22439 10.3086 2.17606 9.26028C1.12717 8.2114 0.602722 6.93001 0.602722 5.41612C0.602722 3.90223 1.12717 2.62084 2.17606 1.57195C3.22439 0.523617 4.5055 -0.000549316 6.01939 -0.000549316C7.53328 -0.000549316 8.81467 0.523617 9.86355 1.57195C10.9119 2.62084 11.4361 3.90223 11.4361 5.41612C11.4361 6.02723 11.3388 6.60362 11.1444 7.14528C10.9499 7.68695 10.6861 8.16612 10.3527 8.58278L15.6027 13.8328L14.4361 14.9995ZM6.01939 9.16612C7.06105 9.16612 7.94661 8.80167 8.67605 8.07278C9.40494 7.34334 9.76939 6.45778 9.76939 5.41612C9.76939 4.37445 9.40494 3.48889 8.67605 2.75945C7.94661 2.03056 7.06105 1.66612 6.01939 1.66612C4.97772 1.66612 4.09217 2.03056 3.36272 2.75945C2.63383 3.48889 2.26939 4.37445 2.26939 5.41612C2.26939 6.45778 2.63383 7.34334 3.36272 8.07278C4.09217 8.80167 4.97772 9.16612 6.01939 9.16612Z" fill="#4B1FED"/>
+                    </svg>
+                </div>
+                <div class="side-text">
+                    Explorer
+                </div>
+            </div>
+            <div class="side-option">
+                <div class="side-icon">
+                    <svg style="padding-top: 0.1rem;" width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 12.5L7.16667 11.2917L5.375 9.50001L7.16667 7.70834L6 6.50001L3 9.50001L6 12.5ZM10 12.5L13 9.50001L10 6.50001L8.83333 7.70834L10.625 9.50001L8.83333 11.2917L10 12.5ZM2.16667 17C1.70833 17 1.31583 16.837 0.989167 16.5108C0.663055 16.1842 0.5 15.7917 0.5 15.3333V3.66668C0.5 3.20834 0.663055 2.81584 0.989167 2.48918C1.31583 2.16307 1.70833 2.00001 2.16667 2.00001H5.66667C5.84722 1.50001 6.14944 1.09723 6.57333 0.791677C6.99667 0.486121 7.47222 0.333344 8 0.333344C8.52778 0.333344 9.00361 0.486121 9.4275 0.791677C9.85083 1.09723 10.1528 1.50001 10.3333 2.00001H13.8333C14.2917 2.00001 14.6842 2.16307 15.0108 2.48918C15.3369 2.81584 15.5 3.20834 15.5 3.66668V15.3333C15.5 15.7917 15.3369 16.1842 15.0108 16.5108C14.6842 16.837 14.2917 17 13.8333 17H2.16667ZM8 3.04168C8.18056 3.04168 8.33 2.98251 8.44833 2.86418C8.56611 2.7464 8.625 2.59723 8.625 2.41668C8.625 2.23612 8.56611 2.08668 8.44833 1.96834C8.33 1.85057 8.18056 1.79168 8 1.79168C7.81944 1.79168 7.67028 1.85057 7.5525 1.96834C7.43417 2.08668 7.375 2.23612 7.375 2.41668C7.375 2.59723 7.43417 2.7464 7.5525 2.86418C7.67028 2.98251 7.81944 3.04168 8 3.04168ZM2.16667 15.3333H13.8333V3.66668H2.16667V15.3333Z" fill="#5B7296"/>
+                    </svg>                        
+                </div>
+                <div class="side-text">
+                    Documentation
+                </div>
+            </div>
+            <div class="side-indicator-wrapper">
+                <div class="side-indicator">
+                    <div class="status-label">
+                        Blockchain status:
+                    </div>
+                    <div class="status-badge">
+                        <div class="status-light">
+                            <svg style="padding-top: -0.3rem;" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="5.5" cy="5.49994" r="5.5" fill="#0FE088"/>
+                            </svg>
+                        </div>
+                        <div class="status-explantion">
+                            Synchronized
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="main-content">
+                <div class="contract-header">
+                    <span class="contract-label">Contract - </span><span class="contract-id">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17</span>
+                </div>
+                <div class="button-row">
+                    <button class="button-cell active inactive-text">Details</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=state&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Code</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">Transactions</button>
+                    <button class="button-cell inactive-text" onclick="window.location.href='contractView?tab=txs&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231'">
+                        <svg class="icon" width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1.5 12.5001C1.0875 12.5001 0.734375 12.3532 0.440625 12.0595C0.146875 11.7657 0 11.4126 0 11.0001V8.75012H1.5V11.0001H10.5V8.75012H12V11.0001C12 11.4126 11.8531 11.7657 11.5594 12.0595C11.2656 12.3532 10.9125 12.5001 10.5 12.5001H1.5ZM6 9.50012L2.25 5.75012L3.3 4.66262L5.25 6.61262V0.500122H6.75V6.61262L8.7 4.66262L9.75 5.75012L6 9.50012Z" fill="#878FAA"/>
+                        </svg>
+                        Download
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <tr class="table-header">
+                            <th>
+                                <b>Transaction Hash</b>
+                            </th>
+                            <th>
+                                <b>Timestamp</b>
+                            </th>
+                            <th>
+                                <b>Slot</b>
+                            </th>
+                            <th>
+                                <b>Inputs</b>
+                            </th>
+                            <th>
+                                <b>Outputs</b>
+                            </th>
+                            <th>
+                                <b>Total</b>
+                            </th>
+                        </tr>
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                        <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+ 
+                         <tr class="table-row">
+                            <td class="table-cell">
+                                <a
+                                    href="contractView?tab=info&amp;contractId=fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17%231">fd60a7dfe7b10eab3fa308aa06c0ddd2bd6ce7f6e8ae4f5dd107697d50064e17#1</a>
+                            </td>
+                            <td class="table-cell">01/19/2023 5:34:33 PM</td>
+                            <td class="table-cell">388</td>
+                            <td class="table-cell">
+                                addr1q80hsff3uwtphx7dtya7uasdlkjasdkjalkjdlajklsdakjdslajalksajdsak
+                            </td>
+                            <td class="table-cell">
+                                addr1qy86sf5xrzcpg2ncddkzasldjakdfjkalsjda32422lklj23kl3j4kl2j32lkj
+                            </td>
+                            <td class="table-cell">
+                                <div>
+                                    <span class="transaction-fee inactive-text">1.130981 <span class="transaction-fee-label">Fee</span></span>
+                                </div>
+                                <div>
+                                    <span class="transaction-amount brand-color-text">1,300.130981</span>
+                                </div>
+                            </td>
+                        </tr>
+                       
+                    </table>
+                    <div class="pagination-box">
+                        <a href="listContracts?page=2"><div class="page-arrow">&lt;</div></a>
+                        <a href="listContracts?page=2"><div class="page-button">Previous</div></a>
+                        <a href="listContracts?page=2"><div class="page-button current-page">1</div></a>
+                        <a href="listContracts?page=2"><div class="page-button">2</div></a>
+                        <a href="listContracts?page=3"><div class="page-button">3</div></a>
+                        <a href="listContracts?page=4"><div class="page-button">4</div></a>
+                        <a href="listContracts?page=5"><div class="page-button">5</div></a>
+                        <a href="listContracts?page=6"><div class="page-button">6</div></a>
+                        <a href="listContracts?page=7"><div class="page-button">7</div></a>
+                        <a href="listContracts?page=2"><div class="page-button">Next</div></a>
+                        <a href="listContracts?page=27"><div class="page-arrow">&gt</div></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

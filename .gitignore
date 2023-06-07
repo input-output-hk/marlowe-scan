@@ -6,6 +6,7 @@ cabal-dev
 cabal.sandbox.config
 cabal.project.local
 cabal.project.local~
+node_modules
 
 # ghc
 *.o

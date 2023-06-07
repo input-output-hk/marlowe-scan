@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Language.Marlowe.Runtime.ContractCaching (refreshContracts) where
 
-import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractList(..), ContractListISeq, ResultList(ResultList, results), ContractInList )
+import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractListISeq, ResultList(ResultList, results), ContractInList )
 import qualified Language.Marlowe.Runtime.Types.LazyFeed as LazyFeed
 import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import Language.Marlowe.Runtime.Types.LazyFeed (LazyFeed)
 import Network.HTTP.Simple (HttpException, parseRequest, setRequestHeader, setRequestMethod, httpLBS, getResponseBody, getResponseHeader)
-import Data.Time.Clock (getCurrentTime)
 import Data.Foldable (foldl')
 import Control.Exception (try, Exception (displayException))
 import Data.Aeson (eitherDecode)
@@ -15,16 +14,8 @@ import Control.Error.Util (hoistEither)
 import Data.Either.Extra (mapLeft)
 import Language.Marlowe.Runtime.Types.General (Range (..), setRangeHeader, parseRangeHeader)
 
-refreshContracts :: String -> ContractListISeq -> IO (Either String ContractList)
-refreshContracts endpoint lOldChain = do
-  eresult <- updateContracts endpoint lOldChain
-  now <- getCurrentTime
-  return $ do contracts <- eresult
-              return (ContractList { clRetrievedTime = Just now
-                                   , clContracts = contracts })
-
-updateContracts :: String -> ContractListISeq -> IO (Either String ContractListISeq)
-updateContracts endpoint oldContracts =
+refreshContracts :: String -> ContractListISeq -> IO (Either String ContractListISeq)
+refreshContracts endpoint oldContracts =
   LazyFeed.foldThroughLazyFeed (completeOldContractList oldContracts) (getAllContracts endpoint)
 
 completeOldContractList :: ContractListISeq -> Maybe ContractInList
@@ -51,7 +42,7 @@ getAllContracts' endpoint range = LazyFeed.fromExceptTIO $ do
   (ResultList { results = contracts }) <- hoistEither $ eitherDecode (getResponseBody response)
   let nextRange = parseRangeHeader $ getResponseHeader "Next-Range" response
   return $ LazyFeed.prependListToLazyFeed contracts (getAllContracts' endpoint nextRange)
-    
+
   where
     httpExceptionToString :: Either HttpException a -> Either String a
     httpExceptionToString = mapLeft displayException
