@@ -166,6 +166,10 @@ div.logo {
     align-items: flex-start;
 }
 
+.icon-margin-right {
+    padding-right: 0.5rem;
+}
+
 .table {
     border-collapse: separate;
     border-spacing: 0;
@@ -222,7 +226,7 @@ div.logo {
 
 .button-row {
     padding: 1.25rem 0;
-    margin-bottom: 2rem;
+    margin-bottom: 0.8rem;
 }
 
 .button-cell {
@@ -246,6 +250,11 @@ div.logo {
 .inactive-text {
     font-size: 0.94rem;
     color: #5B7296;
+}
+
+.flex-container {
+    display: flex;
+    align-items: flex-end;
 }
 
 .icon {
@@ -325,15 +334,15 @@ div.logo {
 }
 
 .contract-header {
-    margin-bottom: 20px;
+    margin-bottom: 1.3rem;
 }
 
 .contract-label {
     font-weight: bold;
-    font-size: 26px;
+    font-size: 1.625rem;
 }
 
 .contract-id {
-    font-size: 26px;
+    font-size: 1.625rem;
 }
 

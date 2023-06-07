@@ -13,12 +13,16 @@ import qualified Data.Map as Map
 import Data.Text (unpack)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import GHC.Utils.Misc (split)
-import Text.Blaze.Html5 ( Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue) )
+import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue))
 import qualified Text.Blaze.Html5 as H
-import Text.Blaze.Html5.Attributes ( href, style, class_ )
+import Text.Blaze.Html5.Attributes (href, style, class_)
 import Text.Printf (printf)
-import Explorer.Web.Util ( tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, SyncStatus, downloadIcon  )
-import Language.Marlowe.Pretty ( pretty )
+import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime,
+                          generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
+                          valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
+                          roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv)
+import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
 import qualified Language.Marlowe.Runtime.Types.TransactionJSON as TJ
@@ -224,7 +228,7 @@ instance ToMarkup ContractView where
                          , cvMContractId = Nothing
                          , cvData = cv
                          }) =
-    baseDoc curSyncStatus "Error" (string "An error occurred") $ toMarkup cv
+    baseDoc curSyncStatus "Error" (makeTitleDiv "An error occurred") $ toMarkup cv
 
 data CV = ContractInfoView CIVR
         | ContractStateView CSVR
@@ -268,22 +272,32 @@ renderCIVR (CIVR { civrContractId = cid
                  , civrIsActive = contractStatus
                  , civrVersion = marloweVersion
                  }) =
-  table $ do tr $ do td $ b "Status"
-                     td $ string $ if contractStatus then "Active" else "Closed"
-             tr $ do td $ b "Contract ID"
-                     td $ a ! href (toValue cidLink) $ string cid
-             tr $ do td $ b "Block Header Hash"
-                     td $ string blockHash
-             tr $ do td $ b "Role Token Minting Policy ID"
-                     td $ a ! href (toValue roleMintingPolicyIdLink) $ string roleMintingPolicyId
-             tr $ do td $ b "Slot No"
-                     td $ string (show slotNum)
-             tr $ do td $ b "Block No"
-                     td $ a ! href (toValue blockLink) $ string $ show blockNum
-             tr $ do td $ b "Tags"
-                     td $ renderTags civrTags'
-             tr $ do td $ b "Version"
-                     td $ string marloweVersion
+  dtable $ do tr $ do dtd $ do statusIcon
+                               string "Status"
+                      mtd $ do H.span ! class_ "icon-margin-right"
+                                      $ if contractStatus then activeLight else inactiveLight
+                               H.span $ string $ if contractStatus then "Active" else "Closed"
+              tr $ do dtd $ do contractIdIcon
+                               string "Contract ID"
+                      mtd $ a ! href (toValue cidLink) $ string cid
+              tr $ do dtd $ do blockHeaderHashIcon
+                               string "Block Header Hash"
+                      mtd $ string blockHash
+              tr $ do dtd $ do roleTokenMintingPolicyIdIcon
+                               string "Role Token Minting Policy ID"
+                      mtd $ a ! href (toValue roleMintingPolicyIdLink) $ string roleMintingPolicyId
+              tr $ do dtd $ do slotNoIcon
+                               string "Slot No"
+                      mtd $ string (show slotNum)
+              tr $ do dtd $ do blockNoIcon
+                               string "Block No"
+                      mtd $ a ! href (toValue blockLink) $ string $ show blockNum
+              tr $ do dtd $ do metadataIcon
+                               string "Tags"
+                      mtd $ renderTags civrTags'
+              tr $ do dtd $ do versionIcon
+                               string "Version"
+                      mtd $ string marloweVersion
 
 data CSVR = CSVR { csvrContractId :: String
                  , csvrContractIdLink :: String
