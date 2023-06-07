@@ -31,6 +31,7 @@ import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Data.Map as M
 import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
+import Data.Maybe (isJust)
 
 contractView :: ContractListCacheStatusReader contractCache => Options -> contractCache -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
 contractView opts contractCache mTab mCid mTxId = do
@@ -51,7 +52,7 @@ contractViewInner :: Options -> Maybe String -> Maybe String -> Maybe String -> 
 contractViewInner opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHost}) mTab (Just cid) mTxId = do
   let urlPrefix = mkUrlPrefix opts
       tab = parseTab mTab
-  
+
   r <- runExceptT (do cjson <- ExceptT $ CJ.getContractJSON urlPrefix cid
                       let link = CJ.transactions $ CJ.links cjson
                       txsjson <- whenMaybe (tab == CTxView)
@@ -79,21 +80,22 @@ parseTab _ = CInfoView
 
 
 extractInfo :: ContractViews -> String -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> CV
-extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource = 
+extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource =
                                          (CJ.Resource { CJ.block = CJ.Block { CJ.blockHeaderHash = blkHash
                                                                             , CJ.blockNo = blkNo
                                                                             , CJ.slotNo = sltNo
                                                                             }
                                                       , CJ.contractId = cid
+                                                      , CJ.currentContract = currContract
                                                       , CJ.metadata =_metadata
                                                       , CJ.roleTokenMintingPolicyId = mintingPolicyId
-                                                      , CJ.status = currStatus
                                                       , CJ.tags = tagsMap
                                                       , CJ.version = ver
                                                       })
                                                      } _ _ =
   ContractInfoView
-      (CIVR { civrContractId = cid
+      (CIVR { civrIsActive = isJust currContract
+            , civrContractId = cid
             , civrContractIdLink = mkTransactionExplorerLink blockExplHost cid
             , civrBlockHeaderHash = blkHash
             , civrBlockNo = blkNo
@@ -102,10 +104,9 @@ extractInfo CInfoView blockExplHost CJ.ContractJSON { CJ.resource =
             , civrRoleTokenMintingPolicyId = mintingPolicyId
             , civrRoleTokenMintingPolicyIdLink = mkTokenPolicyExplorerLink blockExplHost mintingPolicyId
             , civrTags = fmap valueToString tagsMap
-            , civrStatus = currStatus
             , civrVersion = ver
             })
-extractInfo CStateView blockExplHost CJ.ContractJSON { CJ.resource = 
+extractInfo CStateView blockExplHost CJ.ContractJSON { CJ.resource =
                                          (CJ.Resource { CJ.contractId = cid
                                                       , CJ.currentContract = currContract
                                                       , CJ.initialContract = initContract
@@ -218,7 +219,7 @@ instance ToMarkup ContractView where
                                      $ string "Contract - "
                               H.span ! class_ "contract-id"
                                      $ string cid
-    
+
   toMarkup (ContractView { cvRetrievalSyncStatus = curSyncStatus
                          , cvMContractId = Nothing
                          , cvData = cv
@@ -241,7 +242,8 @@ instance ToMarkup CV where
   toMarkup (ContractViewError str) =
     string $ "Error: " ++ str
 
-data CIVR = CIVR { civrContractId :: String
+data CIVR = CIVR { civrIsActive :: Bool
+                 , civrContractId :: String
                  , civrContractIdLink :: String
                  , civrBlockHeaderHash :: String
                  , civrBlockNo :: Integer
@@ -250,7 +252,6 @@ data CIVR = CIVR { civrContractId :: String
                  , civrRoleTokenMintingPolicyId :: String
                  , civrRoleTokenMintingPolicyIdLink :: String
                  , civrTags :: Map String String
-                 , civrStatus :: String
                  , civrVersion :: String
                  }
 
@@ -264,23 +265,23 @@ renderCIVR (CIVR { civrContractId = cid
                  , civrRoleTokenMintingPolicyId = roleMintingPolicyId
                  , civrRoleTokenMintingPolicyIdLink = roleMintingPolicyIdLink
                  , civrTags = civrTags'
-                 , civrStatus = contractStatus
+                 , civrIsActive = contractStatus
                  , civrVersion = marloweVersion
                  }) =
-  table $ do tr $ do td $ b "Contract ID"
+  table $ do tr $ do td $ b "Status"
+                     td $ string $ if contractStatus then "Active" else "Closed"
+             tr $ do td $ b "Contract ID"
                      td $ a ! href (toValue cidLink) $ string cid
              tr $ do td $ b "Block Header Hash"
                      td $ string blockHash
-             tr $ do td $ b "Block No"
-                     td $ a ! href (toValue blockLink) $ string $ show blockNum
-             tr $ do td $ b "Slot No"
-                     td $ string (show slotNum)
              tr $ do td $ b "Role Token Minting Policy ID"
                      td $ a ! href (toValue roleMintingPolicyIdLink) $ string roleMintingPolicyId
+             tr $ do td $ b "Slot No"
+                     td $ string (show slotNum)
+             tr $ do td $ b "Block No"
+                     td $ a ! href (toValue blockLink) $ string $ show blockNum
              tr $ do td $ b "Tags"
                      td $ renderTags civrTags'
-             tr $ do td $ b "Status"
-                     td $ string contractStatus
              tr $ do td $ b "Version"
                      td $ string marloweVersion
 
@@ -404,7 +405,7 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
       td $ string $ show txSlotNo'
     tr $ do
       td $ b "Inputs"
-      td $ do if null inputs' 
+      td $ do if null inputs'
               then string "No inputs"
               else table $ do
                      mapM_ (\inp -> do tr $ td $ code $ stringToHtml $ show $ pretty inp) inputs'
