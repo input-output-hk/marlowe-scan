@@ -12,7 +12,6 @@ import Control.Newtype.Generics ( op )
 import Network.Wai ( Application )
 import Network.Wai.Handler.Warp ( run )
 import Servant ( Proxy(..), hoistServer, serve, type (:<|>)(..), OctetStream, QueryParam, type (:>), Get, Headers, Header, JSON, HasServer (ServerT) )
-import Servant.HTML.Blaze ( HTML )
 
 import Explorer.SharedContractCache ( ContractListCacheReader )
 import Explorer.Web.ContractListView ( ContractListView (..), contractListView )
@@ -27,6 +26,7 @@ import Explorer.API.IsContractOpen (isContractOpen)
 import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
 import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon)
 import Explorer.Resources.MimeTypes (CSS, SVG)
+import Servant.HTML.Blaze (HTML)
 
 startApp :: Options -> IO ()
 startApp opts = do

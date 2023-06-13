@@ -14,7 +14,7 @@ import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ( body, docTypeHtml, head, html, title,
-                          string, Html, (!), br, preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue )
+                          string, Html, (!), preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue, br )
 import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt )
 import Data.Time (UTCTime, NominalDiffTime)
 import Text.Printf (printf)
@@ -53,7 +53,7 @@ fullLogo = a ! class_ "invisible-link" ! href "/"
                      $ do logo
                           H.div ! class_ "logo-text"
                                 $ do H.span ! class_ "logo-text-marlowe" $ string "Marlowe"
-                                     nbsp
+                                     space
                                      H.span ! class_ "logo-text-explorer" $ string "Explorer"
 
 downloadIcon :: Html
@@ -189,6 +189,9 @@ dtd = H.td ! class_ "inactive-text flex-container"
 
 mtd :: Html -> Html
 mtd = H.td ! style "padding-left: 4rem;"
+
+space :: Html
+space = preEscapedString " "
 
 nbsp :: Html
 nbsp = preEscapedString "&nbsp;"
