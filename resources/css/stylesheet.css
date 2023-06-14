@@ -356,8 +356,8 @@ pre[class*="language-"]:after {
 }
 
 code.contract-code {
-    width: calc(100vw - 33rem);
+    width: calc(100vw - 33rem - 10px);
     min-width: 60rem;
-    max-height: calc(100vh - 26rem);
+    max-height: calc(100vh - 26rem - 10px);
     min-height: 40rem;
 }
