@@ -14,7 +14,7 @@ import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ( body, docTypeHtml, head, html, title,
-                          string, Html, (!), preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue, br )
+                          string, Html, (!), preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue )
 import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt )
 import Data.Time (UTCTime, NominalDiffTime)
 import Text.Printf (printf)
@@ -134,7 +134,11 @@ baseDoc curSyncStatus titleText caption content = docTypeHtml
                                  $ do head $ do title $ string titleText
                                                 link ! rel "preconnect" ! href "https://fonts.gstatic.com" ! crossorigin
                                                 link ! href "https://fonts.googleapis.com/css2?family=Outfit&display=swap" ! rel "stylesheet"
+                                                link ! href "/prism/prism.css" ! rel "stylesheet"
+                                                link ! href "/prism/marlowe.css" ! rel "stylesheet"
                                                 link ! href "/css/stylesheet.css" ! rel "stylesheet"
+                                                script ! src "/prism/prism.js" $ mempty
+                                                script ! src "/prism/marlowe.js" $ mempty
                                       body $ H.div ! class_ "wrapper"
                                                    $ do H.div ! class_ "side-menu"
                                                               $ do fullLogo
@@ -193,9 +197,6 @@ mtd = H.td ! style "padding-left: 4rem;"
 space :: Html
 space = preEscapedString " "
 
-nbsp :: Html
-nbsp = preEscapedString "&nbsp;"
-
 splitLeadingSpaces :: String -> (String, String)
 splitLeadingSpaces = span (== ' ')
 
@@ -203,9 +204,9 @@ stringToHtml :: String -> Html
 stringToHtml str = mconcat $ map processLine $ lines str
   where
     processLine line = let (spaces, rest) = splitLeadingSpaces line
-                       in do mconcat (replicate (length spaces) nbsp)
+                       in do mconcat (replicate (length spaces) space)
                              string rest
-                             br
+                             string "\n"
 
 generateLink :: String -> [(String, String)] -> String
 generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap pack pack) params))

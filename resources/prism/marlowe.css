@@ -1,0 +1,35 @@
+.token.value {
+  color: #0d6659;
+}
+
+.token.observation {
+  color: #1d704f;
+}
+
+.token.bound {
+  color: #1c598a;
+}
+
+.token.action {
+  color: #6c3a7a;
+}
+
+.token.payee {
+  color: #232f3e;
+}
+
+.token.case {
+  color: #b58c0a;
+}
+
+.token.contract {
+  color: #af5f16;
+}
+
+pre.line-numbers {
+  padding: 0;
+} 
+
+.code-container {
+  max-width: 78rem;
+}

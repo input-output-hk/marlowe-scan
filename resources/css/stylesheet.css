@@ -346,3 +346,16 @@ div.logo {
     font-size: 1.625rem;
 }
 
+pre[class*="language-"]:before,
+pre[class*="language-"]:after {
+    display: none;
+}
+
+.contract-code {
+    margin-top: 2rem;
+}
+
+code.contract-code {
+    width: calc(100vw - 33rem);
+    max-height: calc(100vh - 20rem);
+}

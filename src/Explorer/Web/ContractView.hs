@@ -13,7 +13,7 @@ import qualified Data.Map as Map
 import Data.Text (unpack)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import GHC.Utils.Misc (split)
-import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue))
+import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue), pre)
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes (href, style, class_)
 import Text.Printf (printf)
@@ -310,19 +310,15 @@ data CSVR = CSVR { csvrContractId :: String
 renderCSVR :: CSVR -> Html
 renderCSVR (CSVR { csvrContractId = cid
                  , csvrContractIdLink = cidLink
-                 , currentContract = cc
                  , initialContract = ic
                  , currentState = cs
                  , csvrBlockExplHost = blockExplHost
-                 }) =
+                 }) = do
   table $ do tr $ do td $ b "Contract ID"
                      td $ a ! href (toValue cidLink) $ string cid
-             tr $ do td $ b "Current contract"
-                     td $ renderMContract cc
              tr $ do td $ b "Current state"
                      td $ renderMState blockExplHost cs
-             tr $ do td $ b "Initial contract"
-                     td $ renderMContract (Just ic)
+  renderMContract (Just ic)
 
 data CTVRTDetail = CTVRTDetail
   {
@@ -402,11 +398,11 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
                                                       , txStatus = txStatus'
                                                       , txTags = tags'
                                                       , transactionId = transactionId'
-                                                      }) =
+                                                      }) = do
   table $ do
-  tr $ do
-    td $ maybe (string previousTransactionLabel) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
-    td $ maybe (string nextTransactionLabel) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
+    tr $ do
+      td $ maybe (string previousTransactionLabel) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
+      td $ maybe (string nextTransactionLabel) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
   table $ do
     tr $ do
       td $ b "Block header hash"
@@ -430,9 +426,6 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
       td $ b "Invalid after"
       td $ makeLocalDateTime invalidHereafter'
     tr $ do
-      td $ b "Output Contract"
-      td $ renderMContract outputContract'
-    tr $ do
       td $ b "Output State"
       td $ renderMState blockExplHost outputState'
     tr $ do
@@ -444,6 +437,7 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
     tr $ do
       td $ b "Transaction Id"
       td $ a ! href (toValue $ "https://" ++ blockExplHost ++ "/transaction/" ++ transactionId') $ string transactionId'
+  renderMContract outputContract'
   where previousTransactionLabel = "< Previous Transaction"
         nextTransactionLabel = "Next Transaction >"
         explorerTransactionLinkFromRuntimeLink label rtTxLink =
@@ -538,8 +532,8 @@ ifEmptyMap mapToCheck defaultHtml renderMapFunc
   | otherwise = renderMapFunc mapToCheck
 
 renderMContract :: Maybe Contract -> Html
-renderMContract Nothing = string "Contract closed"
-renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
+renderMContract Nothing = H.div ! class_ "contract-code" $ string "Contract closed"
+renderMContract (Just c) = pre ! class_ "line-numbers" $ code ! class_ "language-marlowe contract-code" $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c = do

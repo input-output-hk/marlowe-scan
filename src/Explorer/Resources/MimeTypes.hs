@@ -4,7 +4,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Explorer.Resources.MimeTypes(CSS, SVG) where
+module Explorer.Resources.MimeTypes(CSS, SVG, JS) where
 
 import Network.HTTP.Media ((//), (/:), MediaType)
 import Servant (Accept (..), Proxy, MimeRender (..))
@@ -31,3 +31,12 @@ instance MimeRender SVG BS.ByteString where
   mimeRender :: Proxy SVG -> BS.ByteString -> LBS.ByteString
   mimeRender _ = LBS.fromStrict
 
+data JS
+
+instance Accept JS where
+  contentType :: Proxy JS -> MediaType
+  contentType _ = "text" // "javascript" /: ("charset", "utf-8")
+
+instance MimeRender JS BS.ByteString where
+  mimeRender :: Proxy JS -> BS.ByteString -> LBS.ByteString
+  mimeRender _ = LBS.fromStrict

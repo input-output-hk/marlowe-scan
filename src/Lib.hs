@@ -24,8 +24,8 @@ import qualified Data.ByteString as BS
 import Explorer.API.GetNumTransactions (getContractNumTransactions)
 import Explorer.API.IsContractOpen (isContractOpen)
 import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
-import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon)
-import Explorer.Resources.MimeTypes (CSS, SVG)
+import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS)
+import Explorer.Resources.MimeTypes (CSS, SVG, JS)
 import Servant.HTML.Blaze (HTML)
 
 startApp :: Options -> IO ()
@@ -36,27 +36,39 @@ startApp opts = do
   contractListCache <- start $ mkUrlPrefix opts
   run eport $ app opts contractListCache
 
-type ResourcesAPI = "css" :> "stylesheet.css" :> Get '[CSS] BS.ByteString
-              :<|> ("svg" :> (("active-light.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("amber-status-light.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("green-status-light.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("inactive-light.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("logo.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("magnifying-glass.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("red-status-light.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("download.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("block_header_hash.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("block_no.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("contract_id.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("metadata.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("role_token_minting_policy_id.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("slot_no.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("status.svg" :> Get '[SVG] BS.ByteString)
-                         :<|> ("version.svg" :> Get '[SVG] BS.ByteString)))
+type CSSResourcesAPI = "css" :> "stylesheet.css" :> Get '[CSS] BS.ByteString
 
-appResources :: ServerT ResourcesAPI IO
-appResources = return cssStylesheet
-          :<|> return activeLight
+type SVGResourcesAPI = "svg" :> (("active-light.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("amber-status-light.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("green-status-light.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("inactive-light.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("logo.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("magnifying-glass.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("red-status-light.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("download.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("block_header_hash.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("block_no.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("contract_id.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("metadata.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("role_token_minting_policy_id.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("slot_no.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("status.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("version.svg" :> Get '[SVG] BS.ByteString))
+
+type PrismResourcesAPI = "prism" :> ("prism.js" :> Get '[JS] BS.ByteString
+                                :<|> "prism.css" :> Get '[CSS] BS.ByteString
+                                :<|> "marlowe.js" :> Get '[CSS] BS.ByteString
+                                :<|> "marlowe.css" :> Get '[CSS] BS.ByteString)
+
+type ResourcesAPI = CSSResourcesAPI
+                :<|> SVGResourcesAPI
+                :<|> PrismResourcesAPI
+
+cssResources :: ServerT CSSResourcesAPI IO
+cssResources = return cssStylesheet
+
+svgResources :: ServerT SVGResourcesAPI IO
+svgResources = return activeLight
           :<|> return amberStatus
           :<|> return greenStatus
           :<|> return inactiveLight
@@ -72,6 +84,15 @@ appResources = return cssStylesheet
           :<|> return slotNoIcon
           :<|> return statusIcon
           :<|> return versionIcon
+
+prismResources :: ServerT PrismResourcesAPI IO
+prismResources = return prismJS
+            :<|> return prismCSS
+            :<|> return marlowePrismJS
+            :<|> return marlowePrismCSS
+
+appResources :: ServerT ResourcesAPI IO
+appResources = cssResources :<|> svgResources :<|> prismResources
 
 type API
      = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/
