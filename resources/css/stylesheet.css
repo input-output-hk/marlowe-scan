@@ -357,5 +357,7 @@ pre[class*="language-"]:after {
 
 code.contract-code {
     width: calc(100vw - 33rem);
-    max-height: calc(100vh - 20rem);
+    min-width: 60rem;
+    max-height: calc(100vh - 26rem);
+    min-height: 40rem;
 }

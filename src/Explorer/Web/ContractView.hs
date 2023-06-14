@@ -21,7 +21,7 @@ import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintA
                           generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
-                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv)
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon)
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -314,10 +314,12 @@ renderCSVR (CSVR { csvrContractId = cid
                  , currentState = cs
                  , csvrBlockExplHost = blockExplHost
                  }) = do
-  table $ do tr $ do td $ b "Contract ID"
-                     td $ a ! href (toValue cidLink) $ string cid
-             tr $ do td $ b "Current state"
-                     td $ renderMState blockExplHost cs
+  dtable $ do tr $ do dtd $ do contractIdIcon
+                               string "Contract ID"
+                      mtd $ a ! href (toValue cidLink) $ string cid
+              tr $ do dtd $ do stateIcon
+                               string "Current state"
+                      mtd $ renderMState blockExplHost cs
   renderMContract (Just ic)
 
 data CTVRTDetail = CTVRTDetail

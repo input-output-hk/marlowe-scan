@@ -5,7 +5,7 @@ module Explorer.Web.Util (SyncStatus(..), baseDoc, formatTimeDiff, generateLink,
                           mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr,
                           tlr, tld, calculateSyncStatus, tldhc, downloadIcon, blockHeaderHashIcon, blockNoIcon,
                           contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon,
-                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv)
+                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon)
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -76,6 +76,9 @@ roleTokenMintingPolicyIdIcon = img ! class_ "icon" ! src "/svg/role_token_mintin
 
 slotNoIcon :: Html
 slotNoIcon = img ! class_ "icon" ! src "/svg/slot_no.svg" ! alt "Slot Number icon"
+
+stateIcon :: Html
+stateIcon = img ! class_ "icon" ! src "/svg/state.svg" ! alt "State icon"
 
 statusIcon :: Html
 statusIcon = img ! class_ "icon" ! src "/svg/status.svg" ! alt "Status icon"

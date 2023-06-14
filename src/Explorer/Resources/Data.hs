@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS) where
+module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon) where
 
 import Explorer.Resources.Helpers (cssPath, embedResource, svgPath, prismPath)
 import Data.ByteString (ByteString)
@@ -59,6 +59,9 @@ slotNoIcon = $(embedResource svgPath "slot_no.svg")
 
 statusIcon :: ByteString
 statusIcon = $(embedResource svgPath "status.svg")
+
+stateIcon :: ByteString
+stateIcon = $(embedResource svgPath "state.svg")
 
 versionIcon :: ByteString
 versionIcon = $(embedResource svgPath "version.svg")

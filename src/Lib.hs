@@ -24,7 +24,7 @@ import qualified Data.ByteString as BS
 import Explorer.API.GetNumTransactions (getContractNumTransactions)
 import Explorer.API.IsContractOpen (isContractOpen)
 import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
-import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS)
+import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS, stateIcon)
 import Explorer.Resources.MimeTypes (CSS, SVG, JS)
 import Servant.HTML.Blaze (HTML)
 
@@ -52,6 +52,7 @@ type SVGResourcesAPI = "svg" :> (("active-light.svg" :> Get '[SVG] BS.ByteString
                             :<|> ("metadata.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("role_token_minting_policy_id.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("slot_no.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("state.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("status.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("version.svg" :> Get '[SVG] BS.ByteString))
 
@@ -82,6 +83,7 @@ svgResources = return activeLight
           :<|> return metadataIcon
           :<|> return roleTokenMintingPolicyIdIcon
           :<|> return slotNoIcon
+          :<|> return stateIcon
           :<|> return statusIcon
           :<|> return versionIcon
 
