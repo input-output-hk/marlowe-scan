@@ -5,7 +5,7 @@ module Explorer.Web.Util (SyncStatus(..), baseDoc, formatTimeDiff, generateLink,
                           mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr,
                           tlr, tld, calculateSyncStatus, tldhc, downloadIcon, blockHeaderHashIcon, blockNoIcon,
                           contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon,
-                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon)
+                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon, arrowDropDownIcon, createPopUpLauncher, baseJSScripts)
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -15,7 +15,8 @@ import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ( body, docTypeHtml, head, html, title,
                           string, Html, (!), preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue )
-import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt )
+import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt, onclick )
+import qualified Text.Blaze.Html5.Attributes as A
 import Data.Time (UTCTime, NominalDiffTime)
 import Text.Printf (printf)
 import Data.Aeson (Value)
@@ -58,6 +59,9 @@ fullLogo = a ! class_ "invisible-link" ! href "/"
 
 downloadIcon :: Html
 downloadIcon = img ! class_ "icon" ! src "/svg/download.svg" ! alt "Download icon"
+
+arrowDropDownIcon :: Html
+arrowDropDownIcon = img ! class_ "icon" ! src "/svg/arrow_drop_down.svg" ! alt "Arrow drop down icon"
 
 blockHeaderHashIcon :: Html
 blockHeaderHashIcon = img ! class_ "icon" ! src "/svg/block_header_hash.svg" ! alt "Block Header Hash icon"
@@ -142,6 +146,7 @@ baseDoc curSyncStatus titleText caption content = docTypeHtml
                                                 link ! href "/css/stylesheet.css" ! rel "stylesheet"
                                                 script ! src "/prism/prism.js" $ mempty
                                                 script ! src "/prism/marlowe.js" $ mempty
+                                                baseJSScripts
                                       body $ H.div ! class_ "wrapper"
                                                    $ do H.div ! class_ "side-menu"
                                                               $ do fullLogo
@@ -278,3 +283,40 @@ makeTitleDiv :: String -> Html
 makeTitleDiv pageTitle = H.div ! class_ "contract-header"
                            $ H.span ! class_ "contract-label"
                                     $ string pageTitle
+
+createPopUpLauncher :: String -> Html -> Html
+createPopUpLauncher label popupContent = do
+      popUpContent
+      a ! class_ "invisible-link"
+        ! onclick (toValue showPopUp)
+        $ H.span ! class_ "shaded-description-value"
+                 $ do string label
+                      arrowDropDownIcon
+  where (popUpContent, showPopUp) = createPopUp label popupContent
+
+createPopUp :: String -> Html -> (Html, String)
+createPopUp popUpId content = (popUp, "showPopUp('" ++ popUpId ++ "');")
+  where popUp = do H.div ! A.id (toValue $ popUpId ++ "_backdrop")
+                         ! onclick (toValue $ "hidePopUp('" ++ popUpId ++ "');")
+                         ! class_ "popup-background"
+                         $ return ()
+                   H.div ! A.id (toValue $ popUpId ++ "_popup")
+                         ! class_ "popup-body"
+                         $ content
+
+baseJSScripts :: Html
+baseJSScripts =
+  script ! type_ "text/javascript"
+         $ string
+             ("function showPopUp(popUpId) {" ++
+              " var popUpBackdrop = document.getElementById(popUpId + '_backdrop');" ++
+              " popUpBackdrop.style.display = 'block';" ++
+              " var popUp = document.getElementById(popUpId + '_popup');" ++
+              " popUp.style.display = 'block';" ++
+              "}; " ++
+              "function hidePopUp(popUpId) {" ++
+              " var popUpBackdrop = document.getElementById(popUpId + '_backdrop');" ++
+              " popUpBackdrop.style.display = 'none';" ++
+              " var popUp = document.getElementById(popUpId + '_popup');" ++
+              " popUp.style.display = 'none';" ++
+              "}")

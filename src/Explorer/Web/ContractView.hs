@@ -21,7 +21,7 @@ import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintA
                           generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
-                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon)
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon, createPopUpLauncher)
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -515,18 +515,19 @@ renderTime =
 renderMState :: String -> Maybe State -> Html
 renderMState _blockExplHost Nothing = string "Contract closed"
 renderMState blockExplHost (Just (State { accounts    = accs
-                          , choices     = chos
-                          , boundValues = boundVals
-                          , minTime     = mtime })) =
-  table $ do tr $ do td $ b "Accounts"
-                     td $ ifEmptyMap accs (string "No accounts") $ renderMAccounts blockExplHost
-             tr $ do td $ b "Bound values"
-                     td $ ifEmptyMap boundVals (string "No bound values") renderBoundValues
-             tr $ do td $ b "Choices"
-                     td $ ifEmptyMap chos (string "No choices") $ renderChoices blockExplHost
-             tr $ do td $ b "minTime"
-                     td $ do renderTime mtime
-                             string $ " (POSIX: " ++ show mtime ++ ")"
+                                        , choices     = chos
+                                        , boundValues = boundVals
+                                        , minTime     = mtime })) =
+  createPopUpLauncher "State" $ 
+    table $ do tr $ do td $ b "Accounts"
+                       td $ ifEmptyMap accs (string "No accounts") $ renderMAccounts blockExplHost
+               tr $ do td $ b "Bound values"
+                       td $ ifEmptyMap boundVals (string "No bound values") renderBoundValues
+               tr $ do td $ b "Choices"
+                       td $ ifEmptyMap chos (string "No choices") $ renderChoices blockExplHost
+               tr $ do td $ b "minTime"
+                       td $ do renderTime mtime
+                               string $ " (POSIX: " ++ show mtime ++ ")"
 
 ifEmptyMap :: Map a b -> Html -> (Map a b -> Html) -> Html
 ifEmptyMap mapToCheck defaultHtml renderMapFunc
