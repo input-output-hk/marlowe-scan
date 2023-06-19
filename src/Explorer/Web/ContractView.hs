@@ -465,13 +465,9 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
 
 renderTags :: Map String String -> Html
 renderTags tagMap | Map.null tagMap = string "No tags"
-                  | otherwise = table $ do tr $ do
-                                             th $ b "Tag"
-                                             th $ b "Value"
-                                           mapM_ (\(t, v) -> tr $ do
-                                                               td $ string t
-                                                               td $ code $ stringToHtml v
-                                                 ) (Map.toList tagMap)
+                  | otherwise = mapM_ (\(n, (t, v)) -> createPopUpLauncher ("tag_" ++ show n) t $
+                                                         pre ! class_ "line-numbers" $ code ! class_ "language-javascript" $ stringToHtml v
+                                      ) (zip [(1 :: Integer)..] $ Map.toList tagMap)
 
 renderParty :: String -> Party -> Html
 renderParty blockExplHost (Address ad) = do string "Address: "
