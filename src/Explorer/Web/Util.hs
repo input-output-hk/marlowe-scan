@@ -5,7 +5,8 @@ module Explorer.Web.Util (SyncStatus(..), baseDoc, formatTimeDiff, generateLink,
                           mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr,
                           tlr, tld, calculateSyncStatus, tldhc, downloadIcon, blockHeaderHashIcon, blockNoIcon,
                           contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon,
-                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon, arrowDropDownIcon, createPopUpLauncher, baseJSScripts, alarmClockIcon)
+                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon,
+                          arrowDropDownIcon, createPopUpLauncher, baseJSScripts, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe)
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -193,6 +194,23 @@ th = H.th ! style "border: 1px solid black; padding: 5px;"
 
 td :: Html -> Html
 td = H.td ! style "border: 1px solid black; padding: 5px;"
+
+-- Pop-up tables without border
+
+pptable :: Html -> Html
+pptable = H.table ! class_ "popup-table"
+
+pptr :: Html -> Html
+pptr = H.tr
+
+ppth :: Html -> Html
+ppth = H.th ! class_ "popup-table-header"
+
+pptd :: Html -> Html
+pptd = H.td ! class_ "popup-table-content"
+
+pptdWe :: Html -> Html
+pptdWe = H.td ! class_ "popup-table-content ellipsis-address"
 
 -- Adaptors for details table
 

@@ -21,7 +21,7 @@ import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintA
                           generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
-                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon, createPopUpLauncher, alarmClockIcon)
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon, createPopUpLauncher, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe)
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -480,17 +480,17 @@ renderParty blockExplHost (Address ad) = do string "Address: "
 renderParty _blockExplHost (Role ro) = string $ "Role: " ++ unpack ro
 
 renderMAccounts :: String -> Map (Party, Token) Money -> Html
-renderMAccounts blockExplHost mapAccounts = table $ do
-  tr $ do
-    th $ b "Party"
-    th $ b "Currency (token name)"
-    th $ b "Amount"
+renderMAccounts blockExplHost mapAccounts = pptable $ do
+  pptr $ do
+    ppth "Party"
+    ppth "Currency (token name)"
+    ppth "Amount"
   let mkRow ((party, token), money) =
         let (tokenString, moneyString) = renderToken token money in
-        tr $ do
-          td $ renderParty blockExplHost party
-          td $ string tokenString
-          td $ string moneyString
+        pptr $ do
+          pptdWe $ renderParty blockExplHost party
+          pptd $ string tokenString
+          pptd $ string moneyString
   mapM_ mkRow $ Map.toList mapAccounts
 
 renderToken :: Token -> Money -> (String, String)
@@ -498,27 +498,27 @@ renderToken (Token "" "") money = ("ADA", prettyPrintAmount 6 money)
 renderToken (Token currSymbol tokenName) money = (printf "%s (%s)" currSymbol tokenName, prettyPrintAmount 0 money)
 
 renderBoundValues :: Map ValueId Integer -> Html
-renderBoundValues mapBoundValues = table $ do
-  tr $ do
-    th $ b "Value Id"
-    th $ b "Value"
+renderBoundValues mapBoundValues = pptable $ do
+  pptr $ do
+    ppth "Value Id"
+    ppth "Value"
   let mkRow (ValueId valueId, bindingValue) =
-        tr $ do
-          td $ string $ T.unpack valueId
-          td $ string $ prettyPrintAmount 0 bindingValue
+        pptr $ do
+          pptd $ string $ T.unpack valueId
+          pptd $ string $ prettyPrintAmount 0 bindingValue
   mapM_ mkRow $ Map.toList mapBoundValues
 
 renderChoices :: String -> Map ChoiceId Integer -> Html
-renderChoices blockExplHost mapChoices = table $ do
-  tr $ do
-    th $ b "Choice Id"
-    th $ b "Party"
-    th $ b "Value"
+renderChoices blockExplHost mapChoices = pptable $ do
+  pptr $ do
+    ppth $ b "Choice Id"
+    ppth $ b "Party"
+    ppth $ b "Value"
   let mkRow (ChoiceId choiceId party, choiceValue) =
-        tr $ do
-          td $ string $ T.unpack choiceId
-          td $ renderParty blockExplHost party
-          td $ string $ prettyPrintAmount 0 choiceValue
+        pptr $ do
+          pptd $ string $ T.unpack choiceId
+          pptdWe $ renderParty blockExplHost party
+          pptd $ string $ prettyPrintAmount 0 choiceValue
   mapM_ mkRow $ Map.toList mapChoices
 
 renderTime :: POSIXTime -> Html
