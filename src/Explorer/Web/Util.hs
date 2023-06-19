@@ -5,7 +5,7 @@ module Explorer.Web.Util (SyncStatus(..), baseDoc, formatTimeDiff, generateLink,
                           mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr,
                           tlr, tld, calculateSyncStatus, tldhc, downloadIcon, blockHeaderHashIcon, blockNoIcon,
                           contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon,
-                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon, arrowDropDownIcon, createPopUpLauncher, baseJSScripts)
+                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon, arrowDropDownIcon, createPopUpLauncher, baseJSScripts, alarmClockIcon)
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -41,6 +41,9 @@ amberStatusLight = img ! src "/svg/amber-status-light.svg" ! alt "Amber status l
 
 redStatusLight :: Html
 redStatusLight = img ! src "/svg/red-status-light.svg" ! alt "Red status light"
+
+alarmClockIcon :: Html
+alarmClockIcon = img ! src "/svg/alarm_clock.svg" ! alt "Alarm clock" ! class_ "side-icon"
 
 activeLight :: Html
 activeLight = img ! src "/svg/active-light.svg" ! alt "Amber status light"
@@ -284,15 +287,15 @@ makeTitleDiv pageTitle = H.div ! class_ "contract-header"
                            $ H.span ! class_ "contract-label"
                                     $ string pageTitle
 
-createPopUpLauncher :: String -> Html -> Html
-createPopUpLauncher label popupContent = do
+createPopUpLauncher :: String -> String -> Html -> Html
+createPopUpLauncher popupId label popupContent = do
       popUpContent
       a ! class_ "invisible-link"
         ! onclick (toValue showPopUp)
         $ H.span ! class_ "shaded-description-value"
                  $ do string label
                       arrowDropDownIcon
-  where (popUpContent, showPopUp) = createPopUp label popupContent
+  where (popUpContent, showPopUp) = createPopUp popupId popupContent
 
 createPopUp :: String -> Html -> (Html, String)
 createPopUp popUpId content = (popUp, "showPopUp('" ++ popUpId ++ "');")

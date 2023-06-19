@@ -24,7 +24,7 @@ import qualified Data.ByteString as BS
 import Explorer.API.GetNumTransactions (getContractNumTransactions)
 import Explorer.API.IsContractOpen (isContractOpen)
 import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
-import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown)
+import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock)
 import Explorer.Resources.MimeTypes (CSS, SVG, JS)
 import Servant.HTML.Blaze (HTML)
 
@@ -39,6 +39,7 @@ startApp opts = do
 type CSSResourcesAPI = "css" :> "stylesheet.css" :> Get '[CSS] BS.ByteString
 
 type SVGResourcesAPI = "svg" :> (("active-light.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("alarm_clock.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("amber-status-light.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("green-status-light.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("inactive-light.svg" :> Get '[SVG] BS.ByteString)
@@ -71,6 +72,7 @@ cssResources = return cssStylesheet
 
 svgResources :: ServerT SVGResourcesAPI IO
 svgResources = return activeLight
+          :<|> return alarmClock
           :<|> return amberStatus
           :<|> return greenStatus
           :<|> return inactiveLight

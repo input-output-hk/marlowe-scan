@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown) where
+module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock) where
 
 import Explorer.Resources.Helpers (cssPath, embedResource, svgPath, prismPath)
 import Data.ByteString (ByteString)
@@ -17,6 +17,9 @@ cssStylesheet = $(embedResource cssPath "stylesheet.css")
 
 activeLight :: ByteString
 activeLight = $(embedResource svgPath "active-light.svg")
+
+alarmClock :: ByteString
+alarmClock = $(embedResource svgPath "alarm_clock.svg")
 
 greenStatus :: ByteString
 greenStatus = $(embedResource svgPath "green-status-light.svg")

@@ -21,7 +21,7 @@ import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintA
                           generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
-                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon, createPopUpLauncher)
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon, createPopUpLauncher, alarmClockIcon)
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -35,7 +35,7 @@ import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Data.Map as M
 import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, catMaybes)
 
 contractView :: ContractListCacheStatusReader contractCache => Options -> contractCache -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
 contractView opts contractCache mTab mCid mTxId = do
@@ -320,7 +320,17 @@ renderCSVR (CSVR { csvrContractId = cid
               tr $ do dtd $ do stateIcon
                                string "Current state"
                       mtd $ renderMState blockExplHost cs
+              renderMminTime cs
   renderMContract (Just ic)
+
+renderMminTime :: Maybe State -> Html
+renderMminTime cs = case cs of
+                      Nothing -> return mempty
+                      Just (State { minTime = mtime }) ->
+                        tr $ do dtd $ do alarmClockIcon
+                                         string "minTime"
+                                mtd $ do renderTime mtime
+                                         string $ " (POSIX: " ++ show mtime ++ ")"
 
 data CTVRTDetail = CTVRTDetail
   {
@@ -430,6 +440,12 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
     tr $ do
       td $ b "Output State"
       td $ renderMState blockExplHost outputState'
+    case outputState' of
+      Nothing -> return mempty
+      Just (State { minTime = mtime }) ->
+        tr $ do td $ b "minTime"
+                td $ do renderTime mtime
+                        string $ " (POSIX: " ++ show mtime ++ ")"
     tr $ do
       td $ b "Status"
       td $ string txStatus'
@@ -516,20 +532,18 @@ renderMState :: String -> Maybe State -> Html
 renderMState _blockExplHost Nothing = string "Contract closed"
 renderMState blockExplHost (Just (State { accounts    = accs
                                         , choices     = chos
-                                        , boundValues = boundVals
-                                        , minTime     = mtime })) =
-  createPopUpLauncher "State" $ 
-    table $ do tr $ do td $ b "Accounts"
-                       td $ ifEmptyMap accs (string "No accounts") $ renderMAccounts blockExplHost
-               tr $ do td $ b "Bound values"
-                       td $ ifEmptyMap boundVals (string "No bound values") renderBoundValues
-               tr $ do td $ b "Choices"
-                       td $ ifEmptyMap chos (string "No choices") $ renderChoices blockExplHost
-               tr $ do td $ b "minTime"
-                       td $ do renderTime mtime
-                               string $ " (POSIX: " ++ show mtime ++ ")"
+                                        , boundValues = boundVals })) =
+  if null statePopUpList
+  then string "No state"
+  else mconcat statePopUpList
+  where
+  statePopUpList :: [Html]
+  statePopUpList = catMaybes [ ifEmptyMap accs Nothing $ Just . createPopUpLauncher "accounts" "Accounts" . renderMAccounts blockExplHost
+                             , ifEmptyMap boundVals Nothing $ Just . createPopUpLauncher "boundValues" "Bindings" . renderBoundValues
+                             , ifEmptyMap chos Nothing $ Just . createPopUpLauncher "choices" "Choices" . renderChoices blockExplHost
+                             ]
 
-ifEmptyMap :: Map a b -> Html -> (Map a b -> Html) -> Html
+ifEmptyMap :: Map a b -> c -> (Map a b -> c) -> c
 ifEmptyMap mapToCheck defaultHtml renderMapFunc
   | M.null mapToCheck = defaultHtml
   | otherwise = renderMapFunc mapToCheck
