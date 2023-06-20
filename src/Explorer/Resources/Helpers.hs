@@ -1,4 +1,4 @@
-module Explorer.Resources.Helpers(cssPath, embedResource, svgPath) where
+module Explorer.Resources.Helpers(cssPath, embedResource, svgPath, prismPath) where
 
 import Data.FileEmbed (embedFile, makeRelativeToProject, embedFile)
 import Language.Haskell.TH (Q)
@@ -12,6 +12,9 @@ cssPath = (++ "css/") <$> resourcesPath
 
 svgPath :: Q FilePath
 svgPath = (++ "svg/") <$> resourcesPath
+
+prismPath :: Q FilePath
+prismPath = (++ "prism/") <$> resourcesPath
 
 embedResource :: Q [Char] -> String -> Q Exp
 embedResource path name = do 

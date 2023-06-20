@@ -35,6 +35,7 @@ library
       Explorer.Web.ContractInfoDownload
       Explorer.Web.ContractListView
       Explorer.Web.ContractView
+      Explorer.Web.PrettyHtml
       Explorer.Web.Util
       Language.Marlowe.Pretty
       Language.Marlowe.Runtime.Background
@@ -80,6 +81,7 @@ library
     , template-haskell
     , text
     , time
+    , utf8-string
     , wai
     , warp
     , wl-pprint
@@ -117,6 +119,7 @@ executable marlowe-explorer-exe
     , servant-server
     , template-haskell
     , text
+    , utf8-string
     , wai
     , warp
     , wl-pprint
@@ -156,6 +159,7 @@ test-suite marlowe-explorer-test
     , servant-server
     , template-haskell
     , text
+    , utf8-string
     , wai
     , warp
     , wl-pprint

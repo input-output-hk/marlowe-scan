@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon) where
+module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock) where
 
-import Explorer.Resources.Helpers (cssPath, embedResource, svgPath)
+import Explorer.Resources.Helpers (cssPath, embedResource, svgPath, prismPath)
 import Data.ByteString (ByteString)
 
 ----------------
@@ -17,6 +17,9 @@ cssStylesheet = $(embedResource cssPath "stylesheet.css")
 
 activeLight :: ByteString
 activeLight = $(embedResource svgPath "active-light.svg")
+
+alarmClock :: ByteString
+alarmClock = $(embedResource svgPath "alarm_clock.svg")
 
 greenStatus :: ByteString
 greenStatus = $(embedResource svgPath "green-status-light.svg")
@@ -39,6 +42,9 @@ magnifyingGlass = $(embedResource svgPath "magnifying-glass.svg")
 downloadIcon :: ByteString
 downloadIcon = $(embedResource svgPath "download.svg")
 
+arrowDropDown :: ByteString
+arrowDropDown = $(embedResource svgPath "arrow_drop_down.svg")
+
 blockHeaderHashIcon :: ByteString
 blockHeaderHashIcon = $(embedResource svgPath "block_header_hash.svg")
 
@@ -60,6 +66,20 @@ slotNoIcon = $(embedResource svgPath "slot_no.svg")
 statusIcon :: ByteString
 statusIcon = $(embedResource svgPath "status.svg")
 
+stateIcon :: ByteString
+stateIcon = $(embedResource svgPath "state.svg")
+
 versionIcon :: ByteString
 versionIcon = $(embedResource svgPath "version.svg")
 
+prismCSS :: ByteString
+prismCSS = $(embedResource prismPath "prism.css")
+
+prismJS :: ByteString
+prismJS = $(embedResource prismPath "prism.js")
+
+marlowePrismJS :: ByteString
+marlowePrismJS = $(embedResource prismPath "marlowe.js")
+
+marlowePrismCSS :: ByteString
+marlowePrismCSS = $(embedResource prismPath "marlowe.css")

@@ -5,7 +5,8 @@ module Explorer.Web.Util (SyncStatus(..), baseDoc, formatTimeDiff, generateLink,
                           mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr,
                           tlr, tld, calculateSyncStatus, tldhc, downloadIcon, blockHeaderHashIcon, blockNoIcon,
                           contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon,
-                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv)
+                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon,
+                          arrowDropDownIcon, createPopUpLauncher, baseJSScripts, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe)
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -14,8 +15,9 @@ import Network.HTTP.Types ( renderSimpleQuery )
 import Prelude hiding ( head )
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ( body, docTypeHtml, head, html, title,
-                          string, Html, (!), br, preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue )
-import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt )
+                          string, Html, (!), preEscapedString, a, ToValue (toValue), Markup, script, link, customAttribute, img, stringValue )
+import Text.Blaze.Html5.Attributes ( style, lang, href, type_, rel, class_, src, alt, onclick )
+import qualified Text.Blaze.Html5.Attributes as A
 import Data.Time (UTCTime, NominalDiffTime)
 import Text.Printf (printf)
 import Data.Aeson (Value)
@@ -41,6 +43,9 @@ amberStatusLight = img ! src "/svg/amber-status-light.svg" ! alt "Amber status l
 redStatusLight :: Html
 redStatusLight = img ! src "/svg/red-status-light.svg" ! alt "Red status light"
 
+alarmClockIcon :: Html
+alarmClockIcon = img ! src "/svg/alarm_clock.svg" ! alt "Alarm clock" ! class_ "side-icon"
+
 activeLight :: Html
 activeLight = img ! src "/svg/active-light.svg" ! alt "Amber status light"
 
@@ -53,11 +58,14 @@ fullLogo = a ! class_ "invisible-link" ! href "/"
                      $ do logo
                           H.div ! class_ "logo-text"
                                 $ do H.span ! class_ "logo-text-marlowe" $ string "Marlowe"
-                                     nbsp
+                                     space
                                      H.span ! class_ "logo-text-explorer" $ string "Explorer"
 
 downloadIcon :: Html
 downloadIcon = img ! class_ "icon" ! src "/svg/download.svg" ! alt "Download icon"
+
+arrowDropDownIcon :: Html
+arrowDropDownIcon = img ! class_ "icon" ! src "/svg/arrow_drop_down.svg" ! alt "Arrow drop down icon"
 
 blockHeaderHashIcon :: Html
 blockHeaderHashIcon = img ! class_ "icon" ! src "/svg/block_header_hash.svg" ! alt "Block Header Hash icon"
@@ -76,6 +84,9 @@ roleTokenMintingPolicyIdIcon = img ! class_ "icon" ! src "/svg/role_token_mintin
 
 slotNoIcon :: Html
 slotNoIcon = img ! class_ "icon" ! src "/svg/slot_no.svg" ! alt "Slot Number icon"
+
+stateIcon :: Html
+stateIcon = img ! class_ "icon" ! src "/svg/state.svg" ! alt "State icon"
 
 statusIcon :: Html
 statusIcon = img ! class_ "icon" ! src "/svg/status.svg" ! alt "Status icon"
@@ -134,7 +145,12 @@ baseDoc curSyncStatus titleText caption content = docTypeHtml
                                  $ do head $ do title $ string titleText
                                                 link ! rel "preconnect" ! href "https://fonts.gstatic.com" ! crossorigin
                                                 link ! href "https://fonts.googleapis.com/css2?family=Outfit&display=swap" ! rel "stylesheet"
+                                                link ! href "/prism/prism.css" ! rel "stylesheet"
+                                                link ! href "/prism/marlowe.css" ! rel "stylesheet"
                                                 link ! href "/css/stylesheet.css" ! rel "stylesheet"
+                                                script ! src "/prism/prism.js" $ mempty
+                                                script ! src "/prism/marlowe.js" $ mempty
+                                                baseJSScripts
                                       body $ H.div ! class_ "wrapper"
                                                    $ do H.div ! class_ "side-menu"
                                                               $ do fullLogo
@@ -179,6 +195,23 @@ th = H.th ! style "border: 1px solid black; padding: 5px;"
 td :: Html -> Html
 td = H.td ! style "border: 1px solid black; padding: 5px;"
 
+-- Pop-up tables without border
+
+pptable :: Html -> Html
+pptable = H.table ! class_ "popup-table"
+
+pptr :: Html -> Html
+pptr = H.tr
+
+ppth :: Html -> Html
+ppth = H.th ! class_ "popup-table-header"
+
+pptd :: Html -> Html
+pptd = H.td ! class_ "popup-table-content"
+
+pptdWe :: Html -> Html
+pptdWe = H.td ! class_ "popup-table-content ellipsis-address"
+
 -- Adaptors for details table
 
 dtable :: Html -> Html
@@ -190,8 +223,8 @@ dtd = H.td ! class_ "inactive-text flex-container"
 mtd :: Html -> Html
 mtd = H.td ! style "padding-left: 4rem;"
 
-nbsp :: Html
-nbsp = preEscapedString "&nbsp;"
+space :: Html
+space = preEscapedString " "
 
 splitLeadingSpaces :: String -> (String, String)
 splitLeadingSpaces = span (== ' ')
@@ -200,9 +233,9 @@ stringToHtml :: String -> Html
 stringToHtml str = mconcat $ map processLine $ lines str
   where
     processLine line = let (spaces, rest) = splitLeadingSpaces line
-                       in do mconcat (replicate (length spaces) nbsp)
+                       in do mconcat (replicate (length spaces) space)
                              string rest
-                             br
+                             string "\n"
 
 generateLink :: String -> [(String, String)] -> String
 generateLink path params = path ++ unpack (renderSimpleQuery True (map (bimap pack pack) params))
@@ -271,3 +304,40 @@ makeTitleDiv :: String -> Html
 makeTitleDiv pageTitle = H.div ! class_ "contract-header"
                            $ H.span ! class_ "contract-label"
                                     $ string pageTitle
+
+createPopUpLauncher :: String -> String -> Html -> Html
+createPopUpLauncher popupId label popupContent = do
+      popUpContent
+      a ! class_ "invisible-link"
+        ! onclick (toValue showPopUp)
+        $ H.span ! class_ "shaded-description-value"
+                 $ do string label
+                      arrowDropDownIcon
+  where (popUpContent, showPopUp) = createPopUp popupId popupContent
+
+createPopUp :: String -> Html -> (Html, String)
+createPopUp popUpId content = (popUp, "showPopUp('" ++ popUpId ++ "');")
+  where popUp = do H.div ! A.id (toValue $ popUpId ++ "_backdrop")
+                         ! onclick (toValue $ "hidePopUp('" ++ popUpId ++ "');")
+                         ! class_ "popup-background"
+                         $ return ()
+                   H.div ! A.id (toValue $ popUpId ++ "_popup")
+                         ! class_ "popup-body"
+                         $ content
+
+baseJSScripts :: Html
+baseJSScripts =
+  script ! type_ "text/javascript"
+         $ string
+             ("function showPopUp(popUpId) {" ++
+              " var popUpBackdrop = document.getElementById(popUpId + '_backdrop');" ++
+              " popUpBackdrop.style.display = 'block';" ++
+              " var popUp = document.getElementById(popUpId + '_popup');" ++
+              " popUp.style.display = 'block';" ++
+              "}; " ++
+              "function hidePopUp(popUpId) {" ++
+              " var popUpBackdrop = document.getElementById(popUpId + '_backdrop');" ++
+              " popUpBackdrop.style.display = 'none';" ++
+              " var popUp = document.getElementById(popUpId + '_popup');" ++
+              " popUp.style.display = 'none';" ++
+              "}")

@@ -13,7 +13,7 @@ import qualified Data.Map as Map
 import Data.Text (unpack)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import GHC.Utils.Misc (split)
-import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue))
+import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, string, ToValue (toValue), pre)
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes (href, style, class_)
 import Text.Printf (printf)
@@ -21,7 +21,7 @@ import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintA
                           generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
-                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv)
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon, createPopUpLauncher, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe)
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -35,7 +35,7 @@ import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Data.Map as M
 import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, catMaybes)
 
 contractView :: ContractListCacheStatusReader contractCache => Options -> contractCache -> Maybe String -> Maybe String -> Maybe String -> IO ContractView
 contractView opts contractCache mTab mCid mTxId = do
@@ -310,19 +310,27 @@ data CSVR = CSVR { csvrContractId :: String
 renderCSVR :: CSVR -> Html
 renderCSVR (CSVR { csvrContractId = cid
                  , csvrContractIdLink = cidLink
-                 , currentContract = cc
                  , initialContract = ic
                  , currentState = cs
                  , csvrBlockExplHost = blockExplHost
-                 }) =
-  table $ do tr $ do td $ b "Contract ID"
-                     td $ a ! href (toValue cidLink) $ string cid
-             tr $ do td $ b "Current contract"
-                     td $ renderMContract cc
-             tr $ do td $ b "Current state"
-                     td $ renderMState blockExplHost cs
-             tr $ do td $ b "Initial contract"
-                     td $ renderMContract (Just ic)
+                 }) = do
+  dtable $ do tr $ do dtd $ do contractIdIcon
+                               string "Contract ID"
+                      mtd $ a ! href (toValue cidLink) $ string cid
+              tr $ do dtd $ do stateIcon
+                               string "Current state"
+                      mtd $ renderMState blockExplHost cs
+              renderMminTime cs
+  renderMContract (Just ic)
+
+renderMminTime :: Maybe State -> Html
+renderMminTime cs = case cs of
+                      Nothing -> return mempty
+                      Just (State { minTime = mtime }) ->
+                        tr $ do dtd $ do alarmClockIcon
+                                         string "minTime"
+                                mtd $ do renderTime mtime
+                                         string $ " (POSIX: " ++ show mtime ++ ")"
 
 data CTVRTDetail = CTVRTDetail
   {
@@ -402,11 +410,11 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
                                                       , txStatus = txStatus'
                                                       , txTags = tags'
                                                       , transactionId = transactionId'
-                                                      }) =
+                                                      }) = do
   table $ do
-  tr $ do
-    td $ maybe (string previousTransactionLabel) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
-    td $ maybe (string nextTransactionLabel) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
+    tr $ do
+      td $ maybe (string previousTransactionLabel) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
+      td $ maybe (string nextTransactionLabel) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
   table $ do
     tr $ do
       td $ b "Block header hash"
@@ -430,11 +438,14 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
       td $ b "Invalid after"
       td $ makeLocalDateTime invalidHereafter'
     tr $ do
-      td $ b "Output Contract"
-      td $ renderMContract outputContract'
-    tr $ do
       td $ b "Output State"
       td $ renderMState blockExplHost outputState'
+    case outputState' of
+      Nothing -> return mempty
+      Just (State { minTime = mtime }) ->
+        tr $ do td $ b "minTime"
+                td $ do renderTime mtime
+                        string $ " (POSIX: " ++ show mtime ++ ")"
     tr $ do
       td $ b "Status"
       td $ string txStatus'
@@ -444,6 +455,7 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
     tr $ do
       td $ b "Transaction Id"
       td $ a ! href (toValue $ "https://" ++ blockExplHost ++ "/transaction/" ++ transactionId') $ string transactionId'
+  renderMContract outputContract'
   where previousTransactionLabel = "< Previous Transaction"
         nextTransactionLabel = "Next Transaction >"
         explorerTransactionLinkFromRuntimeLink label rtTxLink =
@@ -453,13 +465,9 @@ renderCTVRTDetail cid blockExplHost (Just CTVRTDetail { txPrev = txPrev'
 
 renderTags :: Map String String -> Html
 renderTags tagMap | Map.null tagMap = string "No tags"
-                  | otherwise = table $ do tr $ do
-                                             th $ b "Tag"
-                                             th $ b "Value"
-                                           mapM_ (\(t, v) -> tr $ do
-                                                               td $ string t
-                                                               td $ code $ stringToHtml v
-                                                 ) (Map.toList tagMap)
+                  | otherwise = mapM_ (\(n, (t, v)) -> createPopUpLauncher ("tag_" ++ show n) t $
+                                                         pre ! class_ "line-numbers" $ code ! class_ "language-javascript" $ stringToHtml v
+                                      ) (zip [(1 :: Integer)..] $ Map.toList tagMap)
 
 renderParty :: String -> Party -> Html
 renderParty blockExplHost (Address ad) = do string "Address: "
@@ -468,17 +476,17 @@ renderParty blockExplHost (Address ad) = do string "Address: "
 renderParty _blockExplHost (Role ro) = string $ "Role: " ++ unpack ro
 
 renderMAccounts :: String -> Map (Party, Token) Money -> Html
-renderMAccounts blockExplHost mapAccounts = table $ do
-  tr $ do
-    th $ b "Party"
-    th $ b "Currency (token name)"
-    th $ b "Amount"
+renderMAccounts blockExplHost mapAccounts = pptable $ do
+  pptr $ do
+    ppth "Party"
+    ppth "Currency (token name)"
+    ppth "Amount"
   let mkRow ((party, token), money) =
         let (tokenString, moneyString) = renderToken token money in
-        tr $ do
-          td $ renderParty blockExplHost party
-          td $ string tokenString
-          td $ string moneyString
+        pptr $ do
+          pptdWe $ renderParty blockExplHost party
+          pptd $ string tokenString
+          pptd $ string moneyString
   mapM_ mkRow $ Map.toList mapAccounts
 
 renderToken :: Token -> Money -> (String, String)
@@ -486,27 +494,27 @@ renderToken (Token "" "") money = ("ADA", prettyPrintAmount 6 money)
 renderToken (Token currSymbol tokenName) money = (printf "%s (%s)" currSymbol tokenName, prettyPrintAmount 0 money)
 
 renderBoundValues :: Map ValueId Integer -> Html
-renderBoundValues mapBoundValues = table $ do
-  tr $ do
-    th $ b "Value Id"
-    th $ b "Value"
+renderBoundValues mapBoundValues = pptable $ do
+  pptr $ do
+    ppth "Value Id"
+    ppth "Value"
   let mkRow (ValueId valueId, bindingValue) =
-        tr $ do
-          td $ string $ T.unpack valueId
-          td $ string $ prettyPrintAmount 0 bindingValue
+        pptr $ do
+          pptd $ string $ T.unpack valueId
+          pptd $ string $ prettyPrintAmount 0 bindingValue
   mapM_ mkRow $ Map.toList mapBoundValues
 
 renderChoices :: String -> Map ChoiceId Integer -> Html
-renderChoices blockExplHost mapChoices = table $ do
-  tr $ do
-    th $ b "Choice Id"
-    th $ b "Party"
-    th $ b "Value"
+renderChoices blockExplHost mapChoices = pptable $ do
+  pptr $ do
+    ppth $ b "Choice Id"
+    ppth $ b "Party"
+    ppth $ b "Value"
   let mkRow (ChoiceId choiceId party, choiceValue) =
-        tr $ do
-          td $ string $ T.unpack choiceId
-          td $ renderParty blockExplHost party
-          td $ string $ prettyPrintAmount 0 choiceValue
+        pptr $ do
+          pptd $ string $ T.unpack choiceId
+          pptdWe $ renderParty blockExplHost party
+          pptd $ string $ prettyPrintAmount 0 choiceValue
   mapM_ mkRow $ Map.toList mapChoices
 
 renderTime :: POSIXTime -> Html
@@ -519,27 +527,26 @@ renderTime =
 renderMState :: String -> Maybe State -> Html
 renderMState _blockExplHost Nothing = string "Contract closed"
 renderMState blockExplHost (Just (State { accounts    = accs
-                          , choices     = chos
-                          , boundValues = boundVals
-                          , minTime     = mtime })) =
-  table $ do tr $ do td $ b "Accounts"
-                     td $ ifEmptyMap accs (string "No accounts") $ renderMAccounts blockExplHost
-             tr $ do td $ b "Bound values"
-                     td $ ifEmptyMap boundVals (string "No bound values") renderBoundValues
-             tr $ do td $ b "Choices"
-                     td $ ifEmptyMap chos (string "No choices") $ renderChoices blockExplHost
-             tr $ do td $ b "minTime"
-                     td $ do renderTime mtime
-                             string $ " (POSIX: " ++ show mtime ++ ")"
+                                        , choices     = chos
+                                        , boundValues = boundVals })) =
+  if null statePopUpList
+  then string "No state"
+  else mconcat statePopUpList
+  where
+  statePopUpList :: [Html]
+  statePopUpList = catMaybes [ ifEmptyMap accs Nothing $ Just . createPopUpLauncher "accounts" "Accounts" . renderMAccounts blockExplHost
+                             , ifEmptyMap boundVals Nothing $ Just . createPopUpLauncher "boundValues" "Bindings" . renderBoundValues
+                             , ifEmptyMap chos Nothing $ Just . createPopUpLauncher "choices" "Choices" . renderChoices blockExplHost
+                             ]
 
-ifEmptyMap :: Map a b -> Html -> (Map a b -> Html) -> Html
+ifEmptyMap :: Map a b -> c -> (Map a b -> c) -> c
 ifEmptyMap mapToCheck defaultHtml renderMapFunc
   | M.null mapToCheck = defaultHtml
   | otherwise = renderMapFunc mapToCheck
 
 renderMContract :: Maybe Contract -> Html
-renderMContract Nothing = string "Contract closed"
-renderMContract (Just c) = code $ stringToHtml $ show $ pretty c
+renderMContract Nothing = H.div ! class_ "contract-code" $ string "Contract closed"
+renderMContract (Just c) = pre ! class_ "line-numbers" $ code ! class_ "language-marlowe contract-code" $ stringToHtml $ show $ pretty c
 
 addNavBar :: ContractViews -> String -> Html -> Html
 addNavBar cv cid c = do

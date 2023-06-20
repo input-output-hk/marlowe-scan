@@ -33,6 +33,7 @@ dependencies:
 - servant-server
 - template-haskell
 - text
+- utf8-string
 - wai
 - warp
 - wl-pprint
