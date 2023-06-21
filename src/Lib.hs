@@ -103,7 +103,9 @@ appResources = cssResources :<|> svgResources :<|> prismResources
 type API
      = Get '[HTML] ContractListView  -- Initial "index" page, http://HOST:PORT/
   :<|> "listContracts" :> QueryParam "page" Int :> Get '[HTML] ContractListView
-  :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String :> QueryParam "transactionId" String :> Get '[HTML] ContractView
+  :<|> "contractView" :> QueryParam "tab" String :> QueryParam "contractId" String
+                      :> QueryParam "page" Int :> QueryParam "transactionId" String
+                      :> Get '[HTML] ContractView
   :<|> "contractDownloadInfo" :> QueryParam "contractId" String :> Get '[OctetStream] (Headers '[Header "Content-Disposition" String] ByteString)
   :<|> "isContractOpen" :> QueryParam "contractId" String :> Get '[JSON] Bool
   :<|> "getNumTransactions" :> QueryParam "contractId" String :> Get '[JSON] Integer
