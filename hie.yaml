@@ -36,6 +36,9 @@ cradle:
     - path: "./src/Explorer/Web/ContractView.hs"
       component: "marlowe-explorer:lib"
 
+    - path: "./src/Explorer/Web/Pagination.hs"
+      component: "marlowe-explorer:lib"
+
     - path: "./src/Explorer/Web/PrettyHtml.hs"
       component: "marlowe-explorer:lib"
 
