@@ -37,7 +37,8 @@ import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Data.Map as M
 import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
-import Data.Maybe (isJust, catMaybes)
+import Data.Maybe (isJust, catMaybes, fromMaybe)
+import Explorer.Web.Pagination (bindVal, calcLastPage, calculateRange, PageInfo (..), PageLinkGenerator, renderNavBar)
 
 contractView :: ContractListCacheStatusReader contractCache => Options -> contractCache -> Maybe String -> Maybe String
                                                             -> Maybe Int -> Maybe String -> IO ContractView
@@ -76,6 +77,14 @@ parseTab (Just "state") = CStateView
 parseTab (Just "tx-list") = CTxListView
 parseTab (Just "tx") = CTxView
 parseTab _ = CInfoView
+
+-- Number of transactions per page
+pageLength :: Int
+pageLength = 12
+
+-- Number of pages to each side to show (unless close to border)
+contextPages :: Int
+contextPages = 3
 
 extractInfo :: ContractViews -> String -> Maybe Int -> CJ.ContractJSON -> Maybe TJs.Transactions -> Maybe TJ.Transaction -> CV
 extractInfo CInfoView blockExplHost _ CJ.ContractJSON { CJ.resource =
@@ -119,15 +128,29 @@ extractInfo CStateView blockExplHost _ CJ.ContractJSON { CJ.resource =
             , currentState = currState
             , csvrBlockExplHost = blockExplHost
             })
-extractInfo CTxListView blockExplHost _ CJ.ContractJSON { CJ.resource = CJ.Resource { CJ.contractId = cid }
+extractInfo CTxListView blockExplHost mbPage CJ.ContractJSON { CJ.resource = CJ.Resource { CJ.contractId = cid }
                                                         }
             (Just (TJs.Transactions { TJs.transactions = txs })) mTx =
   ContractTxListView $ CTLVRs { ctlvrsContractId = cid
-                              , ctlvrs = map convertTx $ reverse txs
+                              , ctlvrs = map convertTx transactions
                               , ctlvrsSelectedTransactionInfo = fmap (convertTxDetails blockExplHost) mTx
                               , ctlvrsBlockExplHost = blockExplHost
+                              , ctlvrsPageInfo = PageInfo { currentPage = cPage
+                                                          , pageRange = (minPage, maxPage)
+                                                          , totalItems = numTransactions
+                                                          , contractRange = (firstTransaction, lastTransaction)
+                                                          , numPages = lastPage
+                                                          }
                               }
   where
+    firstTransaction = transactionsBefore + 1
+    lastTransaction = transactionsBefore + length transactions
+    transactionsBefore = pageLength * (cPage - 1)
+    transactions = take pageLength $ drop transactionsBefore (reverse txs)
+    numTransactions = length txs
+    cPage = bindVal 1 lastPage $ fromMaybe 1 mbPage
+    lastPage = calcLastPage pageLength numTransactions
+    (minPage, maxPage) = calculateRange contextPages cPage lastPage
     convertTx TJs.Transaction { TJs.resource = TJs.Resource { TJs.block = TJs.Block { TJs.blockNo = blockNo'
                                                                                     , TJs.slotNo = slotNo'
                                                                                     }
@@ -373,6 +396,7 @@ data CTLVRs = CTLVRs
   , ctlvrs :: [CTLVR]
   , ctlvrsSelectedTransactionInfo :: Maybe CTLVRTDetail
   , ctlvrsBlockExplHost :: String
+  , ctlvrsPageInfo :: PageInfo
   }
   deriving Show
 
@@ -385,16 +409,25 @@ data CTVR = CTVR
 
 renderCTLVRs :: CTLVRs -> Html
 renderCTLVRs CTLVRs { ctlvrs = [] } = p ! style "color: red" $ string "There are no transactions"
-renderCTLVRs CTLVRs { ctlvrs = ctlvrs'
+renderCTLVRs CTLVRs { ctlvrsContractId = cid
+                    , ctlvrs = ctlvrs'
                     , ctlvrsSelectedTransactionInfo = ctlvrsSelectedTransactionInfo'
+                    , ctlvrsPageInfo = pinf@(PageInfo { currentPage = page
+                                                      , totalItems = numTransactions
+                                                      , contractRange = (firstTransaction, lastTransaction)
+                                                      , numPages = lastPage
+                                                      })
                     } = do
   p $ string "Select a transaction to view its details"
+  p $ string $ printf "%d-%d transactions shown out of %d, (page %d out of %d)"
+                        firstTransaction lastTransaction numTransactions page lastPage
   tableList $ do
     tlhr $ do
       tlh $ b "Transaction ID"
       tlh $ b "Block No"
       tlh $ b "Slot No"
     forM_ ctlvrs' makeRow
+  renderNavBar generateLink' pinf
   where makeRow CTLVR { ctlvrBlock = ctlvrBlock'
                       , ctlvrSlot = ctlvrSlot'
                       , ctlvrContractId = ctlvrContractId'
@@ -406,6 +439,15 @@ renderCTLVRs CTLVRs { ctlvrs = ctlvrs'
                     else string ctlvrTransactionId'
             tld $ string $ show ctlvrBlock'
             tld $ string $ show ctlvrSlot'
+        
+        generateLink' :: PageLinkGenerator
+        generateLink' targetPage = a ! class_ "invisible-link"
+                                     ! href (toValue $ generateLink "contractView"
+                                                                    [ ("tab", getNavTab CTxListView)
+                                                                    , ("contractId", cid)
+                                                                    , ("page", show targetPage)
+                                                                    ])
+
 
 renderCTLVRTDetail :: String -> String -> CTLVRTDetail -> Html
 renderCTLVRTDetail cid blockExplHost (CTLVRTDetail { txPrev = txPrev'
