@@ -35,6 +35,7 @@ library
       Explorer.Web.ContractInfoDownload
       Explorer.Web.ContractListView
       Explorer.Web.ContractView
+      Explorer.Web.Pagination
       Explorer.Web.PrettyHtml
       Explorer.Web.Util
       Language.Marlowe.Pretty

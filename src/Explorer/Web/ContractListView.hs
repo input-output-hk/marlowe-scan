@@ -24,14 +24,7 @@ import Explorer.API.IsContractOpen (isOpenAJAXBox)
 import Explorer.API.GetNumTransactions (numTransactionsAJAXBox)
 import Opts (Options (..), TitleLabel (TitleLabel))
 import Data.List.Extra (trim)
-
-data PageInfo = PageInfo {
-       currentPage :: Int
-     , pageRange :: (Int, Int)
-     , totalContracts :: Int
-     , contractRange :: (Int, Int)
-     , numPages :: Int
-} deriving (Show, Eq)
+import Explorer.Web.Pagination (PageInfo (..), renderNavBar, bindVal, calculateRange, PageLinkGenerator, calcLastPage)
 
 data CLVR = CLVR {
       -- | Info about current page
@@ -72,28 +65,6 @@ pageLength = 12
 contextPages :: Int
 contextPages = 3
 
--- Make sure a value is inside an interval
-bindVal :: Int -> Int -> Int -> Int
-bindVal minVal maxVal val = max (min val maxVal) minVal
-
--- Calculte the range of pages to display assuming:
--- * contextPages >= 0
--- * 1 >= page <= lastPage
--- * lastPage >= 1
-calculateRange :: Int -> Int -> Int -> (Int, Int)
-calculateRange ctxt page lastPage =
-  if lastPage < 2 * ctxt + 1
-  then (1, max 1 lastPage)
-  else let centerPage = bindVal (ctxt + 1) (lastPage - ctxt) page
-       in (centerPage - ctxt, centerPage + ctxt)
-
--- Calculates the number of pages available given the number of contracts and pageLength
-calcLastPage :: Int -> Int
-calcLastPage numContracts = fullPages + partialPages
-  where fullPages = numContracts `div` pageLength
-        sizeOfPartialPage = numContracts `rem` pageLength
-        partialPages = if sizeOfPartialPage > 0 then 1 else 0
-
 extractInfo :: SyncStatus -> Maybe Int -> ContractListISeq -> ContractListViewContents
 extractInfo Syncing _mbPage _ = ContractListViewStillSyncing
 extractInfo syncStatus mbPage cils
@@ -101,7 +72,7 @@ extractInfo syncStatus mbPage cils
     | otherwise =
   ContractListViewContents CLVR { pageInfo = PageInfo { currentPage = cPage
                                                       , pageRange = (minPage, maxPage)
-                                                      , totalContracts = numContracts
+                                                      , totalItems = numContracts
                                                       , contractRange = (firstContract, lastContract)
                                                       , numPages = lastPage
                                                       }
@@ -113,7 +84,7 @@ extractInfo syncStatus mbPage cils
     contracts = Seq.take pageLength $ ISeq.toSeq $ ISeq.drop contractsBefore cils
     numContracts = ISeq.length cils
     cPage = bindVal 1 lastPage $ fromMaybe 1 mbPage
-    lastPage = calcLastPage numContracts
+    lastPage = calcLastPage pageLength numContracts
     (minPage, maxPage) = calculateRange contextPages cPage lastPage
 
     convertContract :: ContractInList -> CIR
@@ -154,7 +125,7 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
                              , retrievalSyncStatus = currSyncStatus
                              , clvContents = ContractListViewContents
                                                (CLVR { pageInfo = pinf@(PageInfo { currentPage = page
-                                                                                 , totalContracts = numContracts
+                                                                                 , totalItems = numContracts
                                                                                  , contractRange = (firstContract, lastContract)
                                                                                  , numPages = lastPage
                                                                                  })
@@ -184,14 +155,20 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
               tld $ toHtml $ clvrSlot clvr
               tld $ numTransactionsAJAXBox cid
       forM_ clvrs makeRow
-    renderNavBar pinf
+    renderNavBar generateLink' pinf
     where headerText = "Marlowe Contract List" `appIfNotBlank` labelForTitle
+          
+          generateLink' :: PageLinkGenerator
+          generateLink' targetPage = a ! href (toValue $ generateLink "listContracts" [("page", show targetPage)])
+
 renderCIRs (ContractListView { titleLabel = labelForTitle
                              , clvContents = ContractListViewStillSyncing}) =
   baseDoc Syncing headerText (makeTitleDiv headerText) $ string "The explorer is still synchronising with the chain. Please, try again later"
     where headerText = "Marlowe Contract List" `appIfNotBlank` labelForTitle
+
 renderCIRs (ContractListView { clvContents = ContractListViewError curSyncStatus msg }) =
   baseDoc curSyncStatus "Error" (makeTitleDiv "An error occurred") $ string ("Error: " <> msg)
+
 
 appIfNotBlank :: String -> String -> String
 appIfNotBlank title labelForTitle
@@ -199,39 +176,6 @@ appIfNotBlank title labelForTitle
   | otherwise = title
   where trimmedTitle = trim labelForTitle
 
-
-generateLink' :: Int -> Html -> Html
-generateLink' targetPage = a ! href (toValue $ generateLink "listContracts" [("page", show targetPage)])
-
-renderNavBar :: PageInfo -> Html
-renderNavBar pinf@(PageInfo { currentPage = page
-                            , pageRange = (minPage, maxPage)
-                            , numPages = lastPage
-                            }) =
-  H.div ! class_ "pagination-box"
-        $ sequence_ $ [ generateNavLink False pinf 1 $ genArrow "<"
-                      , generateNavLink True pinf (page - 1) $ genLink "Previous"
-                      ] ++ [ generateNavLink False pinf np $ genLink $ show np | np <- [minPage..maxPage] ] ++
-                      [ generateNavLink True pinf (page + 1) $ genLink "Next"
-                      , generateNavLink False pinf lastPage $ genArrow ">"
-                      ]
-
-
-genArrow :: String -> Bool -> Html
-genArrow label _ = H.div ! class_ "page-arrow" $ string label
-
-genLink :: String -> Bool -> Html
-genLink label isThis = H.div ! class_ (if isThis then "page-button current-page" else "page-button") $ string label
-
-generateNavLink :: Bool -> PageInfo -> Int -> (Bool -> Html) -> Html
-generateNavLink ommit (PageInfo { currentPage = page
-                                , numPages = lastPage
-                                }) targetPage genContent
-  
-  | page == boundPage && ommit = pure ()
-  | otherwise = generateLink' boundPage
-                  $ genContent (boundPage == page)
-  where boundPage = bindVal 1 lastPage targetPage
 
 renderStr :: String -> Html
 renderStr "" = string "-"
