@@ -17,11 +17,13 @@ import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, s
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes (href, style, class_)
 import Text.Printf (printf)
-import Explorer.Web.Util (tr, th, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime,
+import Explorer.Web.Util (tr, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime,
                           generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
-                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon, createPopUpLauncher, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe)
+                          statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon,
+                          createPopUpLauncher, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe, tableList, tlhr,
+                          tlh, tlr, tldhc, tld)
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -58,7 +60,6 @@ contractViewInner :: Options -> Maybe String -> Maybe String -> Maybe Int -> May
 contractViewInner opts@(Options {optBlockExplorerHost = BlockExplorerHost blockExplHost}) mTab (Just cid) mPage mTxId = do
   let urlPrefix = mkUrlPrefix opts
       tab = parseTab mTab
-
   r <- runExceptT (do cjson <- ExceptT $ CJ.getContractJSON urlPrefix cid
                       let link = CJ.transactions $ CJ.links cjson
                       txsjson <- whenMaybe (tab == CTxListView)
@@ -136,7 +137,7 @@ extractInfo CTxListView blockExplHost _ CJ.ContractJSON { CJ.resource = CJ.Resou
                               } =
                    CTLVR { ctlvrBlock = blockNo'
                          , ctlvrBlockLink = mkBlockExplorerLink blockExplHost blockNo'
-                         , ctlvrslot = slotNo'
+                         , ctlvrSlot = slotNo'
                          , ctlvrContractId = txContractId
                          , ctlvrTransactionId = transactionId'
                          }
@@ -361,7 +362,7 @@ data CTLVRTDetail = CTLVRTDetail
 data CTLVR = CTLVR
   { ctlvrBlock :: Integer
   , ctlvrBlockLink :: String
-  , ctlvrslot :: Integer
+  , ctlvrSlot :: Integer
   , ctlvrContractId :: String
   , ctlvrTransactionId :: String
   }
@@ -387,24 +388,24 @@ renderCTLVRs CTLVRs { ctlvrs = [] } = p ! style "color: red" $ string "There are
 renderCTLVRs CTLVRs { ctlvrs = ctlvrs'
                     , ctlvrsSelectedTransactionInfo = ctlvrsSelectedTransactionInfo'
                     } = do
-  table $ do
-    tr $ do
-      th $ b "Transaction ID"
-      th $ b "Block No"
-      th $ b "Slot No"
-    forM_ ctlvrs' makeRow
   p $ string "Select a transaction to view its details"
+  tableList $ do
+    tlhr $ do
+      tlh $ b "Transaction ID"
+      tlh $ b "Block No"
+      tlh $ b "Slot No"
+    forM_ ctlvrs' makeRow
   where makeRow CTLVR { ctlvrBlock = ctlvrBlock'
-                      , ctlvrslot = ctlvrSlot'
+                      , ctlvrSlot = ctlvrSlot'
                       , ctlvrContractId = ctlvrContractId'
                       , ctlvrTransactionId = ctlvrTransactionId'
                       } = do
-          tr $ do
-            td $ if Just ctlvrTransactionId' /= fmap transactionId ctlvrsSelectedTransactionInfo'
-                 then linkToTransaction ctlvrContractId' ctlvrTransactionId' ctlvrTransactionId'
-                 else string ctlvrTransactionId'
-            td $ string $ show ctlvrBlock'
-            td $ string $ show ctlvrSlot'
+          tlr $ do
+            tldhc $ if Just ctlvrTransactionId' /= fmap transactionId ctlvrsSelectedTransactionInfo'
+                    then linkToTransaction ctlvrContractId' ctlvrTransactionId' ctlvrTransactionId'
+                    else string ctlvrTransactionId'
+            tld $ string $ show ctlvrBlock'
+            tld $ string $ show ctlvrSlot'
 
 renderCTLVRTDetail :: String -> String -> CTLVRTDetail -> Html
 renderCTLVRTDetail cid blockExplHost (CTLVRTDetail { txPrev = txPrev'
