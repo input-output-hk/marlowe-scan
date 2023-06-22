@@ -1,6 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MonoLocalBinds #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 module Explorer.Web.ContractView
   (ContractView(..), contractView)
@@ -22,14 +23,14 @@ import Explorer.Web.Util (tr, td, table, baseDoc, stringToHtml, prettyPrintAmoun
                           valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
                           statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon,
-                          createPopUpLauncher, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe, tableList, tlhr,
-                          tlh, tlr, tldhc, tld)
+                          createFullPopUp, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe, tableList, tlhr,
+                          tlh, tlr, tldhc, tld, createPopUpLauncher, createPopUp, PopupLevel (..))
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
 import qualified Language.Marlowe.Runtime.Types.TransactionJSON as TJ
-import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Input(..), Money, POSIXTime(..), Party(..),
-                                         State(..), Token(..), ValueId(..))
+import Language.Marlowe.Semantics.Types (ChoiceId(..), Contract, Input(..), Money, POSIXTime(..),
+                                         Party(..), State(..), Token(..), ValueId(..), InputContent(..))
 import Opts (Options (optBlockExplorerHost, Options), mkUrlPrefix, BlockExplorerHost (BlockExplorerHost))
 import Control.Monad.Except (runExceptT, ExceptT (ExceptT))
 import Prelude hiding (div)
@@ -39,6 +40,8 @@ import qualified Data.Map as M
 import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
 import Data.Maybe (isJust, catMaybes, fromMaybe)
 import Explorer.Web.Pagination (bindVal, calcLastPage, calculateRange, PageInfo (..), PageLinkGenerator, renderNavBar)
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Base16 as BS16
 
 contractView :: ContractListCacheStatusReader contractCache => Options -> contractCache -> Maybe String -> Maybe String
                                                             -> Maybe Int -> Maybe String -> IO ContractView
@@ -439,7 +442,7 @@ renderCTLVRs CTLVRs { ctlvrsContractId = cid
                     else string ctlvrTransactionId'
             tld $ string $ show ctlvrBlock'
             tld $ string $ show ctlvrSlot'
-        
+
         generateLink' :: PageLinkGenerator
         generateLink' targetPage = a ! class_ "invisible-link"
                                      ! href (toValue $ generateLink "contractView"
@@ -483,8 +486,7 @@ renderCTLVRTDetail cid blockExplHost (CTLVRTDetail { txPrev = txPrev'
       td $ b "Inputs"
       td $ do if null inputs'
               then string "No inputs"
-              else table $ do
-                     mapM_ (\inp -> do tr $ td $ code $ stringToHtml $ show $ pretty inp) inputs'
+              else createInputsPopup blockExplHost inputs'
     tr $ do
       td $ b "Invalid before"
       td $ makeLocalDateTime invalidBefore'
@@ -517,6 +519,63 @@ renderCTLVRTDetail cid blockExplHost (CTLVRTDetail { txPrev = txPrev'
             [_, _, _, tTransactionId] -> linkToTransaction cid tTransactionId label
             _ -> string label
 
+createInputsPopup :: String -> [Input] -> Html
+createInputsPopup blockExplHost inputs' = do
+  createFullPopUp "inputs" (show numInputs ++ " Input" ++ s)
+                           inputsTable
+  sequence_ popups
+  where (inputsTable, popups) = renderInputs blockExplHost inputs'
+        numInputs = length inputs'
+        s | numInputs == 1 = ""
+          | otherwise = "s"
+
+renderInputs :: String -> [Input] -> (Html, [Html])
+renderInputs blockExplHost inputs' = (pptable $ do
+  pptr $ do
+    ppth "Input type"
+    ppth "Input owner"
+    ppth "Details"
+    ppth "Value"
+    ppth "Continuation hash"
+    ppth "Continuation contract"
+  sequence_ rows, popups)
+  where
+    (rows, popups) = unzip $ [ renderInput blockExplHost idx inp
+                             | (idx, inp) <- zip [1..] inputs' ]
+
+renderInput :: String -> Integer -> Input -> (Html, Html)
+renderInput blockExplHost _idx (NormalInput ic) =
+  ( pptr $ do renderInputContent blockExplHost ic
+              pptd $ string ""
+              pptd $ string ""
+  , mempty )
+renderInput blockExplHost idx (MerkleizedInput ic chash cont) =
+  ( pptr $ do renderInputContent blockExplHost ic
+              pptdWe $ string $ BS.unpack $ BS16.encode chash
+              pptd $ createPopUpLauncher popupId "Contract"
+  , createPopUp PopupLevel2 popupId (renderMContract (Just cont)) )
+ where popupId = "contract-" ++ show idx
+
+renderInputContent :: String -> InputContent -> Html
+renderInputContent blockExplHost (IDeposit party1 party2 token money) = do
+  pptd "Deposit"
+  pptdWe $ renderParty blockExplHost party2
+  pptdWe $ do string "Account: "
+              renderParty blockExplHost party1
+  pptdWe $ string $ pamount ++ " " ++ tok
+  where (tok, pamount) = renderToken token money
+renderInputContent blockExplHost (IChoice (ChoiceId choiceName party) chosenNum) = do
+  pptd "Choice"
+  pptdWe $ renderParty blockExplHost party
+  pptd $ do string "Choice Id: "
+            string $ unpack choiceName
+  pptd $ string $ show chosenNum
+renderInputContent _ INotify = do
+  pptd "Notify"
+  pptd $ string ""
+  pptd $ string ""
+  pptd $ string ""
+
 renderCTVR :: CTVR -> Html
 renderCTVR CTVR { ctvrContractId = ctvrContractId'
                 , ctvrSelectedTransactionInfo = ctlvrsSelectedTransactionInfo'
@@ -525,7 +584,7 @@ renderCTVR CTVR { ctvrContractId = ctvrContractId'
 
 renderTags :: Map String String -> Html
 renderTags tagMap | Map.null tagMap = string "No tags"
-                  | otherwise = mapM_ (\(n, (t, v)) -> createPopUpLauncher ("tag_" ++ show n) t $
+                  | otherwise = mapM_ (\(n, (t, v)) -> createFullPopUp ("tag_" ++ show n) t $
                                                          pre ! class_ "line-numbers" $ code ! class_ "language-javascript" $ stringToHtml v
                                       ) (zip [(1 :: Integer)..] $ Map.toList tagMap)
 
@@ -594,9 +653,9 @@ renderMState blockExplHost (Just (State { accounts    = accs
   else mconcat statePopUpList
   where
   statePopUpList :: [Html]
-  statePopUpList = catMaybes [ ifEmptyMap accs Nothing $ Just . createPopUpLauncher "accounts" "Accounts" . renderMAccounts blockExplHost
-                             , ifEmptyMap boundVals Nothing $ Just . createPopUpLauncher "boundValues" "Bindings" . renderBoundValues
-                             , ifEmptyMap chos Nothing $ Just . createPopUpLauncher "choices" "Choices" . renderChoices blockExplHost
+  statePopUpList = catMaybes [ ifEmptyMap accs Nothing $ Just . createFullPopUp "accounts" "Accounts" . renderMAccounts blockExplHost
+                             , ifEmptyMap boundVals Nothing $ Just . createFullPopUp "boundValues" "Bindings" . renderBoundValues
+                             , ifEmptyMap chos Nothing $ Just . createFullPopUp "choices" "Choices" . renderChoices blockExplHost
                              ]
 
 ifEmptyMap :: Map a b -> c -> (Map a b -> c) -> c

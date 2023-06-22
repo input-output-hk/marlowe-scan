@@ -10,6 +10,7 @@ module Language.Marlowe.Semantics.Types
   , ChoiceName
   , Contract(..)
   , Input(..)
+  , InputContent(..)
   , Money
   , Party(..)
   , POSIXTime(..)
@@ -268,11 +269,11 @@ instance FromJSON InputContent where
   parseJSON (JSON.String "input_notify") = return INotify
   parseJSON (JSON.Object v) =
     IChoice <$> v .: "for_choice_id"
-                <*> v .: "input_that_chooses_num"
-    <|> IDeposit  <$> v .: "into_account"
-              <*> v .: "input_from_party"
-              <*> v .: "of_token"
-              <*> v .: "that_deposits"
+            <*> v .: "input_that_chooses_num"
+    <|> IDeposit <$> v .: "into_account"
+                 <*> v .: "input_from_party"
+                 <*> v .: "of_token"
+                 <*> v .: "that_deposits"
   parseJSON _ = Haskell.fail "Input must be either an object or the string \"input_notify\""
 
 instance ToJSON InputContent where

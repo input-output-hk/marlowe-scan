@@ -1,12 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Explorer.Web.Util (SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor, makeLocalDateTime,
-                          prettyPrintAmount, stringToHtml, table, td, th, tr, mkTransactionExplorerLink,
-                          mkBlockExplorerLink, mkTokenPolicyExplorerLink, valueToString, tableList, tlh, tlhr,
-                          tlr, tld, calculateSyncStatus, tldhc, downloadIcon, blockHeaderHashIcon, blockNoIcon,
-                          contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon,
-                          versionIcon, dtd, activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon,
-                          arrowDropDownIcon, createPopUpLauncher, baseJSScripts, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe)
+module Explorer.Web.Util (PopupLevel(..), SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor,
+                          makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr,
+                          mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
+                          valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus, tldhc,
+                          downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon,
+                          roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, dtd,
+                          activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon,
+                          arrowDropDownIcon, createFullPopUp, baseJSScripts, alarmClockIcon, pptable,
+                          pptr, ppth, pptd, pptdWe, createPopUpLauncher, createPopUp)
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -305,25 +307,38 @@ makeTitleDiv pageTitle = H.div ! class_ "contract-header"
                            $ H.span ! class_ "contract-label"
                                     $ string pageTitle
 
-createPopUpLauncher :: String -> String -> Html -> Html
-createPopUpLauncher popupId label popupContent = do
-      popUpContent
-      a ! class_ "invisible-link"
-        ! onclick (toValue showPopUp)
+createFullPopUp :: String -> String -> Html -> Html
+createFullPopUp popupId label popupContent = do
+      createPopUp PopupLevel1 popupId popupContent
+      createPopUpLauncher popupId label
+
+createPopUpLauncher :: String -> String -> Html
+createPopUpLauncher popUpId label =
+        a ! class_ "invisible-link"
+        ! onclick (toValue ("showPopUp('" ++ popUpId ++ "');"))
         $ H.span ! class_ "shaded-description-value"
                  $ do string label
                       arrowDropDownIcon
-  where (popUpContent, showPopUp) = createPopUp popupId popupContent
 
-createPopUp :: String -> Html -> (Html, String)
-createPopUp popUpId content = (popUp, "showPopUp('" ++ popUpId ++ "');")
-  where popUp = do H.div ! A.id (toValue $ popUpId ++ "_backdrop")
-                         ! onclick (toValue $ "hidePopUp('" ++ popUpId ++ "');")
-                         ! class_ "popup-background"
-                         $ return ()
-                   H.div ! A.id (toValue $ popUpId ++ "_popup")
-                         ! class_ "popup-body"
-                         $ content
+data PopupLevel = PopupLevel1 | PopupLevel2
+
+createPopUp :: PopupLevel -> String -> Html -> Html
+createPopUp popupLevel popUpId content = 
+  do H.div ! A.id (toValue $ popUpId ++ "_backdrop")
+           ! onclick (toValue $ "hidePopUp('" ++ popUpId ++ "');")
+           ! class_ (toValue $ "popup-background " ++ popupBgLevelClass popupLevel)
+           $ return ()
+     H.div ! A.id (toValue $ popUpId ++ "_popup")
+           ! class_ (toValue $ "popup-body " ++ popupLevelClass popupLevel)
+           $ content
+
+popupBgLevelClass :: PopupLevel -> String
+popupBgLevelClass PopupLevel1 = "popup-background-level1"
+popupBgLevelClass PopupLevel2 = "popup-background-level2"
+
+popupLevelClass :: PopupLevel -> String
+popupLevelClass PopupLevel1 = "popup-level1"
+popupLevelClass PopupLevel2 = "popup-level2"
 
 baseJSScripts :: Html
 baseJSScripts =
