@@ -18,13 +18,13 @@ import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, s
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes (href, style, class_)
 import Text.Printf (printf)
-import Explorer.Web.Util (tr, td, table, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime,
-                          generateLink, mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
-                          valueToString, SyncStatus, downloadIcon, contractIdIcon, blockHeaderHashIcon,
+import Explorer.Web.Util (tr, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink,
+                          mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
+                          valueToString, SyncStatus, downloadIcon, bookIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
                           statusIcon, dtd, inactiveLight, activeLight, mtd, dtable, makeTitleDiv, stateIcon,
                           createFullPopUp, alarmClockIcon, pptable, pptr, ppth, pptd, pptdWe, tableList, tlhr,
-                          tlh, tlr, tldhc, tld, createPopUpLauncher, createPopUp, PopupLevel (..))
+                          tlh, tlr, tldhc, tld, createPopUpLauncher, createPopUp, PopupLevel (..), circleIcon)
 import Language.Marlowe.Pretty (pretty)
 import qualified Language.Marlowe.Runtime.Types.ContractJSON as CJ
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
@@ -312,7 +312,7 @@ renderCIVR (CIVR { civrContractId = cid
                       mtd $ do H.span ! class_ "icon-margin-right"
                                       $ if contractStatus then activeLight else inactiveLight
                                H.span $ string $ if contractStatus then "Active" else "Closed"
-              tr $ do dtd $ do contractIdIcon
+              tr $ do dtd $ do bookIcon
                                string "Contract ID"
                       mtd $ a ! href (toValue cidLink) $ string cid
               tr $ do dtd $ do blockHeaderHashIcon
@@ -349,7 +349,7 @@ renderCSVR (CSVR { csvrContractId = cid
                  , currentState = cs
                  , csvrBlockExplHost = blockExplHost
                  }) = do
-  dtable $ do tr $ do dtd $ do contractIdIcon
+  dtable $ do tr $ do dtd $ do bookIcon
                                string "Contract ID"
                       mtd $ a ! href (toValue cidLink) $ string cid
               tr $ do dtd $ do stateIcon
@@ -421,7 +421,6 @@ renderCTLVRs CTLVRs { ctlvrsContractId = cid
                                                       , numPages = lastPage
                                                       })
                     } = do
-  p $ string "Select a transaction to view its details"
   p $ string $ printf "%d-%d transactions shown out of %d, (page %d out of %d)"
                         firstTransaction lastTransaction numTransactions page lastPage
   tableList $ do
@@ -464,60 +463,68 @@ renderCTLVRTDetail cid blockExplHost (CTLVRTDetail { txPrev = txPrev'
                                                    , invalidHereafter = invalidHereafter'
                                                    , outputContract = outputContract'
                                                    , outputState = outputState'
-                                                   , txStatus = txStatus'
                                                    , txTags = tags'
                                                    , transactionId = transactionId'
                                                    }) = do
-  table $ do
+  H.div ! class_ "pagination-box"
+        $ do p $ string ""
+             maybe (H.div $ previousTransactionLabel False) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
+             maybe (H.div $ nextTransactionLabel False) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
+             p $ string ""
+  dtable $ do
     tr $ do
-      td $ maybe (string previousTransactionLabel) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
-      td $ maybe (string nextTransactionLabel) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
-  table $ do
+      dtd $ do bookIcon
+               string "Transaction Id"
+      mtd $ a ! href (toValue $ "https://" ++ blockExplHost ++ "/transaction/" ++ transactionId') $ string transactionId'
     tr $ do
-      td $ b "Block header hash"
-      td $ string txBlockHeaderHash'
+      dtd $ do alarmClockIcon
+               string "Invalid before"
+      mtd $ makeLocalDateTime invalidBefore'
     tr $ do
-      td $ b "Block number"
-      td $ a ! href (toValue txBlockLink') $ string $ show txBlockNo'
+      dtd $ do alarmClockIcon
+               string "Invalid after"
+      mtd $ makeLocalDateTime invalidHereafter'
     tr $ do
-      td $ b "Slot number"
-      td $ string $ show txSlotNo'
+      dtd $ do slotNoIcon
+               string "Slot number"
+      mtd $ string $ show txSlotNo'
     tr $ do
-      td $ b "Inputs"
-      td $ do if null inputs'
-              then string "No inputs"
-              else createInputsPopup blockExplHost inputs'
+      dtd $ do blockHeaderHashIcon
+               string "Block header hash"
+      mtd $ string txBlockHeaderHash'
     tr $ do
-      td $ b "Invalid before"
-      td $ makeLocalDateTime invalidBefore'
+      dtd $ do blockNoIcon
+               string "Block number"
+      mtd $ a ! href (toValue txBlockLink') $ string $ show txBlockNo'
     tr $ do
-      td $ b "Invalid after"
-      td $ makeLocalDateTime invalidHereafter'
+      dtd $ do circleIcon
+               string "Inputs"
+      mtd $ do if null inputs'
+               then string "No inputs"
+               else createInputsPopup blockExplHost inputs'
     tr $ do
-      td $ b "Output State"
-      td $ renderMState blockExplHost outputState'
+      dtd $ do stateIcon
+               string "Output State"
+      mtd $ renderMState blockExplHost outputState'
     case outputState' of
       Nothing -> return mempty
       Just (State { minTime = mtime }) ->
-        tr $ do td $ b "minTime"
-                td $ do renderTime mtime
-                        string $ " (POSIX: " ++ show mtime ++ ")"
+        tr $ do dtd $ do alarmClockIcon
+                         string "minTime"
+                mtd $ do renderTime mtime
+                         string $ " (POSIX: " ++ show mtime ++ ")"
     tr $ do
-      td $ b "Status"
-      td $ string txStatus'
-    tr $ do
-      td $ b "Tags"
-      td $ renderTags tags'
-    tr $ do
-      td $ b "Transaction Id"
-      td $ a ! href (toValue $ "https://" ++ blockExplHost ++ "/transaction/" ++ transactionId') $ string transactionId'
+      dtd $ do metadataIcon
+               string "Tags"
+      mtd $ renderTags tags'
   renderMContract outputContract'
-  where previousTransactionLabel = "< Previous Transaction"
-        nextTransactionLabel = "Next Transaction >"
-        explorerTransactionLinkFromRuntimeLink label rtTxLink =
+  where previousTransactionLabel enabled = makeTransactionLabel enabled "Previous Transaction"
+        nextTransactionLabel enabled = makeTransactionLabel enabled "Next Transaction"
+        makeTransactionLabel enabled = H.div ! class_ (if enabled then "page-button" else "page-button page-button-disabled")
+        explorerTransactionLinkFromRuntimeLink linkContent rtTxLink =
           case split '/' rtTxLink of
-            [_, _, _, tTransactionId] -> linkToTransaction cid tTransactionId label
-            _ -> string label
+            [_, _, _, tTransactionId] -> invisibleLinkToTransaction cid tTransactionId $ linkContent True
+            _ -> H.div $ linkContent False
 
 createInputsPopup :: String -> [Input] -> Html
 createInputsPopup blockExplHost inputs' = do
@@ -679,9 +686,19 @@ addNavBar cv cid c = do
   c
 
 linkToTransaction :: String -> String -> String -> Html
-linkToTransaction contractId transactionId' linkText =
-  a ! href (toValue $ generateLink "contractView" [("tab", getNavTab CTxView), ("contractId", contractId), ("transactionId", transactionId')])
-    $ string linkText
+linkToTransaction contractId transactionId' =
+  customLinkToTransaction contractId transactionId' Nothing . string
+
+invisibleLinkToTransaction :: String -> String -> Html -> Html
+invisibleLinkToTransaction contractId transactionId' =
+  customLinkToTransaction contractId transactionId' (Just "invisible-link")
+
+customLinkToTransaction :: String -> String -> Maybe String -> Html -> Html
+customLinkToTransaction contractId transactionId' =
+  addMClass (a ! href (toValue $ generateLink "contractView" [("tab", getNavTab CTxView), ("contractId", contractId), ("transactionId", transactionId')]))
+  where addMClass :: (Html -> Html) -> Maybe String -> Html -> Html
+        addMClass f Nothing = f
+        addMClass f (Just c) = f ! class_ (toValue c)
 
 mkNavLink :: Bool -> String -> String -> String -> Html
 mkNavLink isActive cid tabName tabTitle =

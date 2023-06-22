@@ -4,11 +4,11 @@ module Explorer.Web.Util (PopupLevel(..), SyncStatus(..), baseDoc, formatTimeDif
                           makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr,
                           mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus, tldhc,
-                          downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon,
+                          downloadIcon, blockHeaderHashIcon, blockNoIcon, bookIcon, metadataIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, dtd,
                           activeLight, inactiveLight, mtd, dtable, makeTitleDiv, stateIcon,
                           arrowDropDownIcon, createFullPopUp, baseJSScripts, alarmClockIcon, pptable,
-                          pptr, ppth, pptd, pptdWe, createPopUpLauncher, createPopUp)
+                          pptr, ppth, pptd, pptdWe, createPopUpLauncher, createPopUp, circleIcon)
   where
 
 import Data.Bifunctor (Bifunctor (bimap))
@@ -75,8 +75,11 @@ blockHeaderHashIcon = img ! class_ "icon" ! src "/svg/block_header_hash.svg" ! a
 blockNoIcon :: Html
 blockNoIcon = img ! class_ "icon" ! src "/svg/block_no.svg" ! alt "Block Number icon"
 
-contractIdIcon :: Html
-contractIdIcon = img ! class_ "icon" ! src "/svg/contract_id.svg" ! alt "Contract ID icon"
+bookIcon :: Html
+bookIcon = img ! class_ "icon" ! src "/svg/book.svg" ! alt "Contract ID icon"
+
+circleIcon :: Html
+circleIcon = img ! class_ "icon" ! src "/svg/circle.svg" ! alt "Contract ID icon"
 
 metadataIcon :: Html
 metadataIcon = img ! class_ "icon" ! src "/svg/metadata.svg" ! alt "Metadata icon"

@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock) where
+module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, bookIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock, circleIcon) where
 
 import Explorer.Resources.Helpers (cssPath, embedResource, svgPath, prismPath)
 import Data.ByteString (ByteString)
@@ -51,8 +51,11 @@ blockHeaderHashIcon = $(embedResource svgPath "block_header_hash.svg")
 blockNoIcon :: ByteString
 blockNoIcon = $(embedResource svgPath "block_no.svg")
 
-contractIdIcon :: ByteString
-contractIdIcon = $(embedResource svgPath "contract_id.svg")
+bookIcon :: ByteString
+bookIcon = $(embedResource svgPath "book.svg")
+
+circleIcon :: ByteString
+circleIcon = $(embedResource svgPath "circle.svg")
 
 metadataIcon :: ByteString
 metadataIcon = $(embedResource svgPath "metadata.svg")

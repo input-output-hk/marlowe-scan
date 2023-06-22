@@ -24,7 +24,7 @@ import qualified Data.ByteString as BS
 import Explorer.API.GetNumTransactions (getContractNumTransactions)
 import Explorer.API.IsContractOpen (isContractOpen)
 import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
-import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, contractIdIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock)
+import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, bookIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock, circleIcon)
 import Explorer.Resources.MimeTypes (CSS, SVG, JS)
 import Servant.HTML.Blaze (HTML)
 
@@ -50,7 +50,8 @@ type SVGResourcesAPI = "svg" :> (("active-light.svg" :> Get '[SVG] BS.ByteString
                             :<|> ("arrow_drop_down.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("block_header_hash.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("block_no.svg" :> Get '[SVG] BS.ByteString)
-                            :<|> ("contract_id.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("book.svg" :> Get '[SVG] BS.ByteString)
+                            :<|> ("circle.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("metadata.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("role_token_minting_policy_id.svg" :> Get '[SVG] BS.ByteString)
                             :<|> ("slot_no.svg" :> Get '[SVG] BS.ByteString)
@@ -83,7 +84,8 @@ svgResources = return activeLight
           :<|> return arrowDropDown
           :<|> return blockHeaderHashIcon
           :<|> return blockNoIcon
-          :<|> return contractIdIcon
+          :<|> return bookIcon
+          :<|> return circleIcon
           :<|> return metadataIcon
           :<|> return roleTokenMintingPolicyIdIcon
           :<|> return slotNoIcon
