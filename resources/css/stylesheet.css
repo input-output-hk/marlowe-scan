@@ -281,19 +281,19 @@ div.logo {
     font-style: normal;
     font-size: 0.875rem;
     font-weight: 400;
+    line-height: 1.063rem;
     color: #000000;
 }
 
 .pagination-box a {
     text-decoration: none;
-    line-height: 1.063rem;
     color: #000000;
 }
 
 .page-arrow {
     display: float;
     float: right;
-    color: #5B7296;
+    color: #1C1B1F;
     padding: 0.625rem 0.938rem;
     border-style: transparent;
     border-width: 1px;
@@ -311,18 +311,21 @@ div.logo {
     border-style: solid;
     border-color: #E7E7E7;
     border-width: 1px;
-    display: float;
     float: right;
     padding: 0.625rem 0.938rem;
 
 }
 
-.pagination-box a:nth-child(2) div {
+.page-button-disabled {
+    color: #BBBBBB;
+}
+
+.pagination-box :nth-child(2) div {
     border-top-left-radius: 0.25rem;
     border-bottom-left-radius: 0.25rem;
 }
 
-.pagination-box a:nth-last-child(2) div {
+.pagination-box :nth-last-child(2) div {
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
 }
@@ -339,6 +342,7 @@ div.logo {
     padding: 4px 10px;
     border-radius: 4px;
     margin-right: 10px;
+    white-space: nowrap;
 }                       
                         
 .shaded-description-value > img {
@@ -379,9 +383,8 @@ code.contract-code {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 100;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     display: none;
 }
@@ -391,11 +394,10 @@ code.contract-code {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 101;
     width: fit-content;
     height: fit-content;
-    max-width: calc(80vw - 2rem);
-    max-height: calc(80vh - 2rem);
+    max-width: calc(80% - 2rem);
+    max-height: calc(80% - 2rem);
     background-color: #FFFFFF;
     box-shadow: 0px 3px 11px 3px rgba(232, 237, 255, 0.3);
     display: none;
@@ -404,6 +406,31 @@ code.contract-code {
     justify-content: space-between;
     padding: 2rem;
     overflow: auto;
+}
+
+.popup-background-level1 {
+    z-index: 100;
+}
+
+.popup-level1 {
+    z-index: 150;
+}
+
+.popup-background-level2 {
+    z-index: 200;
+}
+
+.popup-level2 {
+    z-index: 250;
+}
+
+.popup-body code.contract-code {
+    max-height: unset;
+    min-height: unset;
+    max-width: unset;
+    min-width: unset;
+    width: unset;
+    height: unset;
 }
 
 .popup-table {
@@ -418,6 +445,7 @@ code.contract-code {
     font-size: 1.125rem;
     line-height: 1.375rem;
     color: #000000;
+    white-space: nowrap;
 }
 
 .popup-table-content {
@@ -426,6 +454,7 @@ code.contract-code {
     font-size: 0.9375rem;
     line-height: 1.125rem;
     color: #000000;
+    white-space: nowrap;
 }
 
 .ellipsis-address {
