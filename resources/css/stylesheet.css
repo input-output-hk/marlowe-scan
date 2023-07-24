@@ -36,8 +36,7 @@ a.invisible-link:hover > * {
 .side-menu {
     min-width: 16.8rem;
     flex-grow: 1;
-    /* background-color: #F7F7FF; */
-    background-color: #F7F9FF;
+    background-color: #F6F7FF;
     padding-top: 1.2rem;
     display: flex;
     flex-direction: column;
@@ -57,15 +56,8 @@ div.logo {
 }
 
 .logo-pic {
-    width: 1.95rem;
-}
-
-.logo-text {
-    margin-top: 0.2rem;
-}
-
-.logo-text-marlowe {
-    font-weight: 600;
+    width: 6.0625rem;
+    height: 4.34163rem;
 }
 
 .side-option {
@@ -80,14 +72,12 @@ div.logo {
     align-items: center;
     box-sizing: border-box;
     border-left: 5px solid transparent;
-    color: #5B7296;
+    background-color: #F0EFFF;
 }
 
 .selected-option {
-    /* background-color: #F0EFFF; */
     background-color: #EFF4FF;
-    /* border-left: 5px solid #4B1FED; */
-    border-left: 5px solid #0038FF;
+    border-left: 5px solid #4B1FED;
     color: #000000;
 }
 
@@ -216,7 +206,7 @@ div.logo {
 }
 
 .table-row.active {
-    background-color: #F7F9FF;
+    background-color: #F6F7FF;
 }
 
 .active-light {
