@@ -57,11 +57,7 @@ inactiveLight = img ! src "/svg/inactive-light.svg" ! alt "Red status light"
 fullLogo :: Html
 fullLogo = a ! class_ "invisible-link" ! href "/"
              $ H.div ! class_ "logo"
-                     $ do logo
-                          H.div ! class_ "logo-text"
-                                $ do H.span ! class_ "logo-text-marlowe" $ string "Marlowe"
-                                     space
-                                     H.span ! class_ "logo-text-explorer" $ string "Explorer"
+                     $ logo
 
 downloadIcon :: Html
 downloadIcon = img ! class_ "icon" ! src "/svg/download.svg" ! alt "Download icon"
