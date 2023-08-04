@@ -8,7 +8,7 @@ let
       , http-conduit, http-types, errors, zip-archive
       }:
       mkDerivation {
-        pname = "marlowe-explorer";
+        pname = "marlowe-scan";
         version = "0.1.0.0";
         src = ./.;
         isLibrary = false;

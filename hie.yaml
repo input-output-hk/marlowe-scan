@@ -1,85 +1,85 @@
 cradle:
   stack:
     - path: "./test/Spec.hs"
-      component: "marlowe-explorer:test:marlowe-explorer-test"
+      component: "marlowe-scan:test:marlowe-scan-test"
 
     - path: "./app/Main.hs"
-      component: "marlowe-explorer:exe:marlowe-explorer-exe"
-
-    - path: "./src/Explorer/API/GetNumTransactions.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/API/HealthCheck.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/API/IsContractOpen.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Resources/Data.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Resources/Helpers.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Resources/MimeTypes.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/SharedContractCache.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Web/ContractInfoDownload.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Web/ContractListView.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Web/ContractView.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Web/Pagination.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Web/PrettyHtml.hs"
-      component: "marlowe-explorer:lib"
-
-    - path: "./src/Explorer/Web/Util.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:exe:marlowe-scan-exe"
 
     - path: "./src/Language/Marlowe/Pretty.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Background.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/ContractCaching.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/ContractJSON.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/ContractsJSON.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/General.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/IndexedSeq.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/LazyFeed.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/TransactionJSON.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Runtime/Types/TransactionsJSON.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Language/Marlowe/Semantics/Types.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Lib.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
 
     - path: "./src/Opts.hs"
-      component: "marlowe-explorer:lib"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/API/GetNumTransactions.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/API/HealthCheck.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/API/IsContractOpen.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Resources/Data.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Resources/Helpers.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Resources/MimeTypes.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/SharedContractCache.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Web/ContractInfoDownload.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Web/ContractListView.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Web/ContractView.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Web/Pagination.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Web/PrettyHtml.hs"
+      component: "marlowe-scan:lib"
+
+    - path: "./src/Scanner/Web/Util.hs"
+      component: "marlowe-scan:lib"

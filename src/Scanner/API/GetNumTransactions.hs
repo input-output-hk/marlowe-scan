@@ -1,11 +1,11 @@
-module Explorer.API.GetNumTransactions(getContractNumTransactions, numTransactionsAJAXBox) where
+module Scanner.API.GetNumTransactions(getContractNumTransactions, numTransactionsAJAXBox) where
 
 import Servant (throwError)
 import Opts (Options(..), mkUrlPrefix)
 import qualified Language.Marlowe.Runtime.Types.TransactionsJSON as TJs
 import Data.List (genericLength)
 import Text.Blaze.Html5 (Html, (!))
-import Explorer.Web.Util (generateLink)
+import Scanner.Web.Util (generateLink)
 import qualified Text.Blaze.Html5.Attributes as A
 import qualified Text.Blaze.Html5 as H
 

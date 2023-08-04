@@ -3,7 +3,7 @@
 {-# LANGUAGE MonoLocalBinds #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-module Explorer.Web.ContractView
+module Scanner.Web.ContractView
   (ContractView(..), contractView)
   where
 
@@ -18,7 +18,7 @@ import Text.Blaze.Html5 (Html, Markup, ToMarkup(toMarkup), (!), a, b, code, p, s
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes (href, style, class_)
 import Text.Printf (printf)
-import Explorer.Web.Util (tr, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink,
+import Scanner.Web.Util (tr, baseDoc, stringToHtml, prettyPrintAmount, makeLocalDateTime, generateLink,
                           mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, SyncStatus, downloadIcon, bookIcon, blockHeaderHashIcon,
                           roleTokenMintingPolicyIdIcon, slotNoIcon, blockNoIcon, metadataIcon, versionIcon,
@@ -37,9 +37,9 @@ import Prelude hiding (div)
 import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Data.Map as M
-import Explorer.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
+import Scanner.SharedContractCache (ContractListCacheStatusReader(getSyncStatus))
 import Data.Maybe (isJust, catMaybes, fromMaybe)
-import Explorer.Web.Pagination (bindVal, calcLastPage, calculateRange, PageInfo (..), PageLinkGenerator, renderNavBar)
+import Scanner.Web.Pagination (bindVal, calcLastPage, calculateRange, PageInfo (..), PageLinkGenerator, renderNavBar)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Base16 as BS16
 
@@ -468,8 +468,8 @@ renderCTLVRTDetail cid blockExplHost (CTLVRTDetail { txPrev = txPrev'
                                                    }) = do
   H.div ! class_ "pagination-box"
         $ do p $ string ""
-             maybe (H.div $ previousTransactionLabel False) (explorerTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
-             maybe (H.div $ nextTransactionLabel False) (explorerTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
+             maybe (H.div $ previousTransactionLabel False) (marloweScanTransactionLinkFromRuntimeLink previousTransactionLabel) txPrev'
+             maybe (H.div $ nextTransactionLabel False) (marloweScanTransactionLinkFromRuntimeLink nextTransactionLabel) txNext'
              p $ string ""
   dtable $ do
     tr $ do
@@ -521,7 +521,7 @@ renderCTLVRTDetail cid blockExplHost (CTLVRTDetail { txPrev = txPrev'
   where previousTransactionLabel enabled = makeTransactionLabel enabled "Previous Transaction"
         nextTransactionLabel enabled = makeTransactionLabel enabled "Next Transaction"
         makeTransactionLabel enabled = H.div ! class_ (if enabled then "page-button" else "page-button page-button-disabled")
-        explorerTransactionLinkFromRuntimeLink linkContent rtTxLink =
+        marloweScanTransactionLinkFromRuntimeLink linkContent rtTxLink =
           case split '/' rtTxLink of
             [_, _, _, tTransactionId] -> invisibleLinkToTransaction cid tTransactionId $ linkContent True
             _ -> H.div $ linkContent False

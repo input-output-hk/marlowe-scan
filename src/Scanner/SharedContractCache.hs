@@ -1,7 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Explorer.SharedContractCache
+module Scanner.SharedContractCache
   ( ContractList(..)
   , ContractListCacheReader(..)
   , ContractListCacheStatusReader(..)
@@ -15,7 +15,7 @@ import Control.Concurrent.MVar ( MVar, modifyMVar_, newMVar, readMVar )
 import Data.Time (UTCTime)
 import Language.Marlowe.Runtime.Types.ContractsJSON (ContractListISeq)
 import Data.Time.Clock (getCurrentTime)
-import Explorer.Web.Util (SyncStatus, calculateSyncStatus)
+import Scanner.Web.Util (SyncStatus, calculateSyncStatus)
 import Language.Marlowe.Runtime.Types.IndexedSeq (empty)
 
 data InnerContractList = InnerContractList

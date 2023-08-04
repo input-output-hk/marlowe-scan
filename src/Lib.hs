@@ -13,25 +13,25 @@ import Network.Wai ( Application )
 import Network.Wai.Handler.Warp ( run )
 import Servant ( Proxy(..), hoistServer, serve, type (:<|>)(..), OctetStream, QueryParam, type (:>), Get, Headers, Header, JSON, HasServer (ServerT) )
 
-import Explorer.SharedContractCache ( ContractListCacheReader )
-import Explorer.Web.ContractListView ( ContractListView (..), contractListView )
-import Explorer.Web.ContractView ( ContractView (..), contractView )
+import Scanner.SharedContractCache ( ContractListCacheReader )
+import Scanner.Web.ContractListView ( ContractListView (..), contractListView )
+import Scanner.Web.ContractView ( ContractView (..), contractView )
 import Language.Marlowe.Runtime.Background ( start )
-import Opts ( Options (optExplorerPort), ExplorerPort (..), mkUrlPrefix )
-import Explorer.Web.ContractInfoDownload (contractDownloadInfo)
+import Opts ( Options (optMarloweScanPort), MarloweScan (..), mkUrlPrefix )
+import Scanner.Web.ContractInfoDownload (contractDownloadInfo)
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString as BS
-import Explorer.API.GetNumTransactions (getContractNumTransactions)
-import Explorer.API.IsContractOpen (isContractOpen)
-import Explorer.API.HealthCheck (HealthCheckResult, healthCheck)
-import Explorer.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, bookIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock, circleIcon)
-import Explorer.Resources.MimeTypes (CSS, SVG, JS)
+import Scanner.API.GetNumTransactions (getContractNumTransactions)
+import Scanner.API.IsContractOpen (isContractOpen)
+import Scanner.API.HealthCheck (HealthCheckResult, healthCheck)
+import Scanner.Resources.Data (cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, bookIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismJS, prismCSS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock, circleIcon)
+import Scanner.Resources.MimeTypes (CSS, SVG, JS)
 import Servant.HTML.Blaze (HTML)
 
 startApp :: Options -> IO ()
 startApp opts = do
-  let eport = op ExplorerPort . optExplorerPort $ opts
-  putStrLn $ "Marlowe Explorer server started, available at localhost:"
+  let eport = op MarloweScan . optMarloweScanPort $ opts
+  putStrLn $ "MarloweScan server started, available at localhost:"
     <> show eport
   contractListCache <- start $ mkUrlPrefix opts
   run eport $ app opts contractListCache

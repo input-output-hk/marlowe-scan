@@ -4,7 +4,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Explorer.Resources.MimeTypes(CSS, SVG, JS) where
+module Scanner.Resources.MimeTypes(CSS, SVG, JS) where
 
 import Network.HTTP.Media ((//), (/:), MediaType)
 import Servant (Accept (..), Proxy, MimeRender (..))

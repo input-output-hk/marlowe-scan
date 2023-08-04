@@ -2,12 +2,12 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE MonoLocalBinds #-}
 
-module Explorer.API.HealthCheck(HealthCheckResult(..), healthCheck) where
+module Scanner.API.HealthCheck(HealthCheckResult(..), healthCheck) where
 
 import Data.Aeson (ToJSON)
 import GHC.Generics (Generic)
-import Explorer.Web.Util (SyncStatus(..))
-import Explorer.SharedContractCache (ContractListCacheStatusReader (..))
+import Scanner.Web.Util (SyncStatus(..))
+import Scanner.SharedContractCache (ContractListCacheStatusReader (..))
 
 data HealthCheckResult = HealthCheckResult
   { alive :: Bool

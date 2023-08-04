@@ -1,4 +1,4 @@
-module Explorer.API.IsContractOpen(isContractOpen, isOpenAJAXBox) where
+module Scanner.API.IsContractOpen(isContractOpen, isOpenAJAXBox) where
  
 import Servant (throwError)
 import Opts (Options(..), mkUrlPrefix)
@@ -7,7 +7,7 @@ import Data.Maybe (isJust)
 import Text.Blaze.Html5 (Html, (!))
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import Explorer.Web.Util (generateLink)
+import Scanner.Web.Util (generateLink)
 
 isContractOpen :: Options -> Maybe [Char] -> IO Bool
 isContractOpen _ Nothing = throwError (userError "Need to specify contract id")

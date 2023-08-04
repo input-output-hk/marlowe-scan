@@ -1,4 +1,4 @@
-# Changelog for `explorer`
+# Changelog for `marlowe-scan`
 
 All notable changes to this project will be documented in this file.
 

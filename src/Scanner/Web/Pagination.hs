@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Explorer.Web.Pagination (PageInfo(..), PageLinkGenerator, bindVal, calcLastPage, calculateRange, renderNavBar) where
+module Scanner.Web.Pagination (PageInfo(..), PageLinkGenerator, bindVal, calcLastPage, calculateRange, renderNavBar) where
 
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes (class_)

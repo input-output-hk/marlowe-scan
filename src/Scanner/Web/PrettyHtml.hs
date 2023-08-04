@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Explorer.Web.PrettyHtml(PrettyHtml) where
+module Scanner.Web.PrettyHtml(PrettyHtml) where
 import Servant (Accept (..), MimeRender (..), Proxy)
 import Text.Blaze (ToMarkup)
 import Text.Blaze.Html (toHtml, Html)

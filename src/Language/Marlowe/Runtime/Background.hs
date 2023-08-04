@@ -7,7 +7,7 @@ module Language.Marlowe.Runtime.Background
 
 import Control.Concurrent ( forkIO, threadDelay, myThreadId )
 
-import Explorer.SharedContractCache ( ContractListCache, newContractList, readContractList, writeContractList, ContractList (..) )
+import Scanner.SharedContractCache ( ContractListCache, newContractList, readContractList, writeContractList, ContractList (..) )
 import Language.Marlowe.Runtime.ContractCaching (refreshContracts)
 import GHC.GHCi.Helpers (flushAll)
 import GHC.Conc (ThreadId)

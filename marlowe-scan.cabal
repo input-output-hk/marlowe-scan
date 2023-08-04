@@ -4,11 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           marlowe-explorer
+name:           marlowe-scan
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/input-output-hk/marlowe-explorer>
-homepage:       https://github.com/input-ouptut-hk/marlowe-explorer#readme
-bug-reports:    https://github.com/input-ouptut-hk/marlowe-explorer/issues
+description:    Please see the README on GitHub at <https://github.com/input-output-hk/marlowe-scan>
+homepage:       https://github.com/input-ouptut-hk/marlowe-scan#readme
+bug-reports:    https://github.com/input-ouptut-hk/marlowe-scan/issues
 author:         Input Output
 maintainer:     Input Output
 copyright:      2023 Input Output
@@ -21,23 +21,10 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/input-ouptut-hk/marlowe-explorer
+  location: https://github.com/input-ouptut-hk/marlowe-scan
 
 library
   exposed-modules:
-      Explorer.API.GetNumTransactions
-      Explorer.API.HealthCheck
-      Explorer.API.IsContractOpen
-      Explorer.Resources.Data
-      Explorer.Resources.Helpers
-      Explorer.Resources.MimeTypes
-      Explorer.SharedContractCache
-      Explorer.Web.ContractInfoDownload
-      Explorer.Web.ContractListView
-      Explorer.Web.ContractView
-      Explorer.Web.Pagination
-      Explorer.Web.PrettyHtml
-      Explorer.Web.Util
       Language.Marlowe.Pretty
       Language.Marlowe.Runtime.Background
       Language.Marlowe.Runtime.ContractCaching
@@ -51,8 +38,21 @@ library
       Language.Marlowe.Semantics.Types
       Lib
       Opts
+      Scanner.API.GetNumTransactions
+      Scanner.API.HealthCheck
+      Scanner.API.IsContractOpen
+      Scanner.Resources.Data
+      Scanner.Resources.Helpers
+      Scanner.Resources.MimeTypes
+      Scanner.SharedContractCache
+      Scanner.Web.ContractInfoDownload
+      Scanner.Web.ContractListView
+      Scanner.Web.ContractView
+      Scanner.Web.Pagination
+      Scanner.Web.PrettyHtml
+      Scanner.Web.Util
   other-modules:
-      Paths_marlowe_explorer
+      Paths_marlowe_scan
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
@@ -89,10 +89,10 @@ library
     , zip-archive
   default-language: Haskell2010
 
-executable marlowe-explorer-exe
+executable marlowe-scan-exe
   main-is: Main.hs
   other-modules:
-      Paths_marlowe_explorer
+      Paths_marlowe_scan
   hs-source-dirs:
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -113,7 +113,7 @@ executable marlowe-explorer-exe
     , http-conduit
     , http-media
     , http-types
-    , marlowe-explorer
+    , marlowe-scan
     , newtype-generics
     , scientific
     , servant-blaze
@@ -127,11 +127,11 @@ executable marlowe-explorer-exe
     , zip-archive
   default-language: Haskell2010
 
-test-suite marlowe-explorer-test
+test-suite marlowe-scan-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_marlowe_explorer
+      Paths_marlowe_scan
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -154,7 +154,7 @@ test-suite marlowe-explorer-test
     , http-conduit
     , http-media
     , http-types
-    , marlowe-explorer
+    , marlowe-scan
     , scientific
     , servant-blaze
     , servant-server

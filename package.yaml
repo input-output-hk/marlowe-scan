@@ -1,6 +1,6 @@
-name:                marlowe-explorer
+name:                marlowe-scan
 version:             0.1.0.0
-github:              "input-ouptut-hk/marlowe-explorer"
+github:              "input-ouptut-hk/marlowe-scan"
 license:             Apache-2.0
 author:              "Input Output"
 copyright:           "2023 Input Output"
@@ -9,7 +9,7 @@ extra-source-files:
 - README.md
 - CHANGELOG.md
 
-description:         Please see the README on GitHub at <https://github.com/input-output-hk/marlowe-explorer>
+description:         Please see the README on GitHub at <https://github.com/input-output-hk/marlowe-scan>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -59,7 +59,7 @@ library:
   - time
 
 executables:
-  marlowe-explorer-exe:
+  marlowe-scan-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -68,11 +68,11 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - base
-    - marlowe-explorer
+    - marlowe-scan
     - newtype-generics
 
 tests:
-  marlowe-explorer-test:
+  marlowe-scan-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -81,7 +81,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - base
-    - marlowe-explorer
+    - marlowe-scan
     - hspec
     - hspec-wai
     - aeson
