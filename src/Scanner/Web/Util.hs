@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Explorer.Web.Util (PopupLevel(..), SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor,
+module Scanner.Web.Util (PopupLevel(..), SyncStatus(..), baseDoc, formatTimeDiff, generateLink, linkFor,
                           makeLocalDateTime, prettyPrintAmount, stringToHtml, table, td, th, tr,
                           mkTransactionExplorerLink, mkBlockExplorerLink, mkTokenPolicyExplorerLink,
                           valueToString, tableList, tlh, tlhr, tlr, tld, calculateSyncStatus, tldhc,

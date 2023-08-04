@@ -1,5 +1,5 @@
 {-# LANGUAGE DataKinds #-}
-module Explorer.Web.ContractInfoDownload(contractDownloadInfo) where
+module Scanner.Web.ContractInfoDownload(contractDownloadInfo) where
 
 import Data.Aeson (encode)
 import Codec.Archive.Zip (toEntry, addEntryToArchive, emptyArchive, fromArchive)

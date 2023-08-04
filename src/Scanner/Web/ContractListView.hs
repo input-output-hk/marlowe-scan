@@ -1,7 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Explorer.Web.ContractListView
+module Scanner.Web.ContractListView
   (ContractListView(..), contractListView)
   where
 
@@ -11,8 +11,8 @@ import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes ( href, style, class_ )
 import Text.Printf ( printf )
 
-import Explorer.SharedContractCache ( ContractListCacheReader, readContractList, ContractList(..) )
-import Explorer.Web.Util ( baseDoc, generateLink, formatTimeDiff, makeLocalDateTime, tableList, tlhr, tlh, tlr, tld, SyncStatus (..), tldhc, makeTitleDiv )
+import Scanner.SharedContractCache ( ContractListCacheReader, readContractList, ContractList(..) )
+import Scanner.Web.Util ( baseDoc, generateLink, formatTimeDiff, makeLocalDateTime, tableList, tlhr, tlh, tlr, tld, SyncStatus (..), tldhc, makeTitleDiv )
 import Language.Marlowe.Runtime.Types.ContractsJSON ( ContractInList (..), ContractLinks (..), Resource(..), ContractInList (..), ContractListISeq )
 
 import Data.Foldable (toList)
@@ -20,11 +20,11 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Sequence as Seq
 import qualified Language.Marlowe.Runtime.Types.IndexedSeq as ISeq
 import qualified Language.Marlowe.Runtime.Types.ContractsJSON as CSJ
-import Explorer.API.IsContractOpen (isOpenAJAXBox)
-import Explorer.API.GetNumTransactions (numTransactionsAJAXBox)
+import Scanner.API.IsContractOpen (isOpenAJAXBox)
+import Scanner.API.GetNumTransactions (numTransactionsAJAXBox)
 import Opts (Options (..), TitleLabel (TitleLabel))
 import Data.List.Extra (trim)
-import Explorer.Web.Pagination (PageInfo (..), renderNavBar, bindVal, calculateRange, PageLinkGenerator, calcLastPage)
+import Scanner.Web.Pagination (PageInfo (..), renderNavBar, bindVal, calculateRange, PageLinkGenerator, calcLastPage)
 
 data CLVR = CLVR {
       -- | Info about current page
@@ -163,7 +163,7 @@ renderCIRs (ContractListView { titleLabel = labelForTitle
 
 renderCIRs (ContractListView { titleLabel = labelForTitle
                              , clvContents = ContractListViewStillSyncing}) =
-  baseDoc Syncing headerText (makeTitleDiv headerText) $ string "The explorer is still synchronising with the chain. Please, try again later"
+  baseDoc Syncing headerText (makeTitleDiv headerText) $ string "MarloweScan is still synchronising with the chain. Please, try again later"
     where headerText = "Marlowe Contract List" `appIfNotBlank` labelForTitle
 
 renderCIRs (ContractListView { clvContents = ContractListViewError curSyncStatus msg }) =

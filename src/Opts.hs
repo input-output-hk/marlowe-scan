@@ -3,7 +3,7 @@
 module Opts
   ( TitleLabel (..)
   , BlockExplorerHost (..)
-  , ExplorerPort (..)
+  , MarloweScan (..)
   , RuntimeHost (..)
   , RuntimePort (..)
   , Options (..)
@@ -24,10 +24,10 @@ newtype TitleLabel = TitleLabel String
 
 instance Newtype TitleLabel
 
-newtype ExplorerPort = ExplorerPort Int
+newtype MarloweScan = MarloweScan Int
   deriving (Generic, Show)
 
-instance Newtype ExplorerPort
+instance Newtype MarloweScan
 
 newtype RuntimeHost = RuntimeHost String
   deriving (Generic, Show)
@@ -46,7 +46,7 @@ instance Newtype BlockExplorerHost
 
 data Options = Options
   { optTitleLabel :: TitleLabel
-  , optExplorerPort :: ExplorerPort
+  , optMarloweScanPort :: MarloweScan
   , optRuntimeHost :: RuntimeHost
   , optRuntimePort :: RuntimePort
   , optBlockExplorerHost :: BlockExplorerHost
@@ -58,16 +58,16 @@ parser = Options
   <$> ( TitleLabel <$> strOption
         (  long "title-label"
         <> metavar "TEXT"
-        <> help ("Label to be shown together with the title in the Marlowe Explorer in parenthesis. " ++
-                 "(It can be used to display the name of the network that the Marlowe explorer is deployed to.)")
+        <> help ("Label to be shown together with the title in MarloweScan in parenthesis. " ++
+                 "(It can be used to display the name of the network that MarloweScan is deployed to.)")
         <> showDefault
         <> value "Preprod"
         )
       )
-  <*> ( ExplorerPort <$> option auto
-        (  long "explorer-port"
+  <*> ( MarloweScan <$> option auto
+        (  long "marlowe-scan-port"
         <> metavar "PORT"
-        <> help "Port number to use for this Marlowe Explorer server"
+        <> help "Port number to use for this MarloweScan server"
         <> showDefault
         <> value 8081
         )
@@ -100,7 +100,7 @@ parser = Options
 parseOpts :: IO Options
 parseOpts = do
   execParser $ info (parser <**> helper)
-    (  header "Marlowe Explorer server"
+    (  header "MarloweScan server"
     )
 
 mkUrlPrefix :: Options -> String

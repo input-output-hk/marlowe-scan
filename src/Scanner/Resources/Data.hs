@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Explorer.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, bookIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock, circleIcon) where
+module Scanner.Resources.Data(cssStylesheet, activeLight, greenStatus, inactiveLight, logo, magnifyingGlass, amberStatus, redStatus, downloadIcon, blockHeaderHashIcon, blockNoIcon, bookIcon, metadataIcon, roleTokenMintingPolicyIdIcon, slotNoIcon, statusIcon, versionIcon, prismCSS, prismJS, marlowePrismJS, marlowePrismCSS, stateIcon, arrowDropDown, alarmClock, circleIcon) where
 
-import Explorer.Resources.Helpers (cssPath, embedResource, svgPath, prismPath)
+import Scanner.Resources.Helpers (cssPath, embedResource, svgPath, prismPath)
 import Data.ByteString (ByteString)
 
 ----------------
