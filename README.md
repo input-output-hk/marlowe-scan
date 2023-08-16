@@ -104,4 +104,3 @@ If you have built the project using Stack you can pass the parameters by adding 
 stack exec marlowe-scan-exe -- --title-label "Preview" --marlowe-scan-port 9000 --runtime-host 192.168.0.1 --runtime-port 8888 --block-explorer "preview.cardanoscan.io"
 ```
 
-
