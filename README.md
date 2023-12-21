@@ -2,6 +2,10 @@
 
 MarloweScan is a tool that allows you to explore on-chain Marlowe contracts and watch their execution in Marlowe terms. This document provides instructions on how to build and develop the MarloweScan tool.
 
+## Marlowe Runtime compatibility
+
+This version of MarloweScan requires a running instance of the Marlowe Runtime. The compatible versions of the Marlowe Runtime include from 0.0.4 up to and including 0.0.6.
+
 ## Using Nix
 
 This repo provides a `shell.nix` file that can be used for developing and building MarloweScan without having to worry about dependencies.
