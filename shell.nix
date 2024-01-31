@@ -1,4 +1,4 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "ghc92", doBenchmark ? false }:
+{ nixpkgs ? import <nixpkgs> {}, haskellPackages ? (import <nixpkgs> {}).haskellPackages }:
 
 let
   pkgs = nixpkgs;
@@ -29,14 +29,5 @@ let
           }
         '';
       };
-  haskellPackages = if compiler == "default"
-                       then pkgs.haskellPackages
-                       else pkgs.haskell.packages.${compiler};
-
-  variant = if doBenchmark then pkgs.haskell.lib.doBenchmark else pkgs.lib.id;
-
-  drv = variant (haskellPackages.callPackage f {});
-
-in
-
-  if pkgs.lib.inNixShell then drv.env else drv
+  d = haskellPackages.callPackage f {};
+in d // { meta = d.meta // { mainProgram= "marlowe-scan-exe"; }; }
