@@ -1,4 +1,4 @@
-{ nixpkgs ? import <nixpkgs> {}, haskellPackages ? nixpkgs.haskellPackages, tools ? [ ] }:
+{ nixpkgs ? import <nixpkgs> {}, tools ? [] }:
 
 let
   pkgs = nixpkgs;
@@ -31,5 +31,5 @@ let
           }
         '';
       };
-  d = haskellPackages.callPackage f {};
+  d = pkgs.haskellPackages.callPackage f {};
 in d // { meta = d.meta // { mainProgram= "marlowe-scan-exe"; }; }
