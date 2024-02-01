@@ -1,11 +1,13 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "ghc92", doBenchmark ? false }:
+{ nixpkgs ? import <nixpkgs> {}, haskellPackages ? nixpkgs.haskellPackages, tools ? [ ] }:
 
 let
   pkgs = nixpkgs;
-  f = { mkDerivation, base, blaze-html, gtk, lib, process
-      , temporary, zlib, aeson, servant-server, wai, warp, haskell-language-server
-      , hspec, hspec-wai, servant-blaze, http-client, wl-pprint
-      , http-conduit, http-types, errors, zip-archive
+  f = { mkDerivation, base, aeson, aeson-pretty, base16-bytestring, blaze-html,
+          blaze-markup, bytestring, containers, errors, extra,
+          file-embed, ghc, http-client, http-conduit, http-media,
+          http-types, scientific, servant-blaze, servant-server,
+          template-haskell, text, utf8-string, wai, warp, wl-pprint,
+          zip-archive, zlib, haskell-language-server, lib, hspec, hspec-wai
       }:
       mkDerivation {
         pname = "marlowe-scan";
@@ -14,13 +16,13 @@ let
         isLibrary = false;
         isExecutable = true;
         executableHaskellDepends = [
-          base blaze-html gtk process temporary zlib
-          aeson servant-server wai warp
-          haskell-language-server errors
-          hspec hspec-wai servant-blaze
-          http-client wl-pprint http-conduit http-types
-          zip-archive
-        ];
+          base aeson aeson-pretty base16-bytestring blaze-html
+          blaze-markup bytestring containers errors extra
+          file-embed ghc http-client http-conduit http-media
+          http-types scientific servant-blaze servant-server
+          template-haskell text utf8-string wai warp wl-pprint
+          zip-archive zlib haskell-language-server hspec hspec-wai
+        ] ++ tools;
         license = "unknown";
         hydraPlatforms = lib.platforms.none;
         shellHook = ''
@@ -29,14 +31,5 @@ let
           }
         '';
       };
-  haskellPackages = if compiler == "default"
-                       then pkgs.haskellPackages
-                       else pkgs.haskell.packages.${compiler};
-
-  variant = if doBenchmark then pkgs.haskell.lib.doBenchmark else pkgs.lib.id;
-
-  drv = variant (haskellPackages.callPackage f {});
-
-in
-
-  if pkgs.lib.inNixShell then drv.env else drv
+  d = haskellPackages.callPackage f {};
+in d // { meta = d.meta // { mainProgram= "marlowe-scan-exe"; }; }

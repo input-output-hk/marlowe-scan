@@ -8,31 +8,37 @@ This version of MarloweScan requires a running instance of the Marlowe Runtime. 
 
 ## Using Nix
 
-This repo provides a `shell.nix` file that can be used for developing and building MarloweScan without having to worry about dependencies.
+This repo provides a `flake.nix` file that can be used for developing and building MarloweScan without having to worry about dependencies.
 
 ### Building with Nix
 
-To build MarloweScan with Nix, you can use the `nix-build` command with `shell.nix`:
+To build MarloweScan with Nix, you can use the `nix` command:
 
 ```bash
-nix-build shell.nix
+nix build
 ```
 
 The resulting executable will be made available in `result/bin/marlowe-scan-exe`
 
-### Development shell
-
-As usual, you can use the `nix-shell` command to enter the development environment from the root folder of the project:
+Alternatively, you can run MarloweScan directly by writing:
 
 ```bash
-nix-shell
+nix run
 ```
 
-That will make the required Haskell libraries, tools like cabal, stack, the Haskell Language Server, and the `gen-hie` command available in the command line.
+### Development shell
+
+As usual, you can use the `nix` command to enter the development environment from the root folder of the project:
+
+```bash
+nix develop
+```
+
+That will make the required Haskell libraries, tools like cabal, stack, the Haskell Language Server, and the `fix-hie` command available in the command line.
 
 ### Caching dependencies
 
-In order to take advantage of caching, you can use the `https://nixos.org/channels/nixos-22.11` channel. If using a different channel like `unstable`, building may take a while.
+In order to take advantage of caching, you can use the `https://nixos.org/channels/nixos-23.05` channel.
 
 ## Using Stack
 
