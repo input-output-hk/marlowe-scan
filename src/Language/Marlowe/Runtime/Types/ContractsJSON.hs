@@ -38,7 +38,6 @@ instance FromJSON Block where
 
 data Resource = Resource
   { block :: Block
-  , continuations :: Maybe String
   , contractId :: String
   , roleTokenMintingPolicyId :: String
   , status :: String
@@ -49,7 +48,6 @@ instance FromJSON Resource where
   parseJSON :: Value -> Parser Resource
   parseJSON = withObject "Resource" $ \o ->
     Resource <$> o .: "block"
-             <*> o .: "continuations"
              <*> o .: "contractId"
              <*> o .: "roleTokenMintingPolicyId"
              <*> o .: "status"

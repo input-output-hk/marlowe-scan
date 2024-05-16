@@ -1,10 +1,29 @@
-# MarloweScan
+<h2 align="center">
+  <a href="" target="blank_">
+    <img src="./doc/image/logo.svg" alt="Logo" height="75">
+  </a>
+  <br>
+  MarloweScan (Marlowe Cardano Explorer)
+</h2>
+  <p align="center">
+    <a href="https://github.com/input-output-hk/marlowe-scan/releases"><img src="https://img.shields.io/github/v/release/input-output-hk/marlowe-scan?style=for-the-badge" /></a>
+  </p>
+<div align="center">
+  <a href=""><img src="https://img.shields.io/badge/stability-beta-33bbff.svg" alt="Beta"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
+  <a href="https://discord.com/invite/cmveaxuzBn"><img src="https://img.shields.io/discord/826816523368005654?label=Chat%20on%20Discord"></a>
+</div>
+
+> [!IMPORTANT] 
+> This Marlowe repository will soon be moved to https://github.com/marlowe-lang. The new repositories will be administered by an independent vehicle, a not-for-profit organization currently being set up by the transition team.<br> 
+> This will allow us to ensure community representation and stewardship. Future developments and support for Marlowe are transitioning to a community-driven model initially led by [Simon Thompson](https://github.com/simonjohnthompson), [Nicolas Henin](https://github.com/nhenin) and [Tomasz Rybarczyk](https://github.com/paluh). <br>
+> See [here](https://github.com/marlowe-lang/.github/blob/main/profile/transition.md) for details.
 
 MarloweScan is a tool that allows you to explore on-chain Marlowe contracts and watch their execution in Marlowe terms. This document provides instructions on how to build and develop the MarloweScan tool.
 
 ## Marlowe Runtime compatibility
 
-This version of MarloweScan requires a running instance of the Marlowe Runtime. The compatible versions of the Marlowe Runtime include from 0.0.4 up to and including 0.0.6.
+This version of MarloweScan requires a running instance of the Marlowe Runtime. The compatible versions of the Marlowe Runtime include from 0.0.4 up to and including 1.0.0.
 
 ## Using Nix
 
