@@ -38,7 +38,6 @@ data Token = Token
 data Resource = Resource
   { block :: Block,
     consumingTx :: Maybe String,
-    continuations :: Maybe String,
     contractId :: String,
     inputUtxo :: String,
     inputs :: [Input],
@@ -96,7 +95,6 @@ instance FromJSON Resource where
   parseJSON = withObject "Resource" $ \v -> do
     block' <- v .: "block"
     consumingTx' <- v .:? "consumingTx"
-    continuations' <- v .:? "continuations"
     contractId' <- v .: "contractId"
     inputUtxo' <- v .: "inputUtxo"
     inputs' <- v .: "inputs"
@@ -110,7 +108,6 @@ instance FromJSON Resource where
     transactionId' <- v .: "transactionId"
     return Resource { block = block'
                     , consumingTx = consumingTx'
-                    , continuations = continuations'
                     , contractId = contractId'
                     , inputUtxo = inputUtxo'
                     , inputs = inputs'
